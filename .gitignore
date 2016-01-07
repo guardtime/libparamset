@@ -1,0 +1,63 @@
+# http://www.gnu.org/software/automake
+
+GNUMakefile.in
+config.h.in
+Makefile.in
+/m4
+
+# http://www.gnu.org/software/autoconf
+
+/autom4te.cache
+/aclocal.m4
+/compile
+/configure
+/depcomp
+/install-sh
+/missing
+/stamp-h1
+/config
+>>>>>>> release_3.4
+config.status
+config.log
+
+GNUMakefile
+config.h
+
+.deps
+libksi.pc
+src/ksi/stamp-h1
+
+libtool
+
+#Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
