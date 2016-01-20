@@ -22,6 +22,8 @@ BIN_DIR = ..\..\out\bin
 
 TOOL_OBJ = \
 	$(OBJ_DIR)\all_tests.obj \
+	$(OBJ_DIR)\param_value_test.obj \
+	$(OBJ_DIR)\parameter_test.obj \
 	$(OBJ_DIR)\param_set_test.obj \
 	$(OBJ_DIR)\support_tests.obj
 	
@@ -34,7 +36,7 @@ EXT_LIB = $(PARAM_SET_LIB_NAME)$(RTL).lib \
 	user32.lib gdi32.lib advapi32.lib Ws2_32.lib Kernel32.lib
 	  
 	
-CCFLAGS = /nologo /W3 /D_CRT_SECURE_NO_DEPRECATE  /I$(SRC_DIR) /I$(SRC_CUTEST_DIR)
+CCFLAGS = /nologo /W4 /D_CRT_SECURE_NO_DEPRECATE  /I$(SRC_DIR) /I$(SRC_CUTEST_DIR)
 LDFLAGS = $(LDFLAGS) /NOLOGO /LIBPATH:$(PARAM_SET_LIB_DIR)
 
 !IF "$(ENG_LIB)" == "dll"

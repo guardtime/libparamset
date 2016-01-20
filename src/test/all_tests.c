@@ -35,20 +35,21 @@
 static CuSuite* initSuite(void) {
 	CuSuite *suite = CuSuiteNew();
 
-	addSuite(suite, MashEngineTest_getSuite);
+	addSuite(suite, ParamValueTest_getSuite);
+	addSuite(suite, ParameterTest_getSuite);
+	addSuite(suite, ParamSetTest_getSuite);
 
 	return suite;
 }
 
 static int RunAllTests() {
 	int failCount;
-	int res;
 	CuSuite* suite = initSuite();
 
 
 	CuSuiteRun(suite);
 
-	printStats(suite, "==== INTEGRATION TEST RESULTS ====");
+	printStats(suite, "==== PARAM_SET TEST RESULTS ====");
 
 	writeXmlReport(suite, UNIT_TEST_OUTPUT_XML);
 

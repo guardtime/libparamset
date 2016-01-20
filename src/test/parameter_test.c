@@ -1,0 +1,409 @@
+/*
+ * Copyright 2013-2015 Guardtime, Inc.
+ *
+ * This file is part of the Guardtime client SDK.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES, CONDITIONS, OR OTHER LICENSES OF ANY KIND, either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ * "Guardtime" and "KSI" are trademarks or registered trademarks of
+ * Guardtime, Inc., and no license to trademarks is granted; Guardtime
+ * reserves and retains all trademark rights.
+ */
+
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+#include "cutest/CuTest.h"
+#include "all_tests.h"
+#include "../param_set/param_value.h"
+#include "../param_set/parameter.h"
+#include "../param_set/param_set_obj_impl.h"
+
+
+
+/**
+ * PARAM_new
+ * PARAM_addArgument
+ * PARAM_getValueCount - mostly tested by PARAM_VAL.
+ * PARAM_checkConstraints
+ * PARAM_addControl
+ * PARAM_getInvalidCount
+ * PARAM_getInvalid
+ * PARAM_free
+ */
+static void Test_parameterConstraints(CuTest* tc) {
+	int res;
+	PARAM *multiple = NULL;
+	PARAM *single = NULL;
+	PARAM *single_per_prio = NULL;
+	int count = 0xf;
+
+	res = PARAM_new("test1", NULL, 0, &multiple);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("test2", NULL, PARAM_SINGLE_VALUE, &single);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("test3", NULL, PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL, &single_per_prio);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	/* It is mostly covered by PARAM_VAL tests*/
+	res = PARAM_getValueCount(multiple, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Count must be 0.", res == PST_OK && count == 0);
+
+	/**
+	 * Add valid amount of parameters to multiple.
+     */
+	res = PARAM_addValue(multiple, "1", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(multiple, "2", NULL, 1);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(multiple, "3", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_getValueCount(multiple, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 3);
+
+	res = PARAM_getValueCount(multiple, NULL, 1, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	res = PARAM_getValueCount(multiple, NULL, 0, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 2);
+	CuAssert(tc, "Must be free from duplicate errors.", PARAM_checkConstraints(multiple, PARAM_SINGLE_VALUE | PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) == 0);
+
+	/**
+	 * Add valid amount of parameters to single priority level.
+     */
+	res = PARAM_addValue(single_per_prio, "1", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(single_per_prio, "2", NULL, 1);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(single_per_prio, "3", NULL, 2);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_getValueCount(single_per_prio, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 3);
+
+	res = PARAM_getValueCount(single_per_prio, NULL, 0, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	res = PARAM_getValueCount(single_per_prio, NULL, 1, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	res = PARAM_getValueCount(single_per_prio, NULL, 2, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	CuAssert(tc, "Must be free from duplicate errors.", PARAM_checkConstraints(single_per_prio, PARAM_SINGLE_VALUE | PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) == 0);
+
+	/**
+	 * Add valid amount of parameters to single.
+     */
+	res = PARAM_addValue(single, "1", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_getValueCount(single, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	res = PARAM_getValueCount(single, NULL, 0, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	CuAssert(tc, "Must be free from duplicate errors.", PARAM_checkConstraints(single, PARAM_SINGLE_VALUE | PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) == 0);
+
+	/**
+	 * Brake the rules!
+     */
+	res = PARAM_addValue(single_per_prio, "4", NULL, 2);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+	CuAssert(tc, "Must contain duplicate errors.", PARAM_checkConstraints(single_per_prio, PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) == PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL);
+
+	res = PARAM_addValue(single, "2", NULL, 1);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+	CuAssert(tc, "Must contain duplicate errors.", PARAM_checkConstraints(single, PARAM_SINGLE_VALUE) == PARAM_SINGLE_VALUE);
+
+	PARAM_free(multiple);
+	PARAM_free(single);
+	PARAM_free(single_per_prio);
+}
+
+/**
+ * PARAM_getValue - mostly tested by PARAM_VAL.
+ * PARAM_getInvalidCount - mostly tested by PARAM_VAL
+ */
+static void Test_parameterGetValue(CuTest* tc) {
+	int res;
+	PARAM *multiple = NULL;
+	PARAM_VAL *val = NULL;
+	char *value = NULL;
+	int prio = 0xffff;
+
+	res = PARAM_new("test1", NULL, 0, &multiple);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_getValue(multiple, NULL, PST_PRIORITY_NONE, 0, &val);
+	CuAssert(tc, "Parameters must not have a value.", res == PST_PARAMETER_EMPTY);
+
+	/**
+	 * Add valid amount of parameters to multiple.
+     */
+	res = PARAM_addValue(multiple, "1", NULL, 3);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_getValue(multiple, NULL, PST_PRIORITY_NONE, 0, &val);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+
+	res = PARAM_VAL_extract(val, &value, NULL, &prio);
+	CuAssert(tc, "Parameters must not have a value.", res == PST_OK && strcmp(value, "1") == 0 && prio == 3);
+
+	PARAM_free(multiple);
+}
+
+static int controlFormat_isAlpha(const char *value) {
+	int i = 0;
+	while (value[i]) {
+		if (!isalpha(value[i])) return 1;
+		i++;
+	}
+	return 0;
+}
+
+static int controlContent_notOver_one_char(const char *value) {
+	if (value == NULL) return 1;
+	if (strlen(value) > 1) return 1;
+	return 0;
+}
+
+static int convert_replaceNonAlpha(const char *value, char *buf, unsigned buf_len) {
+	unsigned i = 0;
+	unsigned j = 0;
+	while (value[i]) {
+		if (isalpha(value[i])) buf[j++] = value[i];
+		if (j == buf_len - 1) break;
+		i++;
+	}
+	buf[j] = '\0';
+	return 1;
+}
+
+static void Test_SetValuesAndControl(CuTest* tc) {
+	int res;
+	PARAM *p1 = NULL;
+	PARAM *p2 = NULL;
+	PARAM *p3 = NULL;
+	PARAM *p4 = NULL;
+	PARAM_VAL *value_1 = NULL;
+	PARAM_VAL *value_2 = NULL;
+	int count = 0xffff;
+
+	res = PARAM_new("test1", NULL, 0, &p1);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("test2", NULL, 0, &p2);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("test3", NULL, 0, &p3);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("test4", NULL, 0, &p4);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+
+	/**
+     * Add control functions.
+     */
+	res = PARAM_addControl(p1, controlFormat_isAlpha, NULL, NULL);
+	CuAssert(tc, "Unable to set control.", res == PST_OK);
+
+	res = PARAM_addControl(p2, controlFormat_isAlpha, controlContent_notOver_one_char, NULL);
+	CuAssert(tc, "Unable to set control.", res == PST_OK);
+
+	res = PARAM_addControl(p3, NULL, controlContent_notOver_one_char, NULL);
+	CuAssert(tc, "Unable to set control.", res == PST_OK);
+
+	res = PARAM_addControl(p4, controlFormat_isAlpha, NULL, convert_replaceNonAlpha);
+	CuAssert(tc, "Unable to set control.", res == PST_OK);
+
+	/**
+	 * Add valid parameters.
+     */
+	res = PARAM_addValue(p1, "abcd", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	res = PARAM_addValue(p2, "a", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	res = PARAM_addValue(p3, "1", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	res = PARAM_addValue(p4, "a1b2c3", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	/**
+	 * Validate by invalid count.
+     */
+	res = PARAM_getInvalidCount(p1, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 0);
+
+	res = PARAM_getInvalidCount(p2, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 0);
+
+	res = PARAM_getInvalidCount(p3, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 0);
+
+	res = PARAM_getInvalidCount(p4, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 0);
+
+	/**
+	 * Add invalid parameters.
+     */
+	res = PARAM_addValue(p1, "1234", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	res = PARAM_addValue(p2, "1", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	res = PARAM_addValue(p2, "aa", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	res = PARAM_addValue(p3, "12", NULL, 0);
+	CuAssert(tc, "Unable to at valid parameters.", res == PST_OK);
+
+	/**
+	 * Validate by invalid count.
+     */
+	res = PARAM_getInvalidCount(p1, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	res = PARAM_getInvalidCount(p2, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 2);
+
+	res = PARAM_getInvalidCount(p3, NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Invalid count.", res == PST_OK && count == 1);
+
+	/**
+	 * Get some invalid values.
+     */
+	res = PARAM_getInvalid(p2, NULL, PST_PRIORITY_NONE, 0, &value_1);
+	CuAssert(tc, "Unable to get Invalid value.", res == PST_OK && value_1->formatStatus == 1 && value_1->contentStatus == 0);
+
+	res = PARAM_getInvalid(p2, NULL, PST_PRIORITY_NONE, 1, &value_2);
+	CuAssert(tc, "Unable to get Invalid value.", res == PST_OK && value_2->formatStatus == 0 && value_2->contentStatus == 1);
+
+	res = PARAM_getInvalid(p2, NULL, PST_PRIORITY_NONE, 2, &value_2);
+	CuAssert(tc, "There should be only 2 invalid values.", res == PST_PARAMETER_VALUE_NOT_FOUND);
+
+	PARAM_free(p1);
+	PARAM_free(p2);
+	PARAM_free(p3);
+	PARAM_free(p4);
+}
+
+static int wrapper_returnStr(const char* str, void** obj){
+	*obj = (void*)str;
+	return PST_OK;
+}
+
+static int wrapper_returnInt(const char* str,  void** obj){
+	int *pI = (int*)obj;
+	*pI = atoi(str);
+	return PST_OK;
+}
+
+static int wrapper_returnDouble(const char* str,  void** obj){
+	double *pd = (double*)obj;
+	*pd = atof(str);
+	return PST_OK;
+}
+
+static void Test_ObjectGetter(CuTest* tc) {
+	int res;
+	PARAM *p1 = NULL;
+	PARAM *p2 = NULL;
+	PARAM *p3 = NULL;
+	char *string = NULL;
+	int integer = 98;
+	double floating = 10.0;
+
+	/**
+	 * Create some parameter objects.
+     */
+	res = PARAM_new("string", NULL, 0, &p1);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("int", NULL, 0, &p2);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("double", NULL, 0, &p3);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	/**
+	 * Set extractor methods.
+     */
+	res = PARAM_setObjectExtractor(p1, wrapper_returnStr);
+	CuAssert(tc, "Unable set object extractor.", res == PST_OK);
+
+	res = PARAM_setObjectExtractor(p2, wrapper_returnInt);
+	CuAssert(tc, "Unable set object extractor.", res == PST_OK);
+
+	res = PARAM_setObjectExtractor(p3, wrapper_returnDouble);
+	CuAssert(tc, "Unable set object extractor.", res == PST_OK);
+
+	/**
+	 * Set valid values according to the extractor method.
+     */
+	res = PARAM_addValue(p1, "text", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(p2, "1234", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(p2, "-567", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(p3, "12.3", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	/**
+	 * Extract object valid objects.
+     */
+	res = PARAM_getObject(p1, NULL, PST_PRIORITY_NONE, 0, (void**)&string);
+	CuAssert(tc, "Unable to extract string.", res == PST_OK && strcmp(string, "text") == 0);
+
+	res = PARAM_getObject(p2, NULL, PST_PRIORITY_NONE, 0, (void**)&integer);
+	CuAssert(tc, "Unable to extract int.", res == PST_OK && integer == 1234);
+
+	res = PARAM_getObject(p2, NULL, PST_PRIORITY_NONE, 1, (void**)&integer);
+	CuAssert(tc, "Unable to extract int.", res == PST_OK && integer == -567);
+
+	res = PARAM_getObject(p3, NULL, PST_PRIORITY_NONE, 0, (void**)&floating);
+	CuAssert(tc, "Unable to extract double.", res == PST_OK && floating == 12.3);
+
+
+	PARAM_free(p1);
+	PARAM_free(p2);
+	PARAM_free(p3);
+}
+
+
+CuSuite* ParameterTest_getSuite(void) {
+	CuSuite* suite = CuSuiteNew();
+
+	SUITE_ADD_TEST(suite, Test_parameterConstraints);
+	SUITE_ADD_TEST(suite, Test_parameterGetValue);
+	SUITE_ADD_TEST(suite, Test_SetValuesAndControl);
+	SUITE_ADD_TEST(suite, Test_ObjectGetter);
+
+	return suite;
+}
+

@@ -29,8 +29,9 @@ extern "C" {
 
 const char *getFullResourcePath(const char* resource);
 
-CuSuite* MashTest_getSuite(void);
-CuSuite* MashEngineTest_getSuite(void);
+CuSuite* ParamValueTest_getSuite(void);
+CuSuite* ParameterTest_getSuite(void);
+CuSuite* ParamSetTest_getSuite(void);
 
 #ifdef	__cplusplus
 }

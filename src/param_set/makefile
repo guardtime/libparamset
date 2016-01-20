@@ -25,7 +25,7 @@ LIB_OBJ = \
 EXT_LIB = user32.lib gdi32.lib advapi32.lib Ws2_32.lib
 	  
 	
-CCFLAGS = /nologo /W3 /D_CRT_SECURE_NO_DEPRECATE  /I$(SRC_DIR)
+CCFLAGS = /nologo /W4 /D_CRT_SECURE_NO_DEPRECATE  /I$(SRC_DIR)
 LDFLAGS = /NOLOGO 
 
 

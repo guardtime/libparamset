@@ -22,46 +22,29 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
-//#include "gt_cmd_control.h"
 #include "param_set_obj_impl.h"
-#include "Parameter.h"
 #include "param_value.h"
+#include "Parameter.h"
 #include "param_set.h"
-#include "types.h"
 
-#define UNKNOWN_PARAMETER_NAME "_UN_KNOWN_"
-#define TYPO_PARAMETER_NAME "_TYPO_"
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
 
-#define FORMAT_OK 0
-#define PARAM_OK 0
+typedef struct INT_st {int value;} INT;
 
-const char *getParameterContentErrorString(int res){
-	switch (res) {
-	case PARAM_OK: return "(Parameter OK)";
-		break;
-	
-	}
-}
-
-const char *getFormatErrorString(int res){
-	switch (res) {
-		case FORMAT_OK: return "(Parameter OK)";
-			break;
-
-	}
-}
-
-static char *getParametersName(const char* names, char *name, char *alias, short len, int *isMultiple, int *isSingleHighestPriority){
+static char *getParametersName(const char* list_of_names, char *name, char *alias, short len, int *flags){
 	char *pName = NULL;
 	int i = 0;
 	int isAlias = 0;
 	short i_name = 0;
 	short i_alias = 0;
+	int tmp_flags = 0;
 
-	if(names == NULL || name == NULL) return NULL;
-	if(names[0] == 0) return NULL;
+	if(list_of_names == NULL || name == NULL) return NULL;
+	if(list_of_names[0] == 0) return NULL;
 
-	pName=strchr(names, '{');
+	pName=strchr(list_of_names, '{');
 	if(pName == NULL) return NULL;
 	pName++;
 	while(pName[i] != '}' && pName[i] != 0){
@@ -81,17 +64,15 @@ static char *getParametersName(const char* names, char *name, char *alias, short
 		}
 		i++;
 	}
-	if(isMultiple != NULL && pName[i] == '}'){
+	if (pName[i] == '}') {
 		if(pName[i+1] == '*')
-			*isMultiple = 1;
+			tmp_flags |= 0;
 		else
-			*isMultiple = 0;
+			tmp_flags |= PARAM_SINGLE_VALUE;
 	}
-	if(isSingleHighestPriority != NULL && pName[i] == '}'){
+	if(pName[i] == '}'){
 		if(pName[i+1] == '>')
-			*isSingleHighestPriority = 1;
-		else
-			*isSingleHighestPriority = 0;
+			tmp_flags |= PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL;
 	}
 
 
@@ -99,236 +80,8 @@ static char *getParametersName(const char* names, char *name, char *alias, short
 	if(alias)
 		alias[i_alias] = 0;
 
+	if (flags != NULL) *flags = tmp_flags;
 	return &pName[i];
-}
-
-int PARAM_SET_new(const char *names,
-		int (*printInfo)(const char*, ...), int (*printWarnings)(const char*, ...), int (*printErrors)(const char*, ...),
-		PARAM_SET **set){
-	int res;
-	PARAM_SET *tmp = NULL;
-	PARAM **tmp_param = NULL;
-	const char *pName = NULL;
-	int paramCount = 0;
-	int i = 0;
-	char mem = 0;
-	char buf[1024];
-	char alias[1024];
-	int isMultiple = 0;
-	int isSingleHighestPriority = 0;
-
-	if (set == NULL || names == NULL
-			|| printInfo == NULL|| printWarnings == NULL || printErrors == NULL) {
-		res = PST_INVALID_ARGUMENT;
-		goto cleanup;
-	}
-
-	while(names[i]){
-		if(names[i] == '{') mem = names[i];
-		else if(mem == '{' && names[i] == '}'){
-			paramCount++;
-			mem = 0;
-		}
-		i++;
-	}
-	/* Add extra count for Unknowns and Typos. */
-	paramCount += 2;
-
-	tmp = (PARAM_SET*)malloc(sizeof(PARAM_SET));
-	if(tmp == NULL) {
-		res = PST_OUT_OF_MEMORY;
-		goto cleanup;
-	}
-
-	tmp_param = (PARAM**)calloc(paramCount, sizeof(PARAM*));
-	if(tmp == NULL) {
-		res = PST_OUT_OF_MEMORY;
-		goto cleanup;
-	}
-
-	tmp->count = paramCount;
-	tmp->printError = printErrors;
-	tmp->printInfo = printInfo;
-	tmp->printWarning = printWarnings;
-	tmp->parameter = tmp_param;
-
-	tmp_param = NULL;
-
-	i = 0;
-	pName = names;
-	while((pName = getParametersName(pName, buf, alias, sizeof(buf), &isMultiple, &isSingleHighestPriority)) != NULL){
-		res = PARAM_new(buf, alias[0] ? alias : NULL, isMultiple, isSingleHighestPriority, NULL, NULL, NULL, &tmp->parameter[i]);
-		if(res != PST_OK) goto cleanup;
-
-		i++;
-	}
-
-	res = PARAM_new(UNKNOWN_PARAMETER_NAME, NULL, 1, 0,  NULL, NULL, NULL, &tmp->parameter[i++]);
-	if(res != PST_OK) goto cleanup;
-
-	res = PARAM_new(TYPO_PARAMETER_NAME, NULL, 1, 0, NULL, NULL, NULL, &tmp->parameter[i]);
-	if(res != PST_OK) goto cleanup;
-
-	*set = tmp;
-	tmp = NULL;
-	res = PST_OK;
-
-cleanup:
-
-	PARAM_SET_free(tmp);
-	free(tmp_param);
-
-	return res;
-}
-
-void PARAM_SET_free(PARAM_SET *set){
-	int numOfElements = 0;
-	PARAM **array = NULL;
-	int i =0;
-
-	if(set == NULL) return;
-	numOfElements = set->count;
-	array = set->parameter;
-
-	for(i=0; i<numOfElements;i++)
-		PARAM_free(array[i]);
-	free(set->parameter);
-
-	free(set);
-	return;
-}
-
-static int param_set_getParameterByName(const PARAM_SET *set, const char *name, PARAM **param){
-	int res = 0;
-	PARAM *parameter = NULL;
-	PARAM *tmp = NULL;
-	int i = 0;
-
-	if (set == NULL || param == NULL || name == NULL) {
-		res = PST_INVALID_ARGUMENT;
-		goto cleanup;
-	}
-
-
-	for(i = 0; i < set->count; i++) {
-		parameter = set->parameter[i];
-		if(parameter != NULL){
-			if(strcmp(parameter->flagName, name) == 0 || (parameter->flagAlias && strcmp(parameter->flagAlias, name) == 0)) {
-				tmp = parameter;
-				break;
-			}
-		}
-	}
-
-	if (tmp == NULL) {
-		res = PST_PARAMETER_NOT_FOUND;
-		goto cleanup;
-	}
-
-	*param = parameter;
-	res = PST_OK;
-
-cleanup:
-
-	return res;
-}
-
-int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const char *source, int priority) {
-	int res;
-	PARAM *param = NULL;
-
-	if (set == NULL || name == NULL) {
-		res = PST_INVALID_ARGUMENT;
-		goto cleanup;;
-	}
-
-	res = param_set_getParameterByName(set, name, &param);
-	if(res != PST_OK) goto cleanup;
-
-	res = PARAM_addArgument(param, value, source, priority);
-	if(res != PST_OK) goto cleanup;
-
-	res = PST_OK;
-
-cleanup:
-
-	return res;
-}
-
-int PARAM_SET_clear(PARAM_SET *set, const char *name){
-	int res;
-	PARAM *tmp = NULL;
-	PARAM_VAL *rem = NULL;
-	int i =0;
-
-	if (set == NULL || name == NULL) {
-		res = PST_INVALID_ARGUMENT;
-		goto cleanup;
-	}
-
-	res = param_set_getParameterByName(set, name, &tmp);
-	if (res != PST_OK) goto cleanup;
-
-	tmp->argCount = 0;
-	if(tmp->arg) PARAM_VAL_free(tmp->arg);
-	res = PST_OK;
-
-cleanup:
-
-	return res;
-}
-
-static int param_set_getValue(const PARAM_SET *set, const char *name, const char *source, int prio, unsigned at, PARAM_VAL **value){
-	int res;
-	PARAM_VAL *tmp = NULL;
-	PARAM *parameter = NULL;
-
-	if (set == NULL || value == NULL || name == NULL) {
-		res = PST_INVALID_ARGUMENT;
-		goto cleanup;
-	}
-
-	res = param_set_getParameterByName(set, name, &parameter);
-	if (res != PST_OK) goto cleanup;
-
-	res = PARAM_getValue(parameter, name, source, prio, at, &tmp);
-	if (res != PST_OK) goto cleanup;
-
-	*value = tmp;
-	tmp = NULL;
-	res = PST_OK;
-
-cleanup:
-
-	return res;
-}
-
-int (*PARAM_SET_getErrorPrinter(PARAM_SET *set))(const char*, ...) {
-	return set->printError;
-}
-
-int (*PARAM_SET_getWarningPrinter(PARAM_SET *set))(const char*, ...) {
-	return set->printWarning;
-}
-
-void PARAM_SET_addControl(PARAM_SET *set, const char *names,
-		int (*controlFormat)(const char *),
-		int (*controlContent)(const char *),
-		int (*convert)(const char*, char*, unsigned)){
-	int res;
-	PARAM *tmp = NULL;
-	const char *pName = NULL;
-	char buf[256];
-
-	pName = names;
-	while((pName = getParametersName(pName,buf, NULL, sizeof(buf), NULL, NULL)) != NULL){
-		res = param_set_getParameterByName(set, buf, &tmp);
-		if (res == PST_OK) {
-			tmp->controlFormat = controlFormat;
-			tmp->controlContent = controlContent;
-			tmp->convert = convert;
-		}
-	}
 }
 
 static unsigned min_of_3(unsigned A, unsigned B,unsigned C){
@@ -387,6 +140,41 @@ cleanup:
 	return edit_distance;
 }
 
+static int param_set_getParameterByName(const PARAM_SET *set, const char *name, PARAM **param){
+	int res = 0;
+	PARAM *parameter = NULL;
+	PARAM *tmp = NULL;
+	int i = 0;
+
+	if (set == NULL || param == NULL || name == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+
+	for(i = 0; i < set->count; i++) {
+		parameter = set->parameter[i];
+		if(parameter != NULL){
+			if(strcmp(parameter->flagName, name) == 0 || (parameter->flagAlias && strcmp(parameter->flagAlias, name) == 0)) {
+				tmp = parameter;
+				break;
+			}
+		}
+	}
+
+	if (tmp == NULL) {
+		res = PST_PARAMETER_NOT_FOUND;
+		goto cleanup;
+	}
+
+	*param = parameter;
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
 static int param_set_couldItBeTypo(const char *str, const PARAM_SET *set){
 	int numOfElements = 0;
 	PARAM **array = NULL;
@@ -396,13 +184,12 @@ static int param_set_couldItBeTypo(const char *str, const PARAM_SET *set){
 	numOfElements = set->count;
 	array = set->parameter;
 
-	for(i=0; i<numOfElements;i++){
+	for (i = 0; i < numOfElements; i++) {
 		unsigned lenName = 0;
 		int editDist = 0;
 
 		editDist = editDistance_levenshtein(array[i]->flagName, str);
 		lenName = (unsigned)strlen(array[i]->flagName);
-
 		if((editDist*100)/lenName <= 49)
 			return 1;
 
@@ -418,6 +205,67 @@ static int param_set_couldItBeTypo(const char *str, const PARAM_SET *set){
 	return 0;
 }
 
+int param_set_add_typo(PARAM_SET *set, const char *typo, const char *source) {
+	int res;
+	PARAM **array = NULL;
+	int i = 0;
+	int edit_dist = 0;
+	unsigned name_len = 0;
+
+	if (set == NULL || typo == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+	/**
+	 * Add typo as priority 1 value
+     */
+	res = PARAM_addValue(set->typos, typo, source, 1);
+	if (res != PST_OK) goto cleanup;
+
+	array = set->parameter;
+
+	/**
+	 * Add similar values to priority level == 0 ands source == <typo>.
+     */
+	for (i = 0; i < set->count; i++) {
+		edit_dist = editDistance_levenshtein(array[i]->flagName, typo);
+		name_len = (unsigned)strlen(array[i]->flagName);
+//		printf("'%s' \t '%s' %i\n", array[i]->flagName, typo, (int)((edit_dist*100)/name_len));
+
+		/**
+		 * Check if some parameter is similar enough to add it to the typo list.
+		 */
+		if((edit_dist*100)/name_len <= 49) {
+			res = PARAM_addValue(set->typos,array[i]->flagName, typo, 0);
+			if (res != PST_OK) goto cleanup;
+//			printf("Typo: Did You mean '%s%s'.\n",name_len>1 ? "--" : "-", array[i]->flagName);
+			continue;
+		}
+
+		/**
+		 * If flag itself was not similar enough check if it alias (if exists) is
+		 * similar enough to add it to the typo list.
+		 */
+		if (array[i]->flagAlias) {
+			edit_dist = editDistance_levenshtein(array[i]->flagAlias, typo);
+			name_len = (unsigned)strlen(array[i]->flagAlias);
+
+			if((edit_dist*100)/name_len <= 33) {
+				res = PARAM_addValue(set->typos,array[i]->flagAlias, typo, 0);
+				if (res != PST_OK) goto cleanup;
+//				printf("Typo: Did You mean '%s%s'.\n",name_len>1 ? "--" : "-", array[i]->flagAlias);
+				continue;
+			}
+		}
+	}
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
 /**
  * This functions adds raw parameter to the set. It parses parameters formatted as:
  * --long		- long parameter without argument.
@@ -428,62 +276,462 @@ static int param_set_couldItBeTypo(const char *str, const PARAM_SET *set){
  * @param arg
  * @param set
  */
-static void param_set_addRawParameter(const char *param, const char *arg, const char *source, PARAM_SET *set, int priority){
+static int param_set_addRawParameter(const char *param, const char *arg, const char *source, PARAM_SET *set, int priority){
+	int res;
 	const char *flag = NULL;
 	unsigned len;
 
 	len = (unsigned)strlen(param);
 	if(param[0] == '-' && param[1] != 0){
-		flag = param+(param[1] == '-' ? 2 : 1);
+		flag = param + (param[1] == '-' ? 2 : 1);
 
-		/*It is long parameter*/
-		if(strncmp("--", param, 2)==0 && len >= 3){
-			if(param[3] == 0){
-				PARAM_SET_add(set, TYPO_PARAMETER_NAME, flag, source, PST_PRIORITY_VALID_BASE);
-				if(arg)
-					PARAM_SET_add(set, param_set_couldItBeTypo(arg, set) ? TYPO_PARAMETER_NAME : UNKNOWN_PARAMETER_NAME, arg, source, PST_PRIORITY_VALID_BASE);
-				return;
+		/**
+		 * When it is long or short parameters, append it to the list and include
+		 * the argument. Otherwise it must be bunch of flags.
+         */
+		if ((strncmp("--", param, 2) == 0 && len >= 3) || (param[0] == '-' && len == 2)) {
+			res = PARAM_SET_add(set, flag, arg, source, priority);
+			if (res != PST_OK || res != PST_PARAMETER_IS_UNKNOWN || res != PST_PARAMETER_IS_TYPO) {
+				goto cleanup;
 			}
 
-			if (PARAM_SET_add(set, flag, arg, source, priority) != PST_OK){
-				PARAM_SET_add(set, param_set_couldItBeTypo(flag, set) ? TYPO_PARAMETER_NAME : UNKNOWN_PARAMETER_NAME, flag, source, PST_PRIORITY_VALID_BASE);
-				if(arg)
-					PARAM_SET_add(set, param_set_couldItBeTypo(arg, set) ? TYPO_PARAMETER_NAME : UNKNOWN_PARAMETER_NAME, arg, source, PST_PRIORITY_VALID_BASE);
-			}
-		}
-		/*It is short parameter*/
-		else if(param[0] == '-' && len == 2){
-			if (PARAM_SET_add(set, flag, arg, source, priority) != PST_OK) {
-				PARAM_SET_add(set, UNKNOWN_PARAMETER_NAME, flag, source, PST_PRIORITY_VALID_BASE);
-				if(arg)
-					PARAM_SET_add(set, param_set_couldItBeTypo(arg, set) ? TYPO_PARAMETER_NAME : UNKNOWN_PARAMETER_NAME, arg, source, PST_PRIORITY_VALID_BASE);
-			}
-		}
-		/*It is bunch of flags*/
-		else{
+			res = PST_OK;
+		} else {
 			char str_flg[2] = {255,0};
 			int itr = 0;
 
-			if(arg)
-				PARAM_SET_add(set, param_set_couldItBeTypo(arg, set) ? TYPO_PARAMETER_NAME : UNKNOWN_PARAMETER_NAME, arg, source, PST_PRIORITY_VALID_BASE);
-
-			while((str_flg[0] = flag[itr++]) != '\0'){
-				if (PARAM_SET_add(set, str_flg, NULL, source, priority) != PST_OK) {
-					if(param_set_couldItBeTypo(flag, set)){
-						PARAM_SET_add(set, TYPO_PARAMETER_NAME, flag, source, PST_PRIORITY_VALID_BASE);
-						break;
-					}
-					else
-						PARAM_SET_add(set, UNKNOWN_PARAMETER_NAME, str_flg, source, PST_PRIORITY_VALID_BASE);
+			/**
+			 * If bunch of flags have an argument it must be a typo or unknown parameter.
+             */
+			if (arg != NULL) {
+				if (param_set_couldItBeTypo(arg, set)) {
+					param_set_add_typo(set, arg, source);
+				} else {
+					res = PARAM_addValue(set->unknown, flag, source, PST_PRIORITY_VALID_BASE);
+					if (res != PST_OK) goto cleanup;
 				}
+			}
+
+			/**
+			 * Extract the flags.
+             */
+			while ((str_flg[0] = flag[itr++]) != '\0') {
+				res = PARAM_SET_add(set, str_flg, NULL, source, priority);
+				if (res != PST_OK || res != PST_PARAMETER_IS_UNKNOWN || res != PST_PARAMETER_IS_TYPO) {
+					goto cleanup;
+				}
+
+				res = PST_OK;
+
 			}
 
 		}
 	}
 	else{
-		PARAM_SET_add(set, UNKNOWN_PARAMETER_NAME, param, source, PST_PRIORITY_VALID_BASE);
+		res = PARAM_addValue(set->unknown, param, source, PST_PRIORITY_VALID_BASE);
+		if (res != PST_OK) goto cleanup;
 	}
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
 }
+
+static int wrapper_returnStr(const char* str, void** obj){
+	*obj = (void*)str;
+	return PST_OK;
+}
+
+
+int PARAM_SET_new(const char *names, PARAM_SET **set){
+	int res;
+	PARAM_SET *tmp = NULL;
+	PARAM **tmp_param = NULL;
+	PARAM *tmp_typo = NULL;
+	PARAM *tmp_unknwon = NULL;
+	const char *pName = NULL;
+	int paramCount = 0;
+	int i = 0;
+	char mem = 0;
+	char buf[1024];
+	char alias[1024];
+	int flags = 0;
+
+	if (set == NULL || names == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	/**
+	 * Calculate the parameters count.
+     */
+	while(names[i]){
+		if(names[i] == '{') mem = names[i];
+		else if(mem == '{' && names[i] == '}'){
+			paramCount++;
+			mem = 0;
+		}
+		i++;
+	}
+
+	/**
+	 * Create empty objects.
+     */
+	tmp = (PARAM_SET*)malloc(sizeof(PARAM_SET));
+	if(tmp == NULL) {
+		res = PST_OUT_OF_MEMORY;
+		goto cleanup;
+	}
+
+	tmp->parameter = NULL;
+	tmp->typos = NULL;
+	tmp->unknown = NULL;
+
+	tmp_param = (PARAM**)calloc(paramCount, sizeof(PARAM*));
+	if(tmp == NULL) {
+		res = PST_OUT_OF_MEMORY;
+		goto cleanup;
+	}
+
+	tmp->typos = (PARAM*)calloc(paramCount, sizeof(PARAM));
+	if(tmp == NULL) {
+		res = PST_OUT_OF_MEMORY;
+		goto cleanup;
+	}
+
+	tmp->unknown = (PARAM*)calloc(paramCount, sizeof(PARAM));
+	if(tmp == NULL) {
+		res = PST_OUT_OF_MEMORY;
+		goto cleanup;
+	}
+
+	/**
+	 * Initialize two special parameters to hold and extract unknown parameters.
+     */
+	res = PARAM_new("unknown", NULL, 0, &tmp_unknwon);
+	if(res != PST_OK) goto cleanup;
+
+	res = PARAM_new("typo", NULL, 0, &tmp_typo);
+	if(res != PST_OK) goto cleanup;
+
+	res = PARAM_setObjectExtractor(tmp_typo, wrapper_returnStr);
+	if(res != PST_OK) goto cleanup;
+
+	res = PARAM_setObjectExtractor(tmp_unknwon, wrapper_returnStr);
+	if(res != PST_OK) goto cleanup;
+
+	tmp->count = paramCount;
+	tmp->parameter = tmp_param;
+	tmp->typos = tmp_typo;
+	tmp->unknown = tmp_unknwon;
+	tmp_typo = NULL;
+	tmp_unknwon = NULL;
+	tmp_param = NULL;
+
+	/**
+	 * Add parameters to the list.
+     */
+	i = 0;
+	pName = names;
+	while((pName = getParametersName(pName, buf, alias, sizeof(buf), &flags)) != NULL){
+		res = PARAM_new(buf, alias[0] ? alias : NULL, flags, &tmp->parameter[i]);
+		if(res != PST_OK) goto cleanup;
+		i++;
+	}
+
+	*set = tmp;
+	tmp = NULL;
+	res = PST_OK;
+
+cleanup:
+
+	PARAM_free(tmp_unknwon);
+	PARAM_free(tmp_typo);
+	PARAM_SET_free(tmp);
+	free(tmp_param);
+
+	return res;
+}
+
+void PARAM_SET_free(PARAM_SET *set){
+	int numOfElements = 0;
+	PARAM **array = NULL;
+	int i =0;
+
+	if(set == NULL) return;
+	numOfElements = set->count;
+	array = set->parameter;
+
+	for(i=0; i<numOfElements;i++)
+		PARAM_free(array[i]);
+	free(set->parameter);
+
+	PARAM_free(set->typos);
+	PARAM_free(set->unknown);
+
+	free(set);
+	return;
+}
+
+int PARAM_SET_addControl(PARAM_SET *set, const char *names,
+		int (*controlFormat)(const char *),
+		int (*controlContent)(const char *),
+		int (*convert)(const char*, char*, unsigned),
+		int (*extractObject)(const char *, void**)){
+	int res;
+	PARAM *tmp = NULL;
+	const char *pName = NULL;
+	char buf[1024];
+
+	if (set == NULL || names == NULL) return PST_INVALID_ARGUMENT;
+
+	pName = names;
+	while ((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
+		res = param_set_getParameterByName(set, buf, &tmp);
+		if (res != PST_OK) return res;
+
+		res = PARAM_addControl(tmp, controlFormat, controlContent, convert);
+		if (res != PST_OK) return res;
+
+		res = PARAM_setObjectExtractor(tmp, extractObject);
+		if (res != PST_OK) return res;
+	}
+
+	return PST_OK;
+}
+
+int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const char *source, int priority) {
+	int res;
+	PARAM *param = NULL;
+
+	if (set == NULL || name == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;;
+	}
+
+	res = param_set_getParameterByName(set, name, &param);
+	if (res == PST_PARAMETER_NOT_FOUND) {
+		/**
+		 * If the parameters name is not found, check if it is a typo? If typo
+		 * is found push it to the typo list. If not a typo, push it to the unknown
+		 * list and if unknown flag has argument, push it too.
+         */
+		if (param_set_couldItBeTypo(name, set)) {
+			res = param_set_add_typo(set, name, source);
+			if(res != PST_OK) goto cleanup;
+
+			res = PST_PARAMETER_IS_TYPO;
+			goto cleanup;
+		} else {
+			res = PARAM_addValue(set->unknown, name, source, PST_PRIORITY_VALID_BASE);
+			if(res != PST_OK) goto cleanup;
+
+			if (value != NULL) {
+				res = PARAM_addValue(set->unknown, name, source, PST_PRIORITY_VALID_BASE);
+				if(res != PST_OK) goto cleanup;
+			}
+
+			res = PST_PARAMETER_IS_UNKNOWN;
+			goto cleanup;
+		}
+	} else if (res != PST_OK) {
+		goto cleanup;
+	}
+
+	res = PARAM_addValue(param, value, source, priority);
+	if(res != PST_OK) goto cleanup;
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
+int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int priority, int at, void **obj) {
+	int res;
+	PARAM *param = NULL;
+
+	if (set == NULL || name == NULL || obj == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;;
+	}
+
+	res = param_set_getParameterByName(set, name, &param);
+	if (res != PST_OK) goto cleanup;
+
+	/**
+	 * Obj must be feed directly to the getter function, asi it enables to manipulate
+	 * the data pointed by obj.
+     */
+	res = PARAM_getObject(param, source, priority, at, obj);
+	if (res != PST_OK) goto cleanup;
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
+int PARAM_SET_clearParameter(PARAM_SET *set, const char *names){
+	int res;
+	PARAM *tmp = NULL;
+	const char *pName = NULL;
+	char buf[1024];
+
+	if (set == NULL || names == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	pName = names;
+	while((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
+		res = param_set_getParameterByName(set, buf, &tmp);
+		if (res != PST_OK) return res;
+
+		res = PARAM_clearAll(tmp);
+		if (res != PST_OK) return res;
+	}
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
+int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, int priority, int at) {
+	int res;
+	PARAM *tmp = NULL;
+	const char *pName = NULL;
+	char buf[1024];
+
+	if (set == NULL || names == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	pName = names;
+	while((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
+		res = param_set_getParameterByName(set, buf, &tmp);
+		if (res != PST_OK) return res;
+
+		res = PARAM_clearValue(tmp, source, priority, at);
+		if (res != PST_OK) goto cleanup;
+	}
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
+int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *source, int priority, int *count) {
+	int res;
+	const char *pName = NULL;
+	char buf[1024];
+	PARAM *param = NULL;
+	int sub_count = 0;
+	int C = 0;
+	int i = 0;
+
+	if (set == NULL || count == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;;
+	}
+
+	/**
+	 * Count the values according to the input parameters.
+     */
+	if (names != NULL) {
+		pName = names;
+
+		/**
+		 * If parameters name list is specified, use that to count the values needed.
+		 */
+		while ((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
+			res = param_set_getParameterByName(set, buf, &param);
+			if (res != PST_OK) return res;
+
+			res = PARAM_getValueCount(param, source, priority, &sub_count);
+			if (res != PST_OK) goto cleanup;
+
+			C+= sub_count;
+		}
+	} else {
+		/**
+		 * If parameters name list is NOT specified, count all parameters.
+		 */
+		for(i = 0; i < set->count; i++) {
+			res = PARAM_getValueCount(set->parameter[i], source, priority, &sub_count);
+			if (res != PST_OK) goto cleanup;
+
+			C += sub_count;
+		}
+	}
+
+
+	*count = C;
+	res = PST_OK;
+
+cleanup:
+	return res;
+}
+
+int PARAM_SET_isSetByName(const PARAM_SET *set, const char *name){
+	int res;
+	PARAM *tmp = NULL;
+	int count = 0;
+
+	if (set == NULL || name == NULL) return PST_INVALID_ARGUMENT;
+
+	res = param_set_getParameterByName(set, name, &tmp);
+	if (res != PST_OK) return 0;
+
+	res = PARAM_getValueCount(tmp, NULL, PST_PRIORITY_NONE, &count);
+	if (res != PST_OK) return 0;
+
+	return count == 0 ? 0 : 1;
+}
+
+int PARAM_SET_isFormatOK(const PARAM_SET *set){
+int res;
+	int i = 0;
+	PARAM *parameter = NULL;
+	PARAM_VAL *invalid = NULL;
+
+	if (set == NULL) {
+		return 0;
+	}
+
+	/**
+	 * Scan all parameter values from errors.
+	 */
+	for (i = 0; i < set->count; i++) {
+		parameter = set->parameter[i];
+		invalid = NULL;
+		/**
+		 * Extract all invalid values from parameter.
+         */
+		res = PARAM_getInvalid(parameter, NULL, PST_PRIORITY_NONE, 0, &invalid);
+		if (res == PST_PARAMETER_VALUE_NOT_FOUND || res == PST_PARAMETER_EMPTY) continue;
+		else if (res == PST_OK && invalid != NULL) return 0;
+		else return 0;
+	}
+
+	return 1;
+}
+
+int PARAM_SET_isTypoFailure(const PARAM_SET *set){
+	int count = 0;
+	PARAM_getValueCount(set->typos, NULL, PST_PRIORITY_NONE, &count);
+	return count > 0 ? 1 : 0;
+}
+
 
 void PARAM_SET_readFromFile(const char *fname, PARAM_SET *set, int priority){
 	FILE *file = NULL;
@@ -535,298 +783,166 @@ void PARAM_SET_readFromCMD(int argc, char **argv, PARAM_SET *set, int priority){
 	return;
 }
 
-int PARAM_SET_isFormatOK(const PARAM_SET *set){
-	PARAM **array = NULL;
-	PARAM *pParam = NULL;
-	int i = 0;
-	int numOfElements = 0;
-	PARAM_VAL *value = NULL;
 
-	if(set == NULL) return 0;
-	numOfElements = set->count;
-	array = set->parameter;
-
-	for(i=0; i<numOfElements;i++){
-		if((pParam = array[i]) != NULL){
-			if(strcmp(pParam->flagName, UNKNOWN_PARAMETER_NAME)==0) continue;
-			if(strcmp(pParam->flagName, TYPO_PARAMETER_NAME)==0) continue;
-
-			/*Control duplicate conflicts*/
-			if (PARAM_isDuplicateConflict(pParam)) {
-				return 0;
-			}
-
-			value = pParam->arg;
-			while(value){
-				if(value->formatStatus == FORMAT_OK){
-					if(value->contentStatus != PARAM_OK){
-						return 0;
-					}
-				}
-				else{
-					return 0;
-				}
-
-				value = value->next;
-			}
-		}
-	}
-
-	return 1;
-}
-
-static int getValue(const PARAM_SET *set, const char *name, const char *source, int prio, unsigned at, int controlFormat,
-	int (*getter)(const PARAM_SET *, const char *, const char *, int, unsigned , PARAM_VAL **value),
-	int (*convert)(char*, void**),
-	void **value){
+char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString(int)), char *buf, size_t buf_len) {
 	int res;
-	PARAM_VAL *tmp = NULL;
-
-	if(set == NULL || name == NULL || getter == NULL) {
-		res = PST_INVALID_ARGUMENT;
-		goto cleanup;
-	}
-	/*Get parameter->value at position*/
-	res = getter(set, name, source, prio, at, &tmp);
-	if (res != PST_OK) goto cleanup;
-	if (tmp->formatStatus != FORMAT_OK && controlFormat) {
-		res = PST_PARAMETER_INVALID_FORMAT;
-		goto cleanup;
-	}
-	/*Convert value->string into format*/
-	if(convert && value) {
-		res = convert(tmp->cstr_value, value);
-		if (res != PST_OK) goto cleanup;
-	}
-
-	res = PST_OK;
-
-cleanup:
-	return res;
-}
-
-int wrapper_returnStr(char* str, void** obj){
-	*obj = (void*)str;
-	return PST_OK;
-}
-
-typedef struct INT_st {int value;} INT;
-
-int wrapper_returnInt(char* str,  void** obj){
-	((INT*)obj)->value = atoi(str);
-	return PST_OK;
-}
-//const PARAM_SET *set, const char *name, const char *source, int prio, unsigned at, PARAM_VAL **value
-int PARAM_SET_getIntValue(const PARAM_SET *set, const char *name, const char *source, int prio, unsigned at, int *value) {
-	INT val;
-	int res;
-	res = getValue(set, name, source, prio, at, 1, param_set_getValue, wrapper_returnInt, (void**)&val);
-	*value = val.value;
-	return res;
-}
-
-int PARAM_SET_getStrValue(const PARAM_SET *set, const char *name, const char *source, int prio, unsigned at, char **value) {
-	return getValue(set, name, source, prio, at, 1, param_set_getValue, wrapper_returnStr, (void**)value);
-}
-
-int PARAM_SET_getValueCountByName(const PARAM_SET *set, const char *name, unsigned *count){
-	int res;
-	PARAM *param = NULL;
-
-	if(set == NULL || name == NULL) {
-		res = PST_INVALID_ARGUMENT;
-		goto cleanup;
-	}
-
-	res = param_set_getParameterByName(set, name, &param);
-	if(res != PST_OK) goto cleanup;
-
-	*count = param->argCount;
-	res = PST_OK;
-
-cleanup:
-
-	return res;
-}
-
-int PARAM_SET_isSetByName(const PARAM_SET *set, const char *name){
-	return getValue(set, name, NULL, PST_PRIORITY_NONE, PST_INDEX_FIRST, 0, param_set_getValue, NULL, NULL) == PST_OK ? 1 : 0;
-}
-
-void PARAM_SET_Print(const PARAM_SET *set){
-	int numOfElements = 0;
-	PARAM **array = NULL;
-	int i =0;
-
-	if(set == NULL) return;
-	numOfElements = set->count;
-	set->printInfo("Raw param set (%i)::\n", numOfElements);
-	array = set->parameter;
-
-	for(i=0; i<numOfElements;i++){
-		if(array[i]->arg){
-			PARAM_print(array[i], set->printInfo);
-		}
-	}
-
-	return;
-	}
-
-void PARAM_SET_PrintErrorMessages(const PARAM_SET *set){
-	PARAM **array = NULL;
-	PARAM *pParam = NULL;
+	const char *use_prefix = NULL;
 	int i = 0;
-	int numOfElements = 0;
-	PARAM_VAL *value = NULL;
+	int n = 0;
+	PARAM *parameter = NULL;
+	PARAM_VAL *invalid = NULL;
+	const char *value = NULL;
+	const char *source = NULL;
+	int formatStatus = 0;
+	int contentStatus = 0;
+	size_t count = 0;
 
-	if(set == NULL) return;
-	numOfElements = set->count;
-	array = set->parameter;
+	if (set == NULL || buf == NULL || buf_len == 0) {
+		return NULL;
+	}
 
-	for(i=0; i<numOfElements;i++){
-		if((pParam = array[i]) != NULL){
-			if(strcmp(pParam->flagName, UNKNOWN_PARAMETER_NAME)==0) continue;
-			if(strcmp(pParam->flagName, TYPO_PARAMETER_NAME)==0) continue;
-			value = pParam->arg;
 
-			if (PARAM_isDuplicateConflict(pParam)) {
-				set->printError("Error: Duplicate values '%s'", pParam->flagName);
-				if(value->source) set->printError(" from '%s'", value->source);
-				set->printError("!\n");
-			}
+	use_prefix = prefix == NULL ? "" : prefix;
 
-			while(value){
-				if(value->formatStatus == FORMAT_OK){
-					if(value->contentStatus != PARAM_OK){
-					set->printError("Content error:");
-					if(value->source) set->printError(" from '%s'", value->source);
-					set->printError(" %s%s '%s'. %s\n",
-								strlen(pParam->flagName)>1 ? "--" : "-",
-								pParam->flagName,
-								value->cstr_value ? value->cstr_value : "",
-								getParameterContentErrorString(value->contentStatus)
-								);
-					}
+	/**
+	 * Scan all parameter values from errors.
+	 */
+	for (i = 0; i < set->count; i++) {
+		parameter = set->parameter[i];
+		n = 0;
+
+		/**
+		 * Extract all invalid values from parameter.
+         */
+		while (PARAM_getInvalid(parameter, NULL, PST_PRIORITY_NONE, n++, &invalid) == PST_OK) {
+			res = PARAM_VAL_extract(invalid, &value, &source, NULL);
+			if (res != PST_OK) return NULL;
+
+			res = PARAM_VAL_getErrors(invalid, &formatStatus, &contentStatus);
+			if (res != PST_OK) return NULL;
+
+			/**
+			 * Add Error string or error code.
+			 */
+			if (getErrString != NULL) {
+				if (formatStatus != 0) {
+					count += snprintf(buf + count, buf_len - count, "%s", getErrString(formatStatus));
+				} else {
+					count += snprintf(buf + count, buf_len - count, "%s", getErrString(contentStatus));
 				}
-				else{
-					set->printError("Format error:");
-					if(value->source) set->printError(" from '%s'", value->source);
-					set->printError(" %s%s '%s'. %s\n",
-							strlen(pParam->flagName)>1 ? "--" : "-",
-							pParam->flagName,
-							value->cstr_value ? value->cstr_value : "",
-							getFormatErrorString(value->formatStatus)
-							);
+			} else {
+				if (formatStatus != 0) {
+					count += snprintf(buf + count, buf_len - count, "Error: 0x%0x.", formatStatus);
+				} else {
+					count += snprintf(buf + count, buf_len - count, "Error: 0x%0x.", contentStatus);
 				}
-
-				value = value->next;
 			}
-		}
-	}
 
-	return;
-}
-
-void PARAM_SET_printUnknownParameterWarnings(const PARAM_SET *set){
-	unsigned i = 0;
-	unsigned count = 0;
-
-	if(set == NULL) return;
-
-
-	if(PARAM_SET_getValueCountByName(set, UNKNOWN_PARAMETER_NAME, &count) == PST_OK){
-		for(i = 0; i < count; i++){
-			PARAM_VAL *value = NULL;
-			param_set_getValue(set, UNKNOWN_PARAMETER_NAME, NULL, PST_PRIORITY_NONE, i, &value);
-			if(value){
-				set->printWarning("Warning: Unknown parameter '%s'", value->cstr_value);
-				if(value->source) set->printWarning(" from '%s'", value->source);
-				set->printWarning(".\n");
+			/**
+			 * Add the source, if NULL not included.
+			 */
+			if(source != NULL) {
+				count += snprintf(buf + count, buf_len - count, " Parameter (from '%s') ", source);
+			} else {
+				count += snprintf(buf + count, buf_len - count, " Parameter ");
 			}
-		}
-	}
-}
+
+			/**
+			 * Add the parameter and its value.
+			 */
+			count += snprintf(buf + count, buf_len - count, "%s%s '%s'.",
+									strlen(parameter->flagName) > 1 ? "--" : "-",
+									parameter->flagName,
+									value != NULL ? value : ""
+									);
 
 
 
-static void param_set_PrintSimilar(const char *str, const PARAM_SET *set){
-	int numOfElements = 0;
-	PARAM **array = NULL;
-	int i =0;
-
-	if(set == NULL) return;
-
-	numOfElements = set->count;
-	array = set->parameter;
-
-	for(i=0; i<numOfElements;i++){
-		int editDist = 0;
-		unsigned lenName = 0;
-		editDist = editDistance_levenshtein(array[i]->flagName, str);
-		lenName = (unsigned)strlen(array[i]->flagName);
-
-		if((editDist*100)/lenName <= 49)
-			set->printWarning("Typo: Did You mean '%s%s'.\n",lenName>1 ? "--" : "-", array[i]->flagName);
-
-		if(array[i]->flagAlias){
-			editDist = editDistance_levenshtein(array[i]->flagAlias, str);
-			lenName = (unsigned)strlen(array[i]->flagAlias);
-
-			if((editDist*100)/lenName <= 33)
-				set->printWarning("Typo: Did You mean '%s%s'.\n",lenName>1 ? "--" : "-", array[i]->flagAlias);
+			count += snprintf(buf + count, buf_len - count, "\n");
 		}
 	}
 
-	return;
+	buf[buf_len - 1] = '\0';
+	return buf;
 }
 
-void PARAM_SET_printIgnoredLowerPriorityWarnings(const PARAM_SET *set){
-	int numOfElements = 0;
-	PARAM **array = NULL;
+char* PARAM_SET_unknownsToString(const PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
+	int res;
+	const char *use_prefix = NULL;
 	int i = 0;
-	int highestPriority;
-	if (set == NULL) return;
+	PARAM_VAL *unknown = NULL;
+	const char *name = NULL;
+	const char *source = NULL;
+	size_t count = 0;
 
-	numOfElements = set->count;
-	array = set->parameter;
 
-	for (i = 0; i < numOfElements; i++){
-		PARAM_VAL *pValue = array[i]->arg;
-		if (array[i]->isSingleHighestPriority) {
-			highestPriority = array[i]->highestPriority;
-
-			do{
-				if(pValue != NULL && pValue->priority < highestPriority){
-					set->printWarning("Warning: Lower priority parameter %s%s '%s'", strlen(array[i]->flagName) > 1 ? "--" : "-",  array[i]->flagName, pValue->cstr_value);
-					if(pValue->source) set->printWarning(" from '%s'", pValue->source);
-					set->printWarning(" is ignored.\n");
-					}
-				if(pValue) pValue = pValue->next;
-			}while(pValue);
-		}
+	if (set == NULL || buf == NULL || buf_len == 0) {
+		return NULL;
 	}
 
-	return;
-}
-
-void PARAM_SET_printTypoWarnings(const PARAM_SET *set){
-	unsigned i = 0;
-	unsigned count = 0;
-
-	if(set == NULL) return;
-
-	if(PARAM_SET_getValueCountByName(set, TYPO_PARAMETER_NAME, &count) == PST_OK){
-		for(i=0; i<count; i++){
-			PARAM_VAL *value = NULL;
-			param_set_getValue(set, TYPO_PARAMETER_NAME, NULL, PST_PRIORITY_NONE, i, &value);
-			if(value)
-				param_set_PrintSimilar(value->cstr_value, set);
-		}
+	if (set->unknown->argCount == 0) {
+		buf[0] = '\0';
+		return NULL;
 	}
+
+	use_prefix = prefix == NULL ? "" : prefix;
+
+	for (i = 0; i < set->unknown->argCount; i++) {
+		res = PARAM_getValue(set->unknown, NULL, PST_PRIORITY_NONE, i, &unknown);
+		if (res != PST_OK) return NULL;
+
+		res = PARAM_VAL_extract(unknown, &name, &source, NULL);
+		if (res != PST_OK) return NULL;
+
+		count += snprintf(buf + count, buf_len - count, "%sUnknown parameter '%s'", use_prefix, name);
+		if(source != NULL) count += snprintf(buf + count, buf_len - count, " from '%s'", source);
+		count += snprintf(buf + count, buf_len - count, ".\n");
+	}
+
+	buf[buf_len - 1] = '\0';
+	return buf;
 }
 
-int PARAM_SET_isTypos(const PARAM_SET *set){
-	unsigned count = 0;
-	PARAM_SET_getValueCountByName(set, TYPO_PARAMETER_NAME, &count);
-	return count > 0 ? 1 : 0;
+char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
+	int res;
+	const char *use_prefix = NULL;
+	PARAM_VAL *typo = NULL;
+	int i = 0;
+	const char *name = NULL;
+	const char *source = NULL;
+	int similar_count = 0;
+	int n = 0;
+	const char *similar = NULL;
+	size_t count = 0;
+
+	if (set == NULL || buf == NULL || buf_len == 0) {
+		return NULL;
+	}
+
+	if (set->typos->argCount == 0) {
+		buf[0] = '\0';
+		return NULL;
+	}
+
+	use_prefix = prefix == NULL ? "" : prefix;
+
+	while (PARAM_getValue(set->typos, NULL, 1, i, &typo) == PST_OK) {
+		res = PARAM_VAL_extract(typo, &name, &source, NULL);
+		if (res != PST_OK) return NULL;
+
+		res = PARAM_getValueCount(set->typos, name, 0, &similar_count);
+		if (res != PST_OK) return NULL;
+
+		for (n = 0; n < similar_count; n++) {
+			res = PARAM_getObject(set->typos, name, 0, n, (void**)&similar);
+			if (res != PST_OK || similar == NULL) return NULL;
+
+			count += snprintf(buf + count, buf_len - count, "%sDid You mean '%s%s' instead of '%s'.\n",use_prefix, strlen(similar) > 1 ? "--" : "-", similar, name);
+		}
+
+		i++;
+	}
+
+	buf[buf_len - 1] = '\0';
+	return buf;
 }

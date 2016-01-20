@@ -21,7 +21,7 @@
 #ifndef PARAM_SET_OBJ_IMPL_H
 #define	PARAM_SET_OBJ_IMPL_H
 
-#include "types.h"
+#include "param_set.h"
 
 #ifdef	__cplusplus
 extern "C" {
@@ -39,6 +39,7 @@ struct PARAM_VAL_st{
 	int formatStatus;			/* Format status. */
 	int contentStatus;			/* Content status. */
 	
+	PARAM_VAL *previous;		/* Link to the previous value. */
 	PARAM_VAL *next;			/* Link to the next value. */
 };	
 
@@ -51,13 +52,13 @@ struct PARAM_VAL_st{
 struct PARAM_st{
 	char *flagName;					/* The name of the parameter. */
 	char *flagAlias;				/* The alias for the parameter. */
-	int isMultipleAllowed;			/* Constraint If there is more than 1 parameters allowed. For validity check. */
-	int isSingleHighestPriority;	/* Constraint to allow to have a single value at highest priority. */
+	int constraints;			/* Constraint If there is more than 1 parameters allowed. For validity check. */
 	int highestPriority;			/* Highest priority of inserted values. */
 	int argCount;					/* Count of all arguments in chain. */
 
 	PARAM_VAL *arg;		/* Linked list of parameter values. */
 
+	int (*extractObject)(const char*, void**);		/* Function pointer to convert or repair the value before format and content check. */
 	int (*convert)(const char*, char*, unsigned);	/* Function pointer to convert or repair the value before format and content check. */
 	int (*controlFormat)(const char*);				/* Function pointer for format control. */
 	int (*controlContent)(const char*);				/* Function pointer for content control. */
@@ -75,11 +76,8 @@ struct PARAM_SET_st {
 	
 	/* List of parameters. */
 	PARAM **parameter;
-	
-	/* Function pointers to redirect info, warning and error messages. */
-	int (*printInfo)(const char*, ...);
-	int (*printWarning)(const char*, ...);
-	int (*printError)(const char*, ...);
+	PARAM *typos;
+	PARAM *unknown;
 };
 
 #ifdef	__cplusplus

@@ -37,11 +37,76 @@ static char *new_string(const char *str) {
 	return strcpy(tmp, str);
 }
 
-int PARAM_new(const char *flagName,const char *flagAlias, int isMultipleAllowed, int isSingleHighestPriority,
-		int (*controlFormat)(const char *),
-		int (*controlContent)(const char *),
-		int (*convert)(const char*, char*, unsigned),
-		PARAM **newObj){
+static int param_isFlagSet(PARAM *obj, int state) {
+	if (obj == NULL) return 0;
+	if ((obj->constraints & state) ||
+			(obj->constraints == 0 && state == 0)) return 1;
+	return 0;
+}
+
+static int param_isFlagNotSet(PARAM *obj, int state) {
+	if (obj == NULL) return 0;
+	if ((obj->constraints & (~state)) == obj->constraints ||
+			(obj->constraints != 0 && state == 0)) return 1;
+
+	return 0;
+}
+
+static int param_get_value(PARAM *param, const char *source, int prio, unsigned at,
+		int (*value_getter)(PARAM_VAL *, const char*, int, int, PARAM_VAL**),
+		PARAM_VAL **value) {
+	int res;
+	PARAM_VAL *tmp = NULL;
+
+	if (param == NULL || value == NULL || value_getter == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	if (param->arg == NULL) {
+		res = PST_PARAMETER_EMPTY;
+		goto cleanup;
+	}
+
+	res = value_getter(param->arg, source, prio, at, &tmp);
+	if (res != PST_OK) goto cleanup;
+
+	*value = tmp;
+	tmp = NULL;
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
+static int param_get_value_count(PARAM *param, const char *source, int prio,
+		int (*counter)(PARAM_VAL *, const char *, int, int *),
+		int *count) {
+	int res;
+	int tmp = 0;
+
+	if (param == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	if (param->arg == NULL) {
+		tmp = 0;
+	} else {
+		res = counter(param->arg, source, prio, &tmp);
+		if (res != PST_OK) goto cleanup;
+	}
+
+	*count = tmp;
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
+int PARAM_new(const char *flagName,const char *flagAlias, int constraints, PARAM **newObj){
 	int res;
 	PARAM *tmp = NULL;
 	char *tmpFlagName = NULL;
@@ -62,12 +127,12 @@ int PARAM_new(const char *flagName,const char *flagAlias, int isMultipleAllowed,
 	tmp->flagAlias = NULL;
 	tmp->arg = NULL;
 	tmp->highestPriority = 0;
-	tmp->isMultipleAllowed = isMultipleAllowed;
-	tmp->isSingleHighestPriority = isSingleHighestPriority;
+	tmp->constraints = constraints;
 	tmp->argCount = 0;
-	tmp->controlFormat = controlFormat;
-	tmp->controlContent = controlContent;
-	tmp->convert = convert;
+	tmp->controlFormat = NULL;
+	tmp->controlContent = NULL;
+	tmp->convert = NULL;
+	tmp->extractObject = NULL;
 
 
 	tmpFlagName = new_string(flagName);
@@ -102,7 +167,6 @@ cleanup:
 	return res;
 }
 
-
 void PARAM_free(PARAM *obj) {
 	if(obj == NULL) return;
 	free(obj->flagName);
@@ -111,7 +175,26 @@ void PARAM_free(PARAM *obj) {
 	free(obj);
 }
 
-int PARAM_addArgument(PARAM *param, const char *argument, const char* source, int priority){
+int PARAM_addControl(PARAM *obj,
+		int (*controlFormat)(const char *),
+		int (*controlContent)(const char *),
+		int (*convert)(const char*, char*, unsigned)) {
+	if (obj == NULL) return PST_INVALID_ARGUMENT;
+
+	obj->controlFormat = controlFormat;
+	obj->controlContent = controlContent;
+	obj->convert = convert;
+	return PST_OK;
+}
+
+int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(const char *, void**)) {
+	if (obj == NULL) return PST_INVALID_ARGUMENT;
+
+	obj->extractObject = extractObject;
+	return PST_OK;
+}
+
+int PARAM_addValue(PARAM *param, const char *argument, const char* source, int priority){
 	int res;
 	PARAM_VAL *newValue = NULL;
 	PARAM_VAL *pLastValue = NULL;
@@ -149,6 +232,7 @@ int PARAM_addArgument(PARAM *param, const char *argument, const char* source, in
 			res = PST_UNDEFINED_BEHAVIOUR;
 			goto cleanup;
 		}
+		newValue->previous = pLastValue;
 		pLastValue->next = newValue;
 	}
 	param->argCount++;
@@ -166,74 +250,138 @@ cleanup:
 	return res;
 }
 
-int PARAM_getValue(PARAM *param, const char *name, const char *source, int prio, unsigned at, PARAM_VAL **value) {
-	int res;
-	PARAM_VAL *tmp = NULL;
+int PARAM_getValue(PARAM *param, const char *source, int prio, unsigned at, PARAM_VAL **value) {
+	return param_get_value(param, source, prio, at, PARAM_VAL_getElement, value);
+}
 
-	if (param == NULL || name == NULL || value == NULL) {
+int PARAM_clearAll(PARAM *param) {
+	int res;
+
+	if (param == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
 
-	if (param->arg == NULL) {
+	if (param->argCount == 0) {
+		res = PST_OK;
+		goto cleanup;
+	}
+
+	PARAM_VAL_free(param->arg);
+	param->arg = NULL;
+	res = PST_OK;
+
+cleanup:
+	return res;
+}
+
+int PARAM_clearValue(PARAM *param, const char *source, int priority, int at) {
+	int res;
+	PARAM_VAL *pop = NULL;
+
+	if (param == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	if (param->argCount == 0) {
 		res = PST_PARAMETER_EMPTY;
 		goto cleanup;
 	}
 
-	res = PARAM_VAL_getElement(param->arg, source, prio, at, &tmp);
+	res = PARAM_VAL_popElement(&(param->arg), source, priority, at, &pop);
 	if (res != PST_OK) goto cleanup;
 
-	*value = tmp;
-	tmp = NULL;
+	param->argCount--;
+	PARAM_VAL_free(pop);
+
+	res = PST_OK;
+
+cleanup:
+	return res;
+}
+
+int PARAM_getInvalid(PARAM *param, const char *source, int prio, unsigned at, PARAM_VAL **value) {
+	return param_get_value(param, source, prio, at, PARAM_VAL_getInvalid, value);
+}
+
+int PARAM_getValueCount(PARAM *param, const char *source, int prio, int *count) {
+	return param_get_value_count(param, source, prio, PARAM_VAL_getElementCount, count);
+}
+
+int PARAM_getInvalidCount(PARAM *param, const char *source, int prio, int *count) {
+	return param_get_value_count(param, source, prio, PARAM_VAL_getInvalidCount, count);
+}
+
+int PARAM_checkConstraints(PARAM *param, int constraints) {
+	int priority = 0;
+	int count = 0;
+	int res;
+	int ret = 0;
+
+	if (param->arg == NULL || param == NULL) {
+		return PARAM_INVALID_CONSTRAINT;
+	}
+	/** PARAM_SINGLE_VALUE.*/
+	if (constraints & PARAM_SINGLE_VALUE) {
+		if (param_isFlagSet(param, PARAM_SINGLE_VALUE) && param->argCount > 1) {
+			ret |= PARAM_SINGLE_VALUE;
+		}
+	}
+
+	/**
+	 * PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL
+	 * Check if there are some cases where a single priority level
+	 * contains multiple values.
+     */
+	if (constraints & PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) {
+		if (param_isFlagSet(param, PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL)) {
+			/* Extract the first priority. */
+			res = PARAM_VAL_getPriority(param->arg, PST_PRIORITY_LOWEST, &priority);
+			if (res != PST_OK) return PARAM_INVALID_CONSTRAINT;
+
+			/* Iterate through all priorities. */
+			do {
+				res = PARAM_VAL_getElementCount(param->arg, NULL, priority, &count);
+				if (res != PST_OK) return PARAM_INVALID_CONSTRAINT;
+
+				if (count > 1) ret |= PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL;
+			} while (PARAM_VAL_getPriority(param->arg, priority, &priority) != PST_PARAMETER_VALUE_NOT_FOUND);
+
+		}
+	}
+
+	return ret;
+}
+
+int PARAM_getObject(PARAM *param, const char *source, int prio, unsigned at, void **obj) {
+	int res;
+	PARAM_VAL *value = NULL;
+
+	if(param == NULL || obj == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	res = PARAM_getValue(param, source, prio, at, &value);
+	if (res != PST_OK) goto cleanup;
+
+	if (value->formatStatus != 0 || value->contentStatus != 0) {
+		res = PST_PARAMETER_INVALID_FORMAT;
+		goto cleanup;
+	}
+
+	if (param->extractObject == NULL) {
+		res = PST_PARAMETER_UNIMPLEMENTED_OBJ;
+		goto cleanup;
+	}
+
+	res = param->extractObject(value->cstr_value, obj);
+	if (res != PST_OK) goto cleanup;
+
 	res = PST_OK;
 
 cleanup:
 
 	return res;
-}
-
-int PARAM_isDuplicateConflict(const PARAM *param) {
-	int highestPriority = 0;
-	int count = 0;
-	PARAM_VAL *value = NULL;
-
-	if(param->argCount > 1 && !(param->isMultipleAllowed || param->isSingleHighestPriority)){
-		return 1;
-	}
-	else if(param->isSingleHighestPriority){
-		value = param->arg;
-		do{
-			if (value != NULL){
-				if(value->priority > highestPriority){
-					count = 1;
-					highestPriority = value->priority;
-				}
-				else if (value->priority == highestPriority){
-					count++;
-				}
-				value = value->next;
-			}
-		}while (value);
-		if(count > 1)
-			return 1;
-	}
-	return 0;
-}
-
-void PARAM_print(const PARAM *param, int (*print)(const char*, ...)){
-	PARAM_VAL *pValue = NULL;
-
-	if(param == NULL) return;
-
-	print("%s\n", param->flagName);
-	pValue = param->arg;
-	do{
-		if(pValue != NULL){
-			print("  '%s' p:%i  err: %2x %2x\n", pValue->cstr_value, pValue->priority, pValue->formatStatus, pValue->contentStatus);
-			pValue = pValue->next;
-			}
-		else
-			print("  <null>\n");
-	}while(pValue);
-
 }
