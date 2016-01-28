@@ -32,6 +32,7 @@ const char *getFullResourcePath(const char* resource);
 CuSuite* ParamValueTest_getSuite(void);
 CuSuite* ParameterTest_getSuite(void);
 CuSuite* ParamSetTest_getSuite(void);
+CuSuite* TaskDefTest_getSuite(void);
 
 #ifdef	__cplusplus
 }

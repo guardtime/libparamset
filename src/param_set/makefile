@@ -18,7 +18,8 @@ LIB_DEF = $(SRC_DIR)\$(LIB_NAME).def
 LIB_OBJ = \
 	$(OBJ_DIR)\param_value.obj \
 	$(OBJ_DIR)\param_set.obj \
-	$(OBJ_DIR)\parameter.obj
+	$(OBJ_DIR)\parameter.obj \
+	$(OBJ_DIR)\task_def.obj \
 	
 	
 #Compiler and linker configuration

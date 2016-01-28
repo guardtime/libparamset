@@ -587,14 +587,26 @@ int PARAM_SET_clearParameter(PARAM_SET *set, const char *names){
 		goto cleanup;
 	}
 
-	pName = names;
-	while((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
-		res = param_set_getParameterByName(set, buf, &tmp);
+	/**
+	 * If there is no '{', assume that there is a single value.
+     */
+	if (strchr(names, '{') == NULL) {
+		res = param_set_getParameterByName(set, names, &tmp);
 		if (res != PST_OK) return res;
 
 		res = PARAM_clearAll(tmp);
 		if (res != PST_OK) return res;
+	} else {
+		pName = names;
+		while((pName = getParametersName(pName, buf, NULL, sizeof(buf), NULL)) != NULL) {
+			res = param_set_getParameterByName(set, buf, &tmp);
+			if (res != PST_OK) return res;
+
+			res = PARAM_clearAll(tmp);
+			if (res != PST_OK) return res;
+		}
 	}
+
 
 	res = PST_OK;
 

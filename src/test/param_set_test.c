@@ -119,7 +119,7 @@ static void Test_param_add_count_clear(CuTest* tc) {
 	/**
 	 * Remove parameters.
      */
-	res = PARAM_SET_clearParameter(set, "{1}");
+	res = PARAM_SET_clearParameter(set, "1");
 	CuAssert(tc, "Unable to remove.", res == PST_OK);
 	assert_param_set_value_count(tc, set, "{1}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 0);
 	assert_param_set_value_count(tc, set, NULL, NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 4);

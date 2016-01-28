@@ -80,6 +80,41 @@ struct PARAM_SET_st {
 	PARAM *unknown;
 };
 
+struct TASK_st{
+	int id;
+	TASK_DEFINITION *def;
+	PARAM_SET *set;
+};
+
+struct TASK_DEFINITION_st{
+	int id;
+
+	char *name;
+	char *mandatory;
+	char *atleast_one;
+	char *ignore;
+	char *forbitten;
+
+	char *toString;
+	int isConsistent;
+	int isAnalyzed;
+	double consistency;
+};
+
+struct TASK_SET_st {
+	TASK_DEFINITION *array[TASK_DEFINITION_MAX_COUNT];
+	size_t count;
+
+	size_t consistent_count;
+	PARAM_SET *set_used;
+	TASK *consistentTask;
+
+	double cons[TASK_DEFINITION_MAX_COUNT];
+	int index[TASK_DEFINITION_MAX_COUNT];
+
+	int isAnalyzed;
+};
+
 #ifdef	__cplusplus
 }
 #endif
