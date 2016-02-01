@@ -63,12 +63,23 @@ static int RunAllTests() {
 
 
 int main(int argc, char** argv) {
+	int ret = EXIT_FAILURE;
+#ifdef _WIN32
+#ifdef _DEBUG
+//	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+//	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+//	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
+#endif
+#endif
+
 	if (argc != 2) {
 		printf("Usage:\n %s <path to test root>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
 	initFullResourcePath(argv[1]);
+	ret = RunAllTests();
+//	_CrtDumpMemoryLeaks();
 
-	return RunAllTests();
+	return ret;
 }
