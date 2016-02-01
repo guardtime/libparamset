@@ -33,6 +33,72 @@
 
 typedef struct INT_st {int value;} INT;
 
+static int isValidNameChar(int c) {
+	if ((ispunct(c) || isspace(c)) && c != '_' && c != '-') return 0;
+	else return 1;
+}
+
+const char* extract_next_name(const char* name_string, int (*isValidNameChar)(int), char *buf, short len, int *flags) {
+	int cat_i = 0;
+	int buf_i = 0;
+	int tmp_flags = 0;
+	int isNameOpen = 0;
+	int isFlagsOpen = 0;
+
+
+	if (name_string == NULL || name_string[0] == 0 || buf == NULL) {
+		return NULL;
+	}
+
+	while (name_string[cat_i] != 0) {
+		/* If buf is going to be full, return NULL. */
+		if (buf_i >= len - 1) {
+			buf[len - 1] = 0;
+			return NULL;
+		}
+
+		/**
+		 * Extract the name and extra flags.
+         */
+		if (buf_i == 0 && !isNameOpen && !isFlagsOpen && isValidNameChar(name_string[cat_i])) {
+			isNameOpen = 1;
+		} else if (isNameOpen && buf_i > 0 && !isValidNameChar(name_string[cat_i]) && name_string[cat_i] != '-') {
+			isNameOpen = 0;
+		}
+
+
+		if (buf_i > 0 && !isNameOpen && !isFlagsOpen && name_string[cat_i] == '[') {
+			isFlagsOpen = 1;
+		} else if (isFlagsOpen && name_string[cat_i] == ']') {
+			isFlagsOpen = 0;
+		}
+
+		/**
+		 * Extract the data fields.
+         */
+		if (isNameOpen) {
+			buf[buf_i++] = name_string[cat_i];
+		} else if (isFlagsOpen) {
+			/*TODO: extract flags*/
+		} else if (buf_i > 0){
+			break;
+		}
+
+		cat_i++;
+	}
+
+	if (buf[0] == '0') {
+		return NULL;
+	}
+
+	buf[buf_i] = 0;
+	if (flags != NULL) {
+		*flags = tmp_flags;
+	}
+
+	return buf_i == 0 ? NULL : &name_string[cat_i];
+}
+
 static char *getParametersName(const char* list_of_names, char *name, char *alias, short len, int *flags){
 	char *pName = NULL;
 	int i = 0;

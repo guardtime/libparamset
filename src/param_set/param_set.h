@@ -224,6 +224,21 @@ char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *pref
 
 int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *source, int priority, int *count);
 
+/**
+ * Function that can be used to separate names from string. A function \c isValidNameChar
+ * must be defined to separate valid name characters from all kind of separators.
+ * Function returns a pointer inside <name_string> that can be used in next iteration
+ * to extract next name.
+ *
+ * \param	name_string		A string full of names that are separated from each other.
+ * \param	isValidNameChar	Function that defines valid name characters.
+ * \param	buf				Buffer for storing extracted name.
+ * \param	len				Buffer size.
+ * \param	flags			Can be left to NULL.
+ * \return Pointer inside <name_string> that points to next character after name
+ * extracted or NULL if end if string reached or no name can be extracted.
+ */
+const char* extract_next_name(const char* name_string, int (*isValidNameChar)(int), char *buf, short len, int *flags);
 
 #ifdef	__cplusplus
 }
