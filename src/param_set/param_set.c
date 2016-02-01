@@ -731,6 +731,11 @@ int PARAM_SET_isTypoFailure(const PARAM_SET *set){
 	return count > 0 ? 1 : 0;
 }
 
+int PARAM_SET_isUnknown(const PARAM_SET *set){
+	int count = 0;
+	PARAM_getValueCount(set->unknown, NULL, PST_PRIORITY_NONE, &count);
+	return count > 0 ? 1 : 0;
+}
 
 void PARAM_SET_readFromFile(const char *fname, PARAM_SET *set, int priority){
 	FILE *file = NULL;

@@ -189,6 +189,7 @@ int PARAM_SET_isFormatOK(const PARAM_SET *set);
  */
 int PARAM_SET_isTypoFailure(const PARAM_SET *set);
 
+int PARAM_SET_isUnknown(const PARAM_SET *set);
 /**
  * Reads parameter values from file into predefined parameter set. File must be
  * formatted one parameter (and its possible value) per line.
