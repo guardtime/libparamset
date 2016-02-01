@@ -427,7 +427,7 @@ static void Test_task_definition_ignoring_messages(CuTest* tc) {
 	buf[0] = '\0';
 
 	CuAssert(tc, "Invalid ignoring message.",
-			TASK_DEFINITION_ignoredParametersToString(task_def_3, set, "Warning: ", buf, sizeof(buf)) != NULL && buf[0] == '\0');
+			TASK_DEFINITION_ignoredParametersToString(task_def_3, set, "Warning: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_3) == 0);
 	buf[0] = '\0';
 
 	CuAssert(tc, "Invalid ignoring message.",
@@ -466,7 +466,6 @@ static void Test_task_set_lifecycle(CuTest* tc) {
 	TASK_SET *tasks = NULL;
 	PARAM_SET *set = NULL;
 	TASK *cons_task = NULL;
-	char buf[1024];
 
 	/**
 	 * Create and configure TASK set.
@@ -561,7 +560,6 @@ static void Test_task_set_remove_ignored_parameters(CuTest* tc) {
 	TASK_SET *tasks = NULL;
 	PARAM_SET *set = NULL;
 	TASK *cons_task = NULL;
-	char buf[1024];
 	int removed = 0;
 
 	/**

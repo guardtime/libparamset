@@ -366,22 +366,36 @@ static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	char *path = "<path>";
 	char *p1 = "-abc";
 	char *p2 = "-x";
-	char *argv[3];
-	int argc = 3;
+	char *p3 = "-e";
+	char *p4 = "e_value";
+	char *argv[5];
+	int argc = 5;
 	int count = 0;
+	char *value = NULL;
 
 	argv[0] = path;
 	argv[1] = p1;
 	argv[2] = p2;
+	argv[3] = p3;
+	argv[4] = p4;
 
-	res = PARAM_SET_new("{a}{b}{c}{d}{x}", &set);
+	res = PARAM_SET_new("{a}{b}{c}{d}{x}{e}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
 	PARAM_SET_readFromCMD(argc, argv, set, 0);
 
-	res = PARAM_SET_getValueCount(set, "{a}{b}{c}{d}{x}", NULL, PST_PRIORITY_NONE, &count);
+	res = PARAM_SET_getValueCount(set, "{a}{b}{c}{d}{x}{e}", NULL, PST_PRIORITY_NONE, &count);
 	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
-	CuAssert(tc, "Invalid value count.", count == 4);
+	CuAssert(tc, "Invalid value count.", count == 5);
+
+	res = PARAM_SET_getObj(set, "e", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_OK && strcmp(value, p4) == 0);
+
+	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value == NULL);
+
+	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res = PST_PARAMETER_EMPTY);
 
 	PARAM_SET_free(set);
 }
