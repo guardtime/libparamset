@@ -26,10 +26,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#ifdef _WIN32
-#define snprintf _snprintf
-#endif
-
 static void assert_param_set_value_count(CuTest* tc,
 		PARAM_SET* set, const char* names, const char* source, int priority,
 		const char *file, int line, int C) {
@@ -363,7 +359,32 @@ static void Test_param_set_unknown(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_param_set_from_cmd_flags(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char buf[1024];
+	char *path = "<path>";
+	char *p1 = "-abc";
+	char *p2 = "-x";
+	char *argv[3];
+	int argc = 3;
+	int count = 0;
 
+	argv[0] = path;
+	argv[1] = p1;
+	argv[2] = p2;
+
+	res = PARAM_SET_new("{a}{b}{c}{d}{x}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	PARAM_SET_readFromCMD(argc, argv, set, 0);
+
+	res = PARAM_SET_getValueCount(set, "{a}{b}{c}{d}{x}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 4);
+
+	PARAM_SET_free(set);
+}
 
 
 CuSuite* ParamSetTest_getSuite(void) {
@@ -373,6 +394,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_typos);
 	SUITE_ADD_TEST(suite, Test_param_set_unknown);
 	SUITE_ADD_TEST(suite, Test_param_remove_element);
+	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags);
 	return suite;
 }
 
