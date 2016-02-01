@@ -212,11 +212,11 @@ enum {
 static const char*errToString(int err) {
 	switch(err) {
 	case ERROR_NULL:
-		return "Format error: Parameter must have value.";
+		return "Format error: Parameter must have value";
 	case ERROR_TOO_LONG:
-		return "Content error: Too many characters.";
+		return "Content error: Too many characters";
 	case ERROR_NOT_ALPHA:
-		return "Format error: Not alpha char.";
+		return "Format error: Not alpha char";
 	}
 }
 
@@ -345,6 +345,8 @@ static void Test_param_set_unknown(CuTest* tc) {
 	res = PARAM_SET_new("{ab}{abc}{abcd}{test}{sest}{kest}{mest}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
+	CuAssert(tc, "There should be no unknown parameters.", !PARAM_SET_isUnknown(set));
+
 	res = PARAM_SET_add(set, "unknown 1", NULL, NULL, 0);
 	CuAssert(tc, "Unable to add to set.", res == PST_PARAMETER_IS_UNKNOWN);
 
@@ -353,6 +355,8 @@ static void Test_param_set_unknown(CuTest* tc) {
 
 	res = PARAM_SET_add(set, "unknown 3", NULL, NULL, 0);
 	CuAssert(tc, "Unable to add to set.", res == PST_PARAMETER_IS_UNKNOWN);
+
+	CuAssert(tc, "There should be some unknown parameters.", PARAM_SET_isUnknown(set));
 
 	PARAM_SET_unknownsToString(set, "Warning: ", buf, sizeof(buf));
 	CuAssert(tc, "Invalid string genrated.", strcmp(buf, expected) == 0);

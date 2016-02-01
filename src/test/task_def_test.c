@@ -378,6 +378,7 @@ static void Test_task_definition_repair_messages(CuTest* tc) {
 	CuAssert(tc, "Invalid repair suggestions.",
 			TASK_DEFINITION_howToRepiar_toString(task_def_5, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_5) == 0);
 
+	PARAM_SET_free(set);
 	TASK_DEFINITION_free(task_def_1);
 	TASK_DEFINITION_free(task_def_2);
 	TASK_DEFINITION_free(task_def_3);
@@ -433,7 +434,7 @@ static void Test_task_definition_ignoring_messages(CuTest* tc) {
 			TASK_DEFINITION_ignoredParametersToString(task_def_4, set, NULL, buf, sizeof(buf)) != NULL && strcmp(buf, exp_4) == 0);
 	buf[0] = '\0';
 
-
+	PARAM_SET_free(set);
 	TASK_DEFINITION_free(task_def_1);
 	TASK_DEFINITION_free(task_def_2);
 	TASK_DEFINITION_free(task_def_3);
