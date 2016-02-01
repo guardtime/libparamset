@@ -280,7 +280,6 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 	int res;
 	const char *flag = NULL;
 	unsigned len;
-
 	len = (unsigned)strlen(param);
 	if(param[0] == '-' && param[1] != 0){
 		flag = param + (param[1] == '-' ? 2 : 1);
@@ -317,7 +316,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
              */
 			while ((str_flg[0] = flag[itr++]) != '\0') {
 				res = PARAM_SET_add(set, str_flg, NULL, source, priority);
-				if (res != PST_OK || res != PST_PARAMETER_IS_UNKNOWN || res != PST_PARAMETER_IS_TYPO) {
+				if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) {
 					goto cleanup;
 				}
 
@@ -390,18 +389,6 @@ int PARAM_SET_new(const char *names, PARAM_SET **set){
 	tmp->unknown = NULL;
 
 	tmp_param = (PARAM**)calloc(paramCount, sizeof(PARAM*));
-	if(tmp == NULL) {
-		res = PST_OUT_OF_MEMORY;
-		goto cleanup;
-	}
-
-	tmp->typos = (PARAM*)calloc(paramCount, sizeof(PARAM));
-	if(tmp == NULL) {
-		res = PST_OUT_OF_MEMORY;
-		goto cleanup;
-	}
-
-	tmp->unknown = (PARAM*)calloc(paramCount, sizeof(PARAM));
 	if(tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -796,7 +783,7 @@ void PARAM_SET_readFromCMD(int argc, char **argv, PARAM_SET *set, int priority){
 }
 
 
-char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString(int)), char *buf, size_t buf_len) {
+char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString)(int), char *buf, size_t buf_len) {
 	int res;
 	const char *use_prefix = NULL;
 	int i = 0;
@@ -833,14 +820,15 @@ char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *pref
 			res = PARAM_VAL_getErrors(invalid, &formatStatus, &contentStatus);
 			if (res != PST_OK) return NULL;
 
+			count += snprintf(buf + count, buf_len - count, "%s", use_prefix);
 			/**
 			 * Add Error string or error code.
 			 */
 			if (getErrString != NULL) {
 				if (formatStatus != 0) {
-					count += snprintf(buf + count, buf_len - count, "%s", getErrString(formatStatus));
+					count += snprintf(buf + count, buf_len - count, "%s.", getErrString(formatStatus));
 				} else {
-					count += snprintf(buf + count, buf_len - count, "%s", getErrString(contentStatus));
+					count += snprintf(buf + count, buf_len - count, "%s.", getErrString(contentStatus));
 				}
 			} else {
 				if (formatStatus != 0) {
