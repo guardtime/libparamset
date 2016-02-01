@@ -99,6 +99,7 @@ const char* extract_next_name(const char* name_string, int (*isValidNameChar)(in
 	return buf_i == 0 ? NULL : &name_string[cat_i];
 }
 
+/*TODO: Refactore (use and extend extract_next_name).*/
 static char *getParametersName(const char* list_of_names, char *name, char *alias, short len, int *flags){
 	char *pName = NULL;
 	int i = 0;
@@ -541,7 +542,7 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 	if (set == NULL || names == NULL) return PST_INVALID_ARGUMENT;
 
 	pName = names;
-	while ((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
+	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
 		res = param_set_getParameterByName(set, buf, &tmp);
 		if (res != PST_OK) return res;
 
@@ -651,7 +652,7 @@ int PARAM_SET_clearParameter(PARAM_SET *set, const char *names){
 		if (res != PST_OK) return res;
 	} else {
 		pName = names;
-		while((pName = getParametersName(pName, buf, NULL, sizeof(buf), NULL)) != NULL) {
+		while((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
 			res = param_set_getParameterByName(set, buf, &tmp);
 			if (res != PST_OK) return res;
 
@@ -680,7 +681,7 @@ int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, 
 	}
 
 	pName = names;
-	while((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
+	while((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
 		res = param_set_getParameterByName(set, buf, &tmp);
 		if (res != PST_OK) return res;
 
@@ -718,7 +719,7 @@ int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *sourc
 		/**
 		 * If parameters name list is specified, use that to count the values needed.
 		 */
-		while ((pName = getParametersName(pName, buf, NULL, sizeof(buf), 0)) != NULL) {
+		while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
 			res = param_set_getParameterByName(set, buf, &param);
 			if (res != PST_OK) return res;
 

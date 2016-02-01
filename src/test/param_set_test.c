@@ -109,7 +109,9 @@ static void Test_param_add_count_clear(CuTest* tc) {
 	assert_param_set_value_count(tc, set, "{three}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 2);
 	assert_param_set_value_count(tc, set, "{4}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 2);
 	assert_param_set_value_count(tc, set, "{four}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 2);
+	assert_param_set_value_count(tc, set, "four", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 2);
 	assert_param_set_value_count(tc, set, "{1}{4}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 5);
+	assert_param_set_value_count(tc, set, "1,4", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 5);
 
 
 	/**
@@ -181,8 +183,8 @@ static void Test_param_remove_element(CuTest* tc) {
 	 * Remove parameters.
      */
 	assert_param_set_value_count(tc, set, NULL, NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 7);
-	assert_param_set_value_count(tc, set, "{1}{three}", "B", 0, __FILE__, __LINE__, 2);
-	for (i = 0; PARAM_SET_clearValue(set, "{1}{three}", "B", 0, 0) == PST_OK; i++);
+	assert_param_set_value_count(tc, set, "1 three", "B", 0, __FILE__, __LINE__, 2);
+	for (i = 0; PARAM_SET_clearValue(set, "1 three", "B", 0, 0) == PST_OK; i++);
 
 	assert_param_set_value_count(tc, set, "{1}{three}", "B", 0, __FILE__, __LINE__, 0);
 	assert_param_set_value_count(tc, set, NULL, NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 5);
