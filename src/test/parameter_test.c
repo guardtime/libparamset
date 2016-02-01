@@ -331,6 +331,8 @@ static void Test_ObjectGetter(CuTest* tc) {
 	PARAM *p1 = NULL;
 	PARAM *p2 = NULL;
 	PARAM *p3 = NULL;
+	PARAM *p4 = NULL;
+	PARAM *p5 = NULL;
 	char *string = NULL;
 	int integer = 98;
 	double floating = 10.0;
@@ -345,6 +347,12 @@ static void Test_ObjectGetter(CuTest* tc) {
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	res = PARAM_new("double", NULL, 0, &p3);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("default", NULL, 0, &p4);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("null", NULL, 0, &p5);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	/**
@@ -374,6 +382,12 @@ static void Test_ObjectGetter(CuTest* tc) {
 	res = PARAM_addValue(p3, "12.3", NULL, 0);
 	CuAssert(tc, "Unable to add argument.", res == PST_OK);
 
+	res = PARAM_addValue(p4, "default.txt", NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
+	res = PARAM_addValue(p5, NULL, NULL, 0);
+	CuAssert(tc, "Unable to add argument.", res == PST_OK);
+
 	/**
 	 * Extract object valid objects.
      */
@@ -389,10 +403,17 @@ static void Test_ObjectGetter(CuTest* tc) {
 	res = PARAM_getObject(p3, NULL, PST_PRIORITY_NONE, 0, (void**)&floating);
 	CuAssert(tc, "Unable to extract double.", res == PST_OK && floating == 12.3);
 
+	res = PARAM_getObject(p4, NULL, PST_PRIORITY_NONE, 0, (void**)&string);
+	CuAssert(tc, "Unable to extract default string.", res == PST_OK && strcmp(string, "default.txt") == 0);
+
+	res = PARAM_getObject(p5, NULL, PST_PRIORITY_NONE, 0, (void**)&string);
+	CuAssert(tc, "Unable to extract default string.", res == PST_OK && string == NULL);
 
 	PARAM_free(p1);
 	PARAM_free(p2);
 	PARAM_free(p3);
+	PARAM_free(p4);
+	PARAM_free(p5);
 }
 
 
