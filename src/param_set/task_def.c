@@ -609,8 +609,6 @@ char *TASK_DEFINITION_howToRepiar_toString(TASK_DEFINITION *def, PARAM_SET *set,
 char* TASK_DEFINITION_ignoredParametersToString(TASK_DEFINITION *def, PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
 	const char *pName = NULL;
 	char name_buffer[1024];
-	int res;
-	int i;
 	size_t count = 0;
 	const char *pref = NULL;
 	int err_printed = 0;
