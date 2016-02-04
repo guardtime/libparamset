@@ -297,9 +297,9 @@ static void Test_task_definition_toString(CuTest* tc) {
 	char buf[1024];
 	char *ret = NULL;
 
-	char expected1[] = "-a\n";
-	char expected2[] = "-a one or more of (-x -y)\n";
-	char expected3[] = "-a -b one or more of (-x -y -z)\n";
+	char expected1[] = "-a";
+	char expected2[] = "-a one or more of (-x -y)";
+	char expected3[] = "-a -b one or more of (-x -y -z)";
 
 
 	res = TASK_DEFINITION_new(0, "Task 1", "a", NULL, NULL, NULL, &task_def_1);
@@ -702,7 +702,7 @@ static void Test_task_set_is_one_target(CuTest* tc) {
 	TASK *cons_task = NULL;
 	char buf[1024];
 	int ID = -1;
-	char expected_repair_msg[] = "You have to define flag(s) '--_b'.\n";
+	char expected_repair_msg[] = "Task 'Task 3' -a --_b -d one or more of (-x) is invalid:\nYou have to define flag(s) '--_b'.\n";
 
 
 	/**

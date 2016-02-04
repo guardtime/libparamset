@@ -466,7 +466,7 @@ char* TASK_DEFINITION_toString(TASK_DEFINITION *def, char *buf, size_t buf_len) 
 		count += snprintf(buf + count, buf_len - count, ")");
 	}
 
-	count += snprintf(buf + count, buf_len - count, "\n");
+//	count += snprintf(buf + count, buf_len - count, "\n");
 	return buf;
 }
 
@@ -913,12 +913,23 @@ int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff, int *ID) {
 
 char* TASK_SET_howToRepair_toString(TASK_SET *task_set, PARAM_SET *set, int ID, const char *prefix, char *buf, size_t buf_len) {
 	int i;
+	size_t count = 0;
+	char *tmp;
 
-	if (task_set == NULL || buf == NULL || buf_len == NULL || set == NULL) return NULL;
+	if (task_set == NULL || buf == NULL || buf_len == 0 || set == NULL) return NULL;
 
 	for (i = 0; i < task_set->count; i++) {
 		if (task_set->array[i]->id == ID) {
-			return TASK_DEFINITION_howToRepiar_toString(task_set->array[i], set, prefix, buf, buf_len);
+			if (task_set->array[i]->isConsistent) {
+				count += snprintf(buf + count, buf_len - count, "Task '%s' %s is OK.", task_set->array[i]->name, task_set->array[i]->toString);
+			} else {
+				count += snprintf(buf + count, buf_len - count, "Task '%s' %s is invalid:\n", task_set->array[i]->name, task_set->array[i]->toString);
+				tmp = TASK_DEFINITION_howToRepiar_toString(task_set->array[i], set, prefix, buf + count, buf_len - count);
+
+				if (tmp == NULL) return NULL;
+				else return buf;
+			}
+
 		}
 	}
 
@@ -936,7 +947,7 @@ char* TASK_SET_suggestions_toString(TASK_SET *task_set, int depth, char *buf, si
 	for (i = 0, n = 0; i < task_set->count && n < depth; i++) {
 		tmp = task_set->array[task_set->index[i]];
 		if (!tmp->isConsistent) {
-			count += snprintf(buf + count, buf_len - count, "Maybe you want to: %s %s", tmp->name, tmp->toString);
+			count += snprintf(buf + count, buf_len - count, "Maybe you want to: %s %s\n", tmp->name, tmp->toString);
 			n++;
 		}
 	}
