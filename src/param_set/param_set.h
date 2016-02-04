@@ -133,10 +133,11 @@ void PARAM_SET_free(PARAM_SET *set);
  * size.
  * int (*convert)(const char*, char*, unsigned) extra parameters 
  * 
- * Function \c extractObject us used to extract an object from the parameters value.
- * The value set affects the functions \rfe PARAM_SET_getObj behaviour. If not
- * set, the default value extracted is the c-string. 
- * int (*extractObject)(const char *, void**))
+ * Function \c extractObject used to extract an object from the parameters value.
+ * The value set affects the functions \ref PARAM_SET_getObj behaviour. If not
+ * set, the default value extracted is the c-string. Extra value for extractor
+ * is set as PARAM_SET itself (see \ref PARAM_setObjectExtractor). 
+ * int (*extractObject)(void *, const char *, void**))
  * 
  * \param	set				PARAM_SET object.
  * \param	names			list of names to add the functions.
@@ -151,7 +152,7 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 		int (*controlFormat)(const char *),
 		int (*controlContent)(const char *),
 		int (*convert)(const char*, char*, unsigned),
-		int (*extractObject)(const char *, void**));
+		int (*extractObject)(void *, const char *, void**));
 
 /**
  * Appends parameter to the set. Invalid value format or content is not handled

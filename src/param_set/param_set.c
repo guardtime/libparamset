@@ -533,7 +533,7 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 		int (*controlFormat)(const char *),
 		int (*controlContent)(const char *),
 		int (*convert)(const char*, char*, unsigned),
-		int (*extractObject)(const char *, void**)){
+		int (*extractObject)(void *, const char *, void**)){
 	int res;
 	PARAM *tmp = NULL;
 	const char *pName = NULL;
@@ -620,7 +620,7 @@ int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int p
 	 * Obj must be feed directly to the getter function, asi it enables to manipulate
 	 * the data pointed by obj.
      */
-	res = PARAM_getObject(param, source, priority, at, NULL, obj);
+	res = PARAM_getObject(param, source, priority, at, set, obj);
 	if (res != PST_OK) goto cleanup;
 
 	res = PST_OK;
