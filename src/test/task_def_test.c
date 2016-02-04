@@ -701,6 +701,9 @@ static void Test_task_set_is_one_target(CuTest* tc) {
 	PARAM_SET *set = NULL;
 	TASK *cons_task = NULL;
 	char buf[1024];
+	int ID = -1;
+	char expected_repair_msg[] = "You have to define flag(s) '--_b'.\n";
+
 
 	/**
 	 * Create and configure TASK set.
@@ -733,9 +736,10 @@ static void Test_task_set_is_one_target(CuTest* tc) {
 	res = TASK_SET_analyzeConsistency(tasks, set, 0.2);
 	CuAssert(tc, "Unable to analyze.", res == PST_OK);
 
-	CuAssert(tc, "There should be no tasks that are possible targets.", !TASK_SET_isOneFromSetTheTarget(tasks, 0.25));
-	CuAssert(tc, "There should be no tasks that are possible targets.", !TASK_SET_isOneFromSetTheTarget(tasks, 0.15));
-	CuAssert(tc, "There should be one possible target.", TASK_SET_isOneFromSetTheTarget(tasks, 0.08));
+	CuAssert(tc, "There should be no tasks that are possible targets.", !TASK_SET_isOneFromSetTheTarget(tasks, 0.25, &ID) && ID == -1);
+	CuAssert(tc, "There should be no tasks that are possible targets.", !TASK_SET_isOneFromSetTheTarget(tasks, 0.15, &ID) && ID == -1);
+	CuAssert(tc, "There should be one possible target.", TASK_SET_isOneFromSetTheTarget(tasks, 0.08, &ID) && ID == 3);
+	CuAssert(tc, "Invalid repair message.", strcmp(TASK_SET_howToRepair_toString(tasks, set, 3, NULL, buf, sizeof(buf)), expected_repair_msg) == 0);
 
 
 	PARAM_SET_free(set);

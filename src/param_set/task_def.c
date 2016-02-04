@@ -885,7 +885,7 @@ cleanup:
 	return res;
 }
 
-int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff) {
+int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff, int *ID) {
 	int i;
 	size_t count = 0;
 	TASK_DEFINITION *tmp = NULL;
@@ -904,7 +904,25 @@ int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff) {
 		}
 	}
 
+	if (ID != NULL) {
+		*ID = task_set->array[task_set->index[0]]->id;
+	}
+
 	return 1;
+}
+
+char* TASK_SET_howToRepair_toString(TASK_SET *task_set, PARAM_SET *set, int ID, const char *prefix, char *buf, size_t buf_len) {
+	int i;
+
+	if (task_set == NULL || buf == NULL || buf_len == NULL || set == NULL) return NULL;
+
+	for (i = 0; i < task_set->count; i++) {
+		if (task_set->array[i]->id == ID) {
+			return TASK_DEFINITION_howToRepiar_toString(task_set->array[i], set, prefix, buf, buf_len);
+		}
+	}
+
+	return buf;
 }
 
 char* TASK_SET_suggestions_toString(TASK_SET *task_set, int depth, char *buf, size_t buf_len) {
