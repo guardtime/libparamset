@@ -405,7 +405,7 @@ cleanup:
 	return res;
 }
 
-static int wrapper_returnStr(const char* str, void** obj){
+static int wrapper_returnStr(void *extra, const char* str, void** obj){
 	*obj = (void*)str;
 	return PST_OK;
 }
@@ -620,7 +620,7 @@ int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int p
 	 * Obj must be feed directly to the getter function, asi it enables to manipulate
 	 * the data pointed by obj.
      */
-	res = PARAM_getObject(param, source, priority, at, obj);
+	res = PARAM_getObject(param, source, priority, at, NULL, obj);
 	if (res != PST_OK) goto cleanup;
 
 	res = PST_OK;
@@ -1006,7 +1006,7 @@ char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, siz
 		if (res != PST_OK) return NULL;
 
 		for (n = 0; n < similar_count; n++) {
-			res = PARAM_getObject(set->typos, name, 0, n, (void**)&similar);
+			res = PARAM_getObject(set->typos, name, 0, n, NULL, (void**)&similar);
 			if (res != PST_OK || similar == NULL) return NULL;
 
 			count += snprintf(buf + count, buf_len - count, "%sDid You mean '%s%s' instead of '%s'.\n",use_prefix, strlen(similar) > 1 ? "--" : "-", similar, name);

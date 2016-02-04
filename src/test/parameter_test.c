@@ -309,18 +309,18 @@ static void Test_SetValuesAndControl(CuTest* tc) {
 	PARAM_free(p4);
 }
 
-static int wrapper_returnStr(const char* str, void** obj){
+static int wrapper_returnStr(void *extra, const char* str, void** obj){
 	*obj = (void*)str;
 	return PST_OK;
 }
 
-static int wrapper_returnInt(const char* str,  void** obj){
+static int wrapper_returnInt(void *extra, const char* str,  void** obj){
 	int *pI = (int*)obj;
 	*pI = atoi(str);
 	return PST_OK;
 }
 
-static int wrapper_returnDouble(const char* str,  void** obj){
+static int wrapper_returnDouble(void *extra, const char* str,  void** obj){
 	double *pd = (double*)obj;
 	*pd = atof(str);
 	return PST_OK;
@@ -391,22 +391,22 @@ static void Test_ObjectGetter(CuTest* tc) {
 	/**
 	 * Extract object valid objects.
      */
-	res = PARAM_getObject(p1, NULL, PST_PRIORITY_NONE, 0, (void**)&string);
+	res = PARAM_getObject(p1, NULL, PST_PRIORITY_NONE, 0, NULL, (void**)&string);
 	CuAssert(tc, "Unable to extract string.", res == PST_OK && strcmp(string, "text") == 0);
 
-	res = PARAM_getObject(p2, NULL, PST_PRIORITY_NONE, 0, (void**)&integer);
+	res = PARAM_getObject(p2, NULL, PST_PRIORITY_NONE, 0, NULL, (void**)&integer);
 	CuAssert(tc, "Unable to extract int.", res == PST_OK && integer == 1234);
 
-	res = PARAM_getObject(p2, NULL, PST_PRIORITY_NONE, 1, (void**)&integer);
+	res = PARAM_getObject(p2, NULL, PST_PRIORITY_NONE, 1, NULL, (void**)&integer);
 	CuAssert(tc, "Unable to extract int.", res == PST_OK && integer == -567);
 
-	res = PARAM_getObject(p3, NULL, PST_PRIORITY_NONE, 0, (void**)&floating);
+	res = PARAM_getObject(p3, NULL, PST_PRIORITY_NONE, 0, NULL, (void**)&floating);
 	CuAssert(tc, "Unable to extract double.", res == PST_OK && floating == 12.3);
 
-	res = PARAM_getObject(p4, NULL, PST_PRIORITY_NONE, 0, (void**)&string);
+	res = PARAM_getObject(p4, NULL, PST_PRIORITY_NONE, 0, NULL, (void**)&string);
 	CuAssert(tc, "Unable to extract default string.", res == PST_OK && strcmp(string, "default.txt") == 0);
 
-	res = PARAM_getObject(p5, NULL, PST_PRIORITY_NONE, 0, (void**)&string);
+	res = PARAM_getObject(p5, NULL, PST_PRIORITY_NONE, 0, NULL, (void**)&string);
 	CuAssert(tc, "Unable to extract default string.", res == PST_OK && string == NULL);
 
 	PARAM_free(p1);
