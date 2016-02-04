@@ -1018,3 +1018,48 @@ char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, siz
 	buf[buf_len - 1] = '\0';
 	return buf;
 }
+
+const char* PARAM_SET_errorToString(int err) {
+	switch(err) {
+	case PST_OK:
+		return "OK.";
+	case PST_INVALID_ARGUMENT:
+		return "Invalid argument.";
+	case PST_OUT_OF_MEMORY:
+		return "PARAM_SET out of memory.";
+	case PST_INDEX_OVF:
+		return "Index is too large.";
+	case PST_PARAMETER_INVALID_FORMAT:
+	case PST_INVALID_FORMAT:
+		return "Invalid input format.";
+	case PST_PARAMETER_NOT_FOUND:
+		return "Parameter not found.";
+	case PST_PARAMETER_VALUE_NOT_FOUND:
+		return "Parameter value not found.";
+	case PST_PARAMETER_EMPTY:
+		return "Parameter is empty.";
+	case PST_PARAMETER_IS_TYPO:
+		return "Parameters name looks like typo.";
+	case PST_PARAMETER_IS_UNKNOWN:
+		return "Parameters is unknown.";
+	case PST_PARAMETER_UNIMPLEMENTED_OBJ:
+		return "Parameters object extractor unimplemented.";
+	case PST_NEGATIVE_PRIORITY:
+		return "Negative priority.";
+	case PST_TASK_ZERO_CONSISTENT_TASKS:
+		return "None consistent task.";
+	case PST_TASK_MULTIPLE_CONSISTENT_TASKS:
+		return "More than one consistent tasks.";
+	case PST_TASK_SET_HAS_NO_DEFINITIONS:
+		return "Task definition empty.";
+	case PST_TASK_SET_NOT_ANALYZED:
+		return "Task definition not analyzed.";
+	case PST_TASK_UNABLE_TO_ANALYZE_PARAM_SET_CHANGED:
+		return "Unable to analyze with different PARAM_SET.";
+	case PST_UNDEFINED_BEHAVIOUR:
+		return "PARAM_SET undefined behaviour.";
+	case PST_UNKNOWN_ERROR:
+		return "PARAM_SET unknown error.";
+	}
+	return "PARAM_SET unknown error.";
+}

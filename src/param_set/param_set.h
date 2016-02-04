@@ -45,9 +45,8 @@ enum param_set_err {
 	PST_PARAMETER_INVALID_FORMAT,
 	PST_TASK_ZERO_CONSISTENT_TASKS,
 	PST_TASK_MULTIPLE_CONSISTENT_TASKS,
-	PST_TASK_SET_HAS_NOD_DEFINITIONS,
+	PST_TASK_SET_HAS_NO_DEFINITIONS,
 	PST_TASK_SET_NOT_ANALYZED,
-	PST_TASK_DEFINITION_NOT_DEFINED,
 	PST_TASK_UNABLE_TO_ANALYZE_PARAM_SET_CHANGED,
 	PST_UNDEFINED_BEHAVIOUR,
 	PST_UNKNOWN_ERROR,
@@ -327,6 +326,12 @@ char* PARAM_SET_unknownsToString(const PARAM_SET *set, const char *prefix, char 
  */
 char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString)(int), char *buf, size_t buf_len);
 
+/**
+ * Converts PST_ Error codes to string.
+ * \param err
+ * \return Error string.
+ */
+const char* PARAM_SET_errorToString(int err);
 /**
  * Function that can be used to separate names from string. A function \c isValidNameChar
  * must be defined to separate valid name characters from all kind of separators.

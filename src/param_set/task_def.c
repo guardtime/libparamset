@@ -691,7 +691,7 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 	task_set->consistent_count = 0;
 
 	if (task_set->count == 0) {
-		res = PST_TASK_SET_HAS_NOD_DEFINITIONS;
+		res = PST_TASK_SET_HAS_NO_DEFINITIONS;
 		goto cleanup;
 	}
 
@@ -700,11 +700,6 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 		goto cleanup;
 	}
 
-
-	if (task_set->count == 0) {
-		res = PST_TASK_DEFINITION_NOT_DEFINED;
-		goto cleanup;
-	}
 
 	/**
 	 * Analyze consistency.
@@ -792,7 +787,7 @@ int TASK_SET_getConsistentTask(TASK_SET *task_set, TASK **task) {
 	}
 
 	if (task_set->count == 0) {
-		res = PST_TASK_SET_HAS_NOD_DEFINITIONS;
+		res = PST_TASK_SET_HAS_NO_DEFINITIONS;
 		goto cleanup;
 	}
 

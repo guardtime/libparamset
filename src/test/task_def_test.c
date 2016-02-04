@@ -482,10 +482,10 @@ static void Test_task_set_lifecycle(CuTest* tc) {
 	CuAssert(tc, "Unable to create new task set.", res == PST_OK && tasks != NULL);
 
 	res = TASK_SET_analyzeConsistency(tasks, set, 0.2);
-	CuAssert(tc, "Analyze can't be performed!.", res == PST_TASK_SET_HAS_NOD_DEFINITIONS);
+	CuAssert(tc, "Analyze can't be performed!.", res == PST_TASK_SET_HAS_NO_DEFINITIONS);
 
 	res = TASK_SET_getConsistentTask(tasks, &cons_task);
-	CuAssert(tc, "Unable to add task.", res == PST_TASK_SET_HAS_NOD_DEFINITIONS && cons_task == NULL);
+	CuAssert(tc, "Unable to add task.", res == PST_TASK_SET_HAS_NO_DEFINITIONS && cons_task == NULL);
 
 
 	/* Add only invalid tasks. */
@@ -620,10 +620,10 @@ static void Test_task_set_suggestions(CuTest* tc) {
 	CuAssert(tc, "Unable to create new task set.", res == PST_OK && tasks != NULL);
 
 	res = TASK_SET_analyzeConsistency(tasks, set, 0.2);
-	CuAssert(tc, "Analyze can't be performed!.", res == PST_TASK_SET_HAS_NOD_DEFINITIONS);
+	CuAssert(tc, "Analyze can't be performed!.", res == PST_TASK_SET_HAS_NO_DEFINITIONS);
 
 	res = TASK_SET_getConsistentTask(tasks, &cons_task);
-	CuAssert(tc, "Unable to add task.", res == PST_TASK_SET_HAS_NOD_DEFINITIONS && cons_task == NULL);
+	CuAssert(tc, "Unable to add task.", res == PST_TASK_SET_HAS_NO_DEFINITIONS && cons_task == NULL);
 
 
 	/* Add only invalid tasks. */

@@ -195,7 +195,7 @@ int PARAM_addControl(PARAM *obj,
 int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(const char *, void**)) {
 	if (obj == NULL) return PST_INVALID_ARGUMENT;
 
-	obj->extractObject = extractObject;
+	obj->extractObject = extractObject == NULL ? wrapper_returnStr : extractObject;
 	return PST_OK;
 }
 
