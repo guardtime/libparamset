@@ -92,7 +92,8 @@ int PARAM_addControl(PARAM *obj, int (*controlFormat)(const char *), int (*contr
  * int extractObject(void *extra, const char *str, void **obj)
  * extra - optional pointer to data structure.
  * str - c-string value that belongs to PARAM_VAL object.
- * obj - pointer to receiving pointer to desired object. * 
+ * obj - pointer to receiving pointer to desired object.
+ * Returns PST_OK if successful, error code otherwise.
  * 
  * \param	obj				Parameter object.
  * \param	extractObject	Object extractor.

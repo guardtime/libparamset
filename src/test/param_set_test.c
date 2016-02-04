@@ -25,6 +25,7 @@
 #include "../param_set/param_set_obj_impl.h"
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 static void assert_param_set_value_count(CuTest* tc,
 		PARAM_SET* set, const char* names, const char* source, int priority,
@@ -364,7 +365,6 @@ static void Test_param_set_unknown(CuTest* tc) {
 static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
-	char buf[1024];
 	char *path = "<path>";
 	char *p1 = "-abc";
 	char *p2 = "-x";
@@ -397,11 +397,76 @@ static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value == NULL);
 
 	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, &value);
-	CuAssert(tc, "Invalid value extracted.", res = PST_PARAMETER_EMPTY);
+	CuAssert(tc, "Invalid value extracted.", res == PST_PARAMETER_EMPTY);
 
 	PARAM_SET_free(set);
 }
 
+static int wrapper_return_str_append_a_value(void *extra, const char* str, void** obj){
+	int res;
+	PARAM_SET *set = (PARAM_SET*)extra;
+	char *m = NULL;
+	char *tmp = NULL;
+
+	m = (char*)malloc(sizeof(char) * 1024);
+	if (m == NULL) {
+		return PST_OUT_OF_MEMORY;
+	}
+
+	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, &tmp);
+	if (res != PST_OK) return res;
+
+	snprintf(m, 1024, "%s:%s", str, tmp);
+
+	*obj = m;
+	return PST_OK;
+}
+
+static int wrapper_return_error(void *extra, const char* str, void** obj){
+	return PST_UNDEFINED_BEHAVIOUR;
+}
+
+static void Test_set_get_object(CuTest* tc) {
+int res;
+	PARAM_SET *set = NULL;
+	char buf[1024];
+	char *value;
+	char *d_value = NULL;
+
+
+	res = PARAM_SET_new("{a}{b}{c}{d}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "a", "a_value", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "b", "b_value", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "d", "d_value", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+
+	res = PARAM_SET_addControl(set, "d", NULL, NULL, NULL, wrapper_return_str_append_a_value);
+	CuAssert(tc, "Unable to object extractor to 'd'.", res == PST_OK);
+
+	res = PARAM_SET_addControl(set, "b", NULL, NULL, NULL, wrapper_return_error);
+	CuAssert(tc, "Unable to object extractor to 'd'.", res == PST_OK);
+
+
+	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value != NULL);
+
+	value = NULL;
+	res = PARAM_SET_getObj(set, "b", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_UNDEFINED_BEHAVIOUR && value == NULL);
+
+	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, &d_value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_OK && strcmp(d_value, "d_value:a_value") == 0);
+
+	free(d_value);
+	PARAM_SET_free(set);
+}
 
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
@@ -411,6 +476,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_unknown);
 	SUITE_ADD_TEST(suite, Test_param_remove_element);
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags);
+	SUITE_ADD_TEST(suite, Test_set_get_object);
 	return suite;
 }
 
