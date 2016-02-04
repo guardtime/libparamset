@@ -32,7 +32,7 @@
 #define snprintf _snprintf
 #endif
 
-#define debug_array_printf 	for(n = 0; n < task_set->count; n++) {printf("[%2.2f:%2i]", task_set->cons[n], task_set->index[n]);}printf("\n");
+#define debug_array_printf 	{int n; for(n = 0; n < task_set->count; n++) {printf("[%2.2f:%2i]", task_set->cons[n], task_set->index[n]);}printf("\n");}
 
 
 static int new_string(const char *str, char **out) {
@@ -883,6 +883,28 @@ int TASK_SET_cleanIgnored(TASK_SET *task_set, TASK *task, int *removed) {
 cleanup:
 
 	return res;
+}
+
+int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff) {
+	int i;
+	size_t count = 0;
+	TASK_DEFINITION *tmp = NULL;
+	double cons = 0;
+
+	if (task_set == NULL || diff <= 0) return 0;
+	if (task_set->count == 0) return 0;
+	if (task_set->count == 1) return 1;
+
+	cons = task_set->array[task_set->index[0]]->consistency;
+
+	for (i = 1; i < task_set->count; i++) {
+		tmp = task_set->array[task_set->index[i]];
+		if (fabs(tmp->consistency - cons) < diff) {
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 char* TASK_SET_suggestions_toString(TASK_SET *task_set, int depth, char *buf, size_t buf_len) {

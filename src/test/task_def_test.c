@@ -695,6 +695,53 @@ static void Test_task_set_suggestions(CuTest* tc) {
 	TASK_SET_free(tasks);
 }
 
+static void Test_task_set_is_one_target(CuTest* tc) {
+	int res;
+	TASK_SET *tasks = NULL;
+	PARAM_SET *set = NULL;
+	TASK *cons_task = NULL;
+	char buf[1024];
+
+	/**
+	 * Create and configure TASK set.
+     */
+	res = PARAM_SET_new("{a}{_b}{_c}{d}{e}{x}{y}{z}{f}{g}{_h}{i}", &set);
+	CuAssert(tc, "Unable to create new task definition.", res == PST_OK && set != NULL);
+
+	param_set_add(tc, set, "a,d,e,x,y,z,f,g,i", __FILE__, __LINE__);
+
+	/**
+	 * Create and configure tasks.
+     */
+	res = TASK_SET_new(&tasks);
+	CuAssert(tc, "Unable to create new task set.", res == PST_OK && tasks != NULL);
+
+
+	/* Add only invalid tasks. */
+	res = TASK_SET_add(tasks, 0, "Task 0", "a,_b", NULL, NULL, NULL);
+	CuAssert(tc, "Unable to add task.", res == PST_OK);
+
+	res = TASK_SET_add(tasks, 1, "Task 1", "a,_b,_c,d", NULL, NULL, NULL);
+	CuAssert(tc, "Unable to add task.", res == PST_OK);
+
+	res = TASK_SET_add(tasks, 2, "Task 2", "a,_b,d", NULL, NULL, NULL);
+	CuAssert(tc, "Unable to add task.", res == PST_OK);
+
+	res = TASK_SET_add(tasks, 3, "Task 3", "a,_b,d", "x", NULL, NULL);
+	CuAssert(tc, "Unable to add task.", res == PST_OK);
+
+	res = TASK_SET_analyzeConsistency(tasks, set, 0.2);
+	CuAssert(tc, "Unable to analyze.", res == PST_OK);
+
+	CuAssert(tc, "There should be no tasks that are possible targets.", !TASK_SET_isOneFromSetTheTarget(tasks, 0.25));
+	CuAssert(tc, "There should be no tasks that are possible targets.", !TASK_SET_isOneFromSetTheTarget(tasks, 0.15));
+	CuAssert(tc, "There should be one possible target.", TASK_SET_isOneFromSetTheTarget(tasks, 0.08));
+
+
+	PARAM_SET_free(set);
+	TASK_SET_free(tasks);
+}
+
 
 
 CuSuite* TaskDefTest_getSuite(void) {
@@ -710,6 +757,7 @@ CuSuite* TaskDefTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_task_set_lifecycle);
 	SUITE_ADD_TEST(suite, Test_task_set_remove_ignored_parameters);
 	SUITE_ADD_TEST(suite, Test_task_set_suggestions);
+	SUITE_ADD_TEST(suite, Test_task_set_is_one_target);
 
 	return suite;
 }

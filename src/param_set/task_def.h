@@ -44,6 +44,7 @@ int TASK_SET_add(TASK_SET *obj, int id, const char *name, const char *man, const
 int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensitivity);
 int TASK_SET_getConsistentTask(TASK_SET *task_set, TASK **task);
 int TASK_SET_cleanIgnored(TASK_SET *task_set, TASK *task, int *removed);
+int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff);
 
 char* TASK_SET_suggestions_toString(TASK_SET *task_set, int depth, char *buf, size_t buf_len);
 
