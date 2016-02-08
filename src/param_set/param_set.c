@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include "param_set_obj_impl.h"
 #include "param_value.h"
-#include "Parameter.h"
+#include "parameter.h"
 #include "param_set.h"
 
 #ifdef _WIN32
@@ -604,9 +604,10 @@ cleanup:
 	return res;
 }
 
-int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int priority, int at, void **obj) {
+int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *source, int priority, int at, void *ctxt, void **obj) {
 	int res;
 	PARAM *param = NULL;
+	void *extras[2] = {NULL, NULL};
 
 	if (set == NULL || name == NULL || obj == NULL) {
 		res = PST_INVALID_ARGUMENT;
@@ -616,11 +617,14 @@ int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int p
 	res = param_set_getParameterByName(set, name, &param);
 	if (res != PST_OK) goto cleanup;
 
+	extras[0] = set;
+	extras[1] = ctxt;
+
 	/**
 	 * Obj must be feed directly to the getter function, asi it enables to manipulate
 	 * the data pointed by obj.
      */
-	res = PARAM_getObject(param, source, priority, at, set, obj);
+	res = PARAM_getObject(param, source, priority, at, extras, obj);
 	if (res != PST_OK) goto cleanup;
 
 	res = PST_OK;
@@ -628,6 +632,10 @@ int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int p
 cleanup:
 
 	return res;
+}
+
+int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int priority, int at, void **obj) {
+	return PARAM_SET_getObjExtended(set, name, source, priority, at, set, obj);
 }
 
 int PARAM_SET_clearParameter(PARAM_SET *set, const char *names){

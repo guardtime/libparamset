@@ -404,7 +404,8 @@ static void Test_param_set_from_cmd_flags(CuTest* tc) {
 
 static int wrapper_return_str_append_a_value(void *extra, const char* str, void** obj){
 	int res;
-	PARAM_SET *set = (PARAM_SET*)extra;
+	void **extra_array = extra;
+	PARAM_SET *set = (PARAM_SET*)(extra_array[0]);
 	char *m = NULL;
 	char *tmp = NULL;
 
