@@ -746,6 +746,45 @@ static void Test_task_set_is_one_target(CuTest* tc) {
 	TASK_SET_free(tasks);
 }
 
+static void Test_task_set_is_one_target_single_task(CuTest* tc) {
+	int res;
+	TASK_SET *tasks = NULL;
+	PARAM_SET *set = NULL;
+	TASK *cons_task = NULL;
+	char buf[1024];
+	int ID = -1;
+	char expected_repair_msg[] = "Task 'Task 0' -a --_b is invalid:\nYou have to define flag(s) '--_b'.\n";
+
+
+	/**
+	 * Create and configure TASK set.
+     */
+	res = PARAM_SET_new("{a}{_b}{_c}{d}{e}{x}{y}{z}{f}{g}{_h}{i}", &set);
+	CuAssert(tc, "Unable to create new task definition.", res == PST_OK && set != NULL);
+
+	param_set_add(tc, set, "a,d,e,x,y,z,f,g,i", __FILE__, __LINE__);
+
+	/**
+	 * Create and configure tasks.
+     */
+	res = TASK_SET_new(&tasks);
+	CuAssert(tc, "Unable to create new task set.", res == PST_OK && tasks != NULL);
+
+	/* Add only invalid tasks. */
+	res = TASK_SET_add(tasks, 0, "Task 0", "a,_b", NULL, NULL, NULL);
+	CuAssert(tc, "Unable to add task.", res == PST_OK);
+
+	res = TASK_SET_analyzeConsistency(tasks, set, 0.2);
+	CuAssert(tc, "Unable to analyze.", res == PST_OK);
+
+	CuAssert(tc, "There should be one possible target.", TASK_SET_isOneFromSetTheTarget(tasks, 1.0, &ID) && ID == 0);
+	CuAssert(tc, "Invalid repair message.", strcmp(TASK_SET_howToRepair_toString(tasks, set, 0, NULL, buf, sizeof(buf)), expected_repair_msg) == 0);
+
+
+	PARAM_SET_free(set);
+	TASK_SET_free(tasks);
+}
+
 
 
 CuSuite* TaskDefTest_getSuite(void) {
@@ -762,6 +801,7 @@ CuSuite* TaskDefTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_task_set_remove_ignored_parameters);
 	SUITE_ADD_TEST(suite, Test_task_set_suggestions);
 	SUITE_ADD_TEST(suite, Test_task_set_is_one_target);
+	SUITE_ADD_TEST(suite, Test_task_set_is_one_target_single_task);
 
 	return suite;
 }
