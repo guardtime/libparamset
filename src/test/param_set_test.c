@@ -428,7 +428,7 @@ static int wrapper_return_error(void *extra, const char* str, void** obj){
 }
 
 static void Test_set_get_object(CuTest* tc) {
-int res;
+	int res;
 	PARAM_SET *set = NULL;
 	char buf[1024];
 	char *value;
@@ -469,6 +469,48 @@ int res;
 	PARAM_SET_free(set);
 }
 
+static int isFormatOk_isNull(const char *str) {
+	if (str == NULL) return 0;
+	else return 1;
+}
+
+static void Test_set_get_str(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *value;
+
+
+	res = PARAM_SET_new("{a}{b}{c}{d}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "a", "a_value", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "b", NULL, NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "d", "not null", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_addControl(set, "d", isFormatOk_isNull, NULL, NULL, NULL);
+
+
+	res = PARAM_SET_getStr(set, "a", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value != NULL);
+	CuAssert(tc, "Invalid value extracted.", strcmp(value, "a_value") == 0);
+
+	res = PARAM_SET_getStr(set, "b", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value == NULL);
+
+	res = PARAM_SET_getStr(set, "c", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_PARAMETER_EMPTY);
+
+	res = PARAM_SET_getStr(set, "d", NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Invalid value extracted.", res == PST_PARAMETER_INVALID_FORMAT || strcmp(value, "not null") == 0);
+
+	PARAM_SET_free(set);
+}
+
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_add_count_clear);
@@ -478,6 +520,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_remove_element);
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags);
 	SUITE_ADD_TEST(suite, Test_set_get_object);
+	SUITE_ADD_TEST(suite, Test_set_get_str);
 	return suite;
 }
 
