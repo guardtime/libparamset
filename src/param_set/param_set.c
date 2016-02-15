@@ -1065,6 +1065,8 @@ const char* PARAM_SET_errorToString(int err) {
 		return "Invalid argument.";
 	case PST_OUT_OF_MEMORY:
 		return "PARAM_SET out of memory.";
+	case PST_IO_ERROR:
+		return "PARAM_SET IO error.";
 	case PST_INDEX_OVF:
 		return "Index is too large.";
 	case PST_PARAMETER_INVALID_FORMAT:
