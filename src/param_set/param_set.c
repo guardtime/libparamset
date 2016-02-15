@@ -1200,7 +1200,6 @@ char* PARAM_SET_toString(PARAM_SET *set, char *buf, size_t buf_len) {
 	const char *source = NULL;
 	int priority = 0;
 	int n = 0;
-	const char *similar = NULL;
 	size_t count = 0;
 
 	if (set == NULL || buf == NULL || buf_len == 0) {
