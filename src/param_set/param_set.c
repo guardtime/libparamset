@@ -522,6 +522,7 @@ static int isComment(const char *line) {
 		if(C == '#') return 1;
 		else if (!isspace(C)) return 0;
 	}
+	return 0;
 }
 
 int PARAM_SET_new(const char *names, PARAM_SET **set){
