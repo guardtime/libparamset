@@ -430,7 +430,6 @@ static int wrapper_return_error(void *extra, const char* str, void** obj){
 static void Test_set_get_object(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
-	char buf[1024];
 	char *value;
 	char *d_value = NULL;
 
@@ -511,6 +510,153 @@ static void Test_set_get_str(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_key_value_pairs(CuTest* tc) {
+	int res;
+	char key[2048];
+	char value[2048];
+
+	/**
+	 * Test all kind of empty results.
+     */
+	res = parse_key_value_pair("", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && key[0] == '\0' && value[0] == '\0');
+
+	res = parse_key_value_pair("\n", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && key[0] == '\0' && value[0] == '\0');
+
+	res = parse_key_value_pair("  \n", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && key[0] == '\0' && value[0] == '\0');
+
+	res = parse_key_value_pair("   ", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && key[0] == '\0' && value[0] == '\0');
+
+	res = parse_key_value_pair("\t\t", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && key[0] == '\0' && value[0] == '\0');
+
+	res = parse_key_value_pair("\t\t\n", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && key[0] == '\0' && value[0] == '\0');
+
+	res = parse_key_value_pair("\n\n", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && key[0] == '\0' && value[0] == '\0');
+
+
+	/**
+	 * Test some invalid results
+     */
+	res = parse_key_value_pair(NULL, key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_INVALID_ARGUMENT && key[0] == '\0' && value[0] == '\0');
+
+	res = parse_key_value_pair(" #--aaa test", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_INVALID_FORMAT && key[0] == '\0' && value[0] == '\0');
+
+	/**
+	 * Test some valid values.
+     */
+	res = parse_key_value_pair("\ntest aa\n", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test") == 0 && strcmp(value, "aa") == 0);
+
+	res = parse_key_value_pair("\ntest \"a b c d\" \n", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test") == 0 && strcmp(value, "a b c d") == 0);
+
+	res = parse_key_value_pair("\ntest \\\"a\n", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test") == 0 && strcmp(value, "\"a") == 0);
+
+	res = parse_key_value_pair("test a", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test") == 0 && strcmp(value, "a") == 0);
+
+	res = parse_key_value_pair(" test a1", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test") == 0 && strcmp(value, "a1") == 0);
+
+	res = parse_key_value_pair("-test a2", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "-test") == 0 && strcmp(value, "a2") == 0);
+
+	res = parse_key_value_pair("--test a3", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "--test") == 0 && strcmp(value, "a3") == 0);
+
+	res = parse_key_value_pair("--test      a4", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "--test") == 0 && strcmp(value, "a4") == 0);
+
+	res = parse_key_value_pair("test1 = a1", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test1") == 0 && strcmp(value, "a1") == 0);
+
+	res = parse_key_value_pair("test2= a2", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test2") == 0 && strcmp(value, "a2") == 0);
+
+	res = parse_key_value_pair("test3 =a3", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test3") == 0 && strcmp(value, "a3") == 0);
+
+	res = parse_key_value_pair("test4=a4", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test4") == 0 && strcmp(value, "a4") == 0);
+
+	res = parse_key_value_pair("test5=\\\\a5", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test5") == 0 && strcmp(value, "\\a5") == 0);
+
+	res = parse_key_value_pair(" test6 \"\\\\a6 b6\" ", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test6") == 0 && strcmp(value, "\\a6 b6") == 0);
+
+	res = parse_key_value_pair(" test7 \" \\\"a \\\\ b\\\"\" ", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test7") == 0 && strcmp(value, " \"a \\ b\"") == 0);
+
+	res = parse_key_value_pair(" test8 \" \" ", key, value, sizeof(key));
+	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test8") == 0 && strcmp(value, " ") == 0);
+}
+
+static void assert_value(CuTest* tc,
+		PARAM_SET *set, const char *name, int at,
+		const char *file, int line,
+		const char *expected) {
+	int res;
+	char *V = NULL;
+	char buf[2048];
+	int count = 0;
+
+	count += snprintf(buf + count, sizeof(buf) - count, "Invalid value '%s' at line %i. ", file, line);
+
+	res = PARAM_SET_getStr(set, name, NULL, PST_PRIORITY_NONE, at, &V);
+	if (res != PST_OK) {
+		count += snprintf(buf + count, sizeof(buf) - count, " Unable to get value from '%s' at %i.", name, at);
+		CuAssert(tc, buf, 0);
+	}
+
+	if (((expected != NULL && V != NULL) && strcmp(V, expected) != 0)
+			|| ((expected == NULL && V != NULL) || (expected != NULL && V == NULL))) {
+		count += snprintf(buf + count, sizeof(buf) - count, " Value expected '%s' but is '%s'.", expected, V);
+		CuAssert(tc, buf, 0);
+	}
+}
+
+static void Test_set_read_from_file(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+
+	res = PARAM_SET_new("{a}{b}{c}{test-test}{cnstr}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_readFromFile(getFullResourcePath("ok-conf.conf"), set, 0);
+	CuAssert(tc, "Unable to read conf file.", res == PST_OK);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, NULL);
+
+	assert_value(tc, set, "test-test", 0, __FILE__, __LINE__, "Test");
+	assert_value(tc, set, "test-test", 1, __FILE__, __LINE__, "a b c d");
+	assert_value(tc, set, "test-test", 2, __FILE__, __LINE__, "a b \\c d");
+	assert_value(tc, set, "test-test", 3, __FILE__, __LINE__, "a \"b\" c d");
+	assert_value(tc, set, "test-test", 4, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "test-test", 5, __FILE__, __LINE__, "\\");
+	assert_value(tc, set, "test-test", 6, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "test-test", 7, __FILE__, __LINE__, "  ");
+
+	assert_value(tc, set, "cnstr", 0, __FILE__, __LINE__, "O=Guardtime AS");
+
+
+
+
+
+	PARAM_SET_free(set);
+}
+
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_add_count_clear);
@@ -521,6 +667,8 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags);
 	SUITE_ADD_TEST(suite, Test_set_get_object);
 	SUITE_ADD_TEST(suite, Test_set_get_str);
+	SUITE_ADD_TEST(suite, Test_key_value_pairs);
+	SUITE_ADD_TEST(suite, Test_set_read_from_file);
 	return suite;
 }
 
