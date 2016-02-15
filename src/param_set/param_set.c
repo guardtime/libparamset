@@ -1057,6 +1057,50 @@ char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, siz
 	return buf;
 }
 
+char* PARAM_SET_toString(PARAM_SET *set, char *buf, size_t buf_len) {
+	int res;
+	PARAM_VAL *param_value = NULL;
+	int i = 0;
+	const char *value = NULL;
+	const char *source = NULL;
+	int priority = 0;
+	int n = 0;
+	const char *similar = NULL;
+	size_t count = 0;
+
+	if (set == NULL || buf == NULL || buf_len == 0) {
+		return NULL;
+	}
+
+
+	count += snprintf(buf + count, buf_len - count, "  %3s %10s %50s %10s\n",
+			"nr", "value", "source", "priority");
+
+	for (i = 0; i < set->count; i++) {
+		count += snprintf(buf + count, buf_len - count, "Parameter: '%s' (%i):\n",
+				set->parameter[i]->flagName, set->parameter[i]->argCount);
+
+
+		n = 0;
+		while (PARAM_getValue(set->parameter[i], NULL, PST_PRIORITY_NONE, n, &param_value) == PST_OK) {
+			res = PARAM_VAL_extract(param_value, &value, &source, &priority);
+			if (res != PST_OK) return NULL;
+
+			count += snprintf(buf + count, buf_len - count, "  %2i) %10s %50s %10i\n",
+					n,
+					value == NULL ? "-" : value,
+					source == NULL ? "-" : source,
+					priority);
+
+			n++;
+		}
+	}
+	count += snprintf(buf + count, buf_len - count, "\n");
+
+	buf[buf_len - 1] = '\0';
+	return buf;
+}
+
 const char* PARAM_SET_errorToString(int err) {
 	switch(err) {
 	case PST_OK:

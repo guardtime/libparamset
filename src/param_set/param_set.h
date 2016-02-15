@@ -335,6 +335,8 @@ void PARAM_SET_readFromFile(const char *fname, PARAM_SET *set,  int priority);
  */
 void PARAM_SET_readFromCMD(int argc, char **argv, PARAM_SET *set, int priority);
 
+char* PARAM_SET_toString(PARAM_SET *set, char *buf, size_t buf_len);
+
 /**
  * Generates typo failure string
  * \param	set		PARAM_SET object.
