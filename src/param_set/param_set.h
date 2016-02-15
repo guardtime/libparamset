@@ -320,7 +320,7 @@ int PARAM_SET_isUnknown(const PARAM_SET *set);
  * @param[in]		fname	files path.
  * @param[in/out]	set		parameter set.
  */
-void PARAM_SET_readFromFile(const char *fname, PARAM_SET *set,  int priority);
+int PARAM_SET_readFromFile(const char *fname, PARAM_SET *set,  int priority);
 
 /**
  * Reads parameter values from command-line into predefined parameter set.

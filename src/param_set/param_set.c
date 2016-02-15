@@ -456,7 +456,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
          */
 		if ((strncmp("--", param, 2) == 0 && len >= 3) || (param[0] == '-' && len == 2)) {
 			res = PARAM_SET_add(set, flag, arg, source, priority);
-			if (res != PST_OK || res != PST_PARAMETER_IS_UNKNOWN || res != PST_PARAMETER_IS_TYPO) {
+			if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) {
 				goto cleanup;
 			}
 
@@ -473,7 +473,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 					param_set_add_typo(set, arg, source);
 				} else {
 					res = PARAM_addValue(set->unknown, flag, source, PST_PRIORITY_VALID_BASE);
-					if (res != PST_OK) goto cleanup;
+					if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) goto cleanup;
 				}
 			}
 
@@ -495,6 +495,9 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 	else{
 		res = PARAM_addValue(set->unknown, param, source, PST_PRIORITY_VALID_BASE);
 		if (res != PST_OK) goto cleanup;
+
+		res = PST_INVALID_FORMAT;
+		goto cleanup;
 	}
 
 	res = PST_OK;
@@ -509,6 +512,17 @@ static int wrapper_returnStr(void *extra, const char* str, void** obj){
 	return PST_OK;
 }
 
+static int isComment(const char *line) {
+	int i = 0;
+	int C;
+	if (line == NULL) return 0;
+	if (line[0] == '\0') return 0;
+
+	while (C = (0xff & line[i])) {
+		if(C == '#') return 1;
+		else if (!isspace(C)) return 0;
+	}
+}
 
 int PARAM_SET_new(const char *names, PARAM_SET **set){
 	int res;
@@ -941,32 +955,54 @@ int PARAM_SET_isUnknown(const PARAM_SET *set){
 	return count > 0 ? 1 : 0;
 }
 
-void PARAM_SET_readFromFile(const char *fname, PARAM_SET *set, int priority){
+int PARAM_SET_readFromFile(const char *fname, PARAM_SET *set, int priority){
+	int res;
 	FILE *file = NULL;
 	char *ln = NULL;
 	char line[1024];
 	char flag[1024];
 	char arg[1024];
 
-	if(fname == NULL || set == NULL) goto cleanup;
+	if(fname == NULL || set == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
 
 	file = fopen(fname, "r");
-	if(file == NULL) goto cleanup;
+	if(file == NULL) {
+		res = PST_IO_ERROR;
+		goto cleanup;
+	}
 
-	while(fgets(line, sizeof(line),file)){
+	while(fgets(line, sizeof(line), file)) {
 		ln = strchr(line, '\n');
 		if(ln != NULL) *ln = 0;
 
-		if(sscanf(line, "%s %s", flag, arg) == 2)
-			param_set_addRawParameter(flag, arg, fname, set, priority);
-		else
-			param_set_addRawParameter(line,NULL, fname, set, priority);
+		if (isComment(line)) continue;
+
+		res = parse_key_value_pair(line, flag, arg, sizeof(flag));
+		if (res != PST_OK) {
+			goto cleanup;
+		}
+
+		if (flag[0] == '\0' && arg[0] == '\0') continue;
+
+		if(flag[0] != '\0' && arg[0] != '\0') {
+			res = param_set_addRawParameter(flag, arg, fname, set, priority);
+			if (res != PST_OK) goto cleanup;
+		} else {
+			res = param_set_addRawParameter(flag, NULL, fname, set, priority);
+			if (res != PST_OK) goto cleanup;
+		}
+
 	}
+
+	res = PST_OK;
 
 cleanup:
 
 	if(file) fclose(file);
-	return;
+	return res;
 }
 
 void PARAM_SET_readFromCMD(int argc, char **argv, PARAM_SET *set, int priority){
