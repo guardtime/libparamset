@@ -151,6 +151,105 @@ static char *getParametersName(const char* list_of_names, char *name, char *alia
 	return &pName[i];
 }
 
+const char not_valid_key_beginning_characters[] = "-_";
+
+int parse_key_value_pair(const char *line, char *key, char *value, size_t buf_len) {
+	int res;
+	size_t i = 0;
+	size_t key_i = 0;
+	size_t value_i = 0;
+	int key_opend = 0;
+	int value_opend = 0;
+	int is_ecape_opend = 0;
+	int is_quote_mark_opend = 0;
+	int C;
+
+
+	if (line == NULL || key == NULL || value == NULL || buf_len == 0) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	/**
+	 * Search for the first character that is valid for a KEY string. Everything else
+	 * than space
+     */
+	while (C = 0xff & line[i]) {
+		if (!isspace(C) && C != '-' && !isalpha(C)) {
+			res = PST_INVALID_FORMAT;
+			goto cleanup;
+		} else if (isalnum(C) || C == '-') {
+			break;
+		}
+
+		i++;
+	}
+
+	if (C == '\0') {
+		res = PST_OK;
+		goto cleanup;
+	}
+
+	/**
+	 * The first key character must be available.
+     */
+	key_opend = 1;
+	while (C = 0xff & line[i]) {
+		if (!is_ecape_opend && C == '\\') {
+			is_ecape_opend = 1;
+			i++;
+			continue;
+		}
+
+		if (!is_ecape_opend && !is_quote_mark_opend && C == '"') {
+			is_quote_mark_opend = 1;
+			i++;
+			continue;
+		} else if (!is_ecape_opend && is_quote_mark_opend && C == '"') {
+			break;
+		}
+
+		if (is_ecape_opend && C == '\\') {
+			is_ecape_opend = 0;
+		} else if (is_ecape_opend && C == '"') {
+			is_ecape_opend = 0;
+		}
+
+
+		if (key_opend && key_i < buf_len - 1) {
+			if (isValidNameChar(C)) {
+				key[key_i] = (char)(0xff & C);
+				key_i++;
+			} else {
+				key_opend = 0;
+			}
+		} else if (key_opend == 0 && value_opend == 0) {
+			if ((!isspace(C) && C != '=') || (isspace(C) && is_quote_mark_opend)) {
+				value_opend = 1;
+				value[value_i] = (char)(0xff & C);
+				value_i++;
+			}
+		} else if (value_opend && value_i < buf_len - 1) {
+			if (isspace(C) && !is_quote_mark_opend) break;
+
+			value[value_i] = (char)(0xff & C);
+			value_i++;
+		}
+
+		i++;
+	}
+
+
+	res = PST_OK;
+
+
+cleanup:
+	key[key_i] = '\0';
+	value[value_i] = '\0';
+
+	return res;
+}
+
 static unsigned min_of_3(unsigned A, unsigned B,unsigned C){
 	unsigned tmp;
 	tmp = A < B ? A : B;

@@ -394,6 +394,28 @@ const char* PARAM_SET_errorToString(int err);
  */
 const char* extract_next_name(const char* name_string, int (*isValidNameChar)(int), char *buf, short len, int *flags);
 
+/**
+ * Extract a key value pair from the line. Supported formats, where <ws> is white space:
+ * <wh><key><wh>=<wh><value><wh>
+ * <wh><key><wh><value><wh>
+ * <wh><key><wh>=<wh>"<value><wh><value>"
+ * <wh><key><wh>"<value><wh><value>"
+ * <wh><key><wh>"<value><wh><value>"
+ *
+ * To have <wh> inside value an escape character \ must be used.
+ * Some examples:
+ *
+ * ' key = "a b c d"' result: 'key' 'a b c d'
+ * ' key  "a \"b\" c d"' result 'key' 'a "b" c d'
+ *
+ * \param line
+ * \param key
+ * \param value
+ * \param buf_len
+ * \return
+ */
+int parse_key_value_pair(const char *line, char *key, char *value, size_t buf_len);
+
 #ifdef	__cplusplus
 }
 #endif
