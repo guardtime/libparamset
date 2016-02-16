@@ -338,6 +338,7 @@ static void Test_param_set_unknown(CuTest* tc) {
 	PARAM_SET *set = NULL;
 	char buf[1024];
 	char expected[] = "Warning: Unknown parameter 'unknown 1'.\n"
+					"Warning: Unknown parameter 'argument'.\n"
 					"Warning: Unknown parameter 'unknown 2'.\n"
 					"Warning: Unknown parameter 'unknown 3'.\n";
 
@@ -346,7 +347,7 @@ static void Test_param_set_unknown(CuTest* tc) {
 
 	CuAssert(tc, "There should be no unknown parameters.", !PARAM_SET_isUnknown(set));
 
-	res = PARAM_SET_add(set, "unknown 1", NULL, NULL, 0);
+	res = PARAM_SET_add(set, "unknown 1", "argument", NULL, 0);
 	CuAssert(tc, "Unable to add to set.", res == PST_PARAMETER_IS_UNKNOWN);
 
 	res = PARAM_SET_add(set, "unknown 2", NULL, NULL, 0);

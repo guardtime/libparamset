@@ -697,7 +697,7 @@ int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const cha
 			if(res != PST_OK) goto cleanup;
 
 			if (value != NULL) {
-				res = PARAM_addValue(set->unknown, name, source, PST_PRIORITY_VALID_BASE);
+				res = PARAM_addValue(set->unknown, value, source, PST_PRIORITY_VALID_BASE);
 				if(res != PST_OK) goto cleanup;
 			}
 
