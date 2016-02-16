@@ -633,7 +633,7 @@ static void Test_set_read_from_file(CuTest* tc) {
 	res = PARAM_SET_new("{a}{b}{c}{test-test}{cnstr}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res = PARAM_SET_readFromFile(getFullResourcePath("ok-conf.conf"), set, 0);
+	res = PARAM_SET_readFromFile(set, getFullResourcePath("ok-conf.conf"), NULL, 0);
 	CuAssert(tc, "Unable to read conf file.", res == PST_OK);
 
 	assert_value(tc, set, "a", 0, __FILE__, __LINE__, NULL);
