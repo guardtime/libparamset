@@ -651,11 +651,77 @@ static void Test_set_read_from_file(CuTest* tc) {
 
 	assert_value(tc, set, "cnstr", 0, __FILE__, __LINE__, "O=Guardtime AS");
 
-
-
-
-
 	PARAM_SET_free(set);
+}
+
+static void Test_set_include_other_set(CuTest* tc) {
+	int res;
+	PARAM_SET *set_1 = NULL;
+	PARAM_SET *set_2 = NULL;
+	PARAM_SET *set_3 = NULL;
+	PARAM_SET *set_4 = NULL;
+	char *value;
+	char buf[1024];
+
+	/**
+	 * Create the sets.
+     */
+	res = PARAM_SET_new("{a}{b}{c}{d}", &set_1);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_new("{a}{b}", &set_2);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_new("{a}{x}{y}", &set_3);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_new("{x}{y}", &set_4);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+
+	/**
+	 * Add the data to the sets.
+     */
+	res += PARAM_SET_add(set_1, "a", "a1.0", NULL, 1);
+	res += PARAM_SET_add(set_1, "d", "d1.0", NULL, 1);
+
+	res += PARAM_SET_add(set_2, "a", "a2.0", NULL, 2);
+	res += PARAM_SET_add(set_2, "b", "b2.0", "2B", 2);
+	res += PARAM_SET_add(set_2, "b", "b2.1", NULL, 2);
+
+	res += PARAM_SET_add(set_3, "x", "x3.0", NULL, 3);
+	CuAssert(tc, "There was errors in adding values to the list.", res == PST_OK);
+
+	/**
+	 * Merge sets.
+     */
+	res = PARAM_SET_IncludeSet(set_1, set_2);
+	CuAssert(tc, "Unable to include set 2 to set 1.", res == PST_OK);
+	res = PARAM_SET_IncludeSet(set_1, set_3);
+	CuAssert(tc, "Unable to include set 3 to set 1.", res == PST_OK);
+	res = PARAM_SET_IncludeSet(set_1, set_4);
+	CuAssert(tc, "Unable to include set 4 to set 1.", res == PST_OK);
+
+//	printf("\n-----\n%s\n-----\n", PARAM_SET_toString(set_1, buf, sizeof(buf)));
+
+	/**
+	 * Check the counts.
+     */
+	assert_param_set_value_count(tc, set_1, "{a}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 2);
+	assert_param_set_value_count(tc, set_1, "{b}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 2);
+	assert_param_set_value_count(tc, set_1, "{c}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 0);
+	assert_param_set_value_count(tc, set_1, "{d}", NULL, PST_PRIORITY_NONE, __FILE__, __LINE__, 1);
+
+	assert_param_set_value_count(tc, set_1, "{b}", "2B", 2, __FILE__, __LINE__, 1);
+	assert_param_set_value_count(tc, set_1, "{b}", NULL, 2, __FILE__, __LINE__, 2);
+	assert_param_set_value_count(tc, set_1, "{a}", NULL, 1, __FILE__, __LINE__, 1);
+	assert_param_set_value_count(tc, set_1, "{a}", NULL, 2, __FILE__, __LINE__, 1);
+
+
+	PARAM_SET_free(set_1);
+	PARAM_SET_free(set_2);
+	PARAM_SET_free(set_3);
+	PARAM_SET_free(set_4);
 }
 
 CuSuite* ParamSetTest_getSuite(void) {
@@ -670,6 +736,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_set_get_str);
 	SUITE_ADD_TEST(suite, Test_key_value_pairs);
 	SUITE_ADD_TEST(suite, Test_set_read_from_file);
+	SUITE_ADD_TEST(suite, Test_set_include_other_set);
 	return suite;
 }
 
