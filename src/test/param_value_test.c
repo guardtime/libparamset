@@ -241,6 +241,36 @@ static void Test_param_value(CuTest* tc) {
 	PARAM_VAL_free(value);
 }
 
+static void Test_param_extract_last_higest_priority(CuTest* tc) {
+	int res;
+	PARAM_VAL *value = NULL;
+	int i;
+
+	/**
+	 * Create linked list.
+     */
+	res = PARAM_VAL_new("1_p3", NULL, 3, &value);
+	CuAssert(tc, "Unable to create parameter value object.", res == PST_OK);
+
+	res = PARAM_VAL_new("b1_p2", "B", 2, &value);
+	CuAssert(tc, "Unable to create parameter value object.", res == PST_OK);
+
+	res = PARAM_VAL_new("2_p1", NULL, 1, &value);
+	CuAssert(tc, "Unable to create parameter value object.", res == PST_OK);
+
+
+	/* Extract from PST_PRIORITY_NONE, no source. */
+	i = 0;
+	assert_value(tc, value, NULL, PST_PRIORITY_NONE, i++, __FILE__, __LINE__ , "1_p3");
+	assert_value(tc, value, NULL, PST_PRIORITY_NONE, i++, __FILE__, __LINE__ , "b1_p2");
+	assert_value(tc, value, NULL, PST_PRIORITY_NONE, i++, __FILE__, __LINE__ , "2_p1");
+
+	assert_value(tc, value, NULL, PST_PRIORITY_HIGHEST, PST_INDEX_LAST, __FILE__, __LINE__ , "1_p3");
+
+
+	PARAM_VAL_free(value);
+}
+
 static void Test_param_extractPriority(CuTest* tc) {
 	int res;
 	PARAM_VAL *value = NULL;
@@ -534,6 +564,7 @@ CuSuite* ParamValueTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 
 	SUITE_ADD_TEST(suite, Test_param_value);
+	SUITE_ADD_TEST(suite, Test_param_extract_last_higest_priority);
 	SUITE_ADD_TEST(suite, Test_param_extractPriority);
 	SUITE_ADD_TEST(suite, Test_param_extractInvalid);
 	SUITE_ADD_TEST(suite, Test_param_pop);
