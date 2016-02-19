@@ -25,6 +25,8 @@
 extern "C" {
 #endif
 
+#include <stddef.h>	
+
 #ifndef PARAM_SET_ERROR_BASE 
 #define		PARAM_SET_ERROR_BASE 0x30001 
 #endif	
