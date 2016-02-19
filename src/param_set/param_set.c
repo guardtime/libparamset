@@ -521,6 +521,7 @@ static int isComment(const char *line) {
 	while (C = (0xff & line[i])) {
 		if(C == '#') return 1;
 		else if (!isspace(C)) return 0;
+		i++;
 	}
 	return 0;
 }
