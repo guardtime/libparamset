@@ -654,6 +654,43 @@ static void Test_set_read_from_file(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_set_read_from_file_weird_format(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+
+	res = PARAM_SET_new("{a}{b}{c}{test-test}{cnstr}{x}{y}{z}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_readFromFile(set, getFullResourcePath("ok-conf-weird-format.conf"), NULL, 0);
+	CuAssert(tc, "Unable to read conf file.", res == PST_OK);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "x", 0, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "y", 0, __FILE__, __LINE__, NULL);
+
+	assert_value(tc, set, "test-test", 0, __FILE__, __LINE__, "Test");
+	assert_value(tc, set, "test-test", 1, __FILE__, __LINE__, "a b c d");
+	assert_value(tc, set, "test-test", 2, __FILE__, __LINE__, "a b \\c d");
+	assert_value(tc, set, "test-test", 3, __FILE__, __LINE__, "a \"b\" c d");
+	assert_value(tc, set, "test-test", 4, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "test-test", 5, __FILE__, __LINE__, "\\");
+	assert_value(tc, set, "test-test", 6, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "test-test", 7, __FILE__, __LINE__, "  ");
+	assert_value(tc, set, "test-test", 8, __FILE__, __LINE__, "\t");
+	assert_value(tc, set, "test-test", 9, __FILE__, __LINE__, "#/&}{[]@");
+	assert_value(tc, set, "test-test", 10, __FILE__, __LINE__, "-");
+	assert_value(tc, set, "test-test", 11, __FILE__, __LINE__, "--");
+	assert_value(tc, set, "test-test", 12, __FILE__, __LINE__, "-long way-");
+
+	assert_value(tc, set, "cnstr", 0, __FILE__, __LINE__, "O=Guardtime AS");
+
+	CuAssert(tc, "-z must be commented out.", !PARAM_SET_isSetByName(set, "z"));
+
+	PARAM_SET_free(set);
+}
+
 static void Test_set_include_other_set(CuTest* tc) {
 	int res;
 	PARAM_SET *set_1 = NULL;
@@ -736,6 +773,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_set_get_str);
 	SUITE_ADD_TEST(suite, Test_key_value_pairs);
 	SUITE_ADD_TEST(suite, Test_set_read_from_file);
+	SUITE_ADD_TEST(suite, Test_set_read_from_file_weird_format);
 	SUITE_ADD_TEST(suite, Test_set_include_other_set);
 	return suite;
 }
