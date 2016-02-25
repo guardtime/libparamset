@@ -102,6 +102,9 @@ struct PARAM_ATR_st {
 	int contentStatus;
 };
 
+#define PST_FORMAT_STATUS_OK 0
+#define PST_CONTENT_STATUS_OK 0
+
 typedef struct PARAM_VAL_st PARAM_VAL;	
 typedef struct PARAM_st PARAM;
 typedef struct PARAM_SET_st PARAM_SET;
