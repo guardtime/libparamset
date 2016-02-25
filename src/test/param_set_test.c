@@ -217,6 +217,7 @@ static const char*errToString(int err) {
 	case ERROR_NOT_ALPHA:
 		return "Format error: Not alpha char";
 	}
+	return "Unknown";
 }
 
 static int controlFormat_isAlpha(const char *value) {
@@ -425,6 +426,7 @@ static int wrapper_return_str_append_a_value(void *extra, const char* str, void*
 }
 
 static int wrapper_return_error(void *extra, const char* str, void** obj){
+	if (extra || str || obj);
 	return PST_UNDEFINED_BEHAVIOUR;
 }
 
@@ -697,8 +699,6 @@ static void Test_set_include_other_set(CuTest* tc) {
 	PARAM_SET *set_2 = NULL;
 	PARAM_SET *set_3 = NULL;
 	PARAM_SET *set_4 = NULL;
-	char *value;
-	char buf[1024];
 
 	/**
 	 * Create the sets.

@@ -699,7 +699,6 @@ static void Test_task_set_is_one_target(CuTest* tc) {
 	int res;
 	TASK_SET *tasks = NULL;
 	PARAM_SET *set = NULL;
-	TASK *cons_task = NULL;
 	char buf[1024];
 	int ID = -1;
 	char expected_repair_msg[] = "Task 'Task 3' -a --_b -d one or more of (-x) is invalid:\nYou have to define flag(s) '--_b'.\n";
@@ -750,7 +749,6 @@ static void Test_task_set_is_one_target_single_task(CuTest* tc) {
 	int res;
 	TASK_SET *tasks = NULL;
 	PARAM_SET *set = NULL;
-	TASK *cons_task = NULL;
 	char buf[1024];
 	int ID = -1;
 	char expected_repair_msg[] = "Task 'Task 0' -a --_b is invalid:\nYou have to define flag(s) '--_b'.\n";

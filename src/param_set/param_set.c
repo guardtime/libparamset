@@ -513,7 +513,7 @@ static int isComment(const char *line) {
 	if (line == NULL) return 0;
 	if (line[0] == '\0') return 0;
 
-	while (C = (0xff & line[i])) {
+	while ((C = 0xff & line[i]) != '\0') {
 		if(C == '#') return 1;
 		else if (!isspace(C)) return 0;
 		i++;
