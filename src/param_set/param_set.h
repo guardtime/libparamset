@@ -229,7 +229,7 @@ int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const cha
  * \param	obj			Pointer to receiving pointer to string returned.
  * \return \c PST_OK when successful, error code otherwise. Some more common error
  * codes: 	\c PST_INVALID_ARGUMENT,  \c PST_PARAMETER_NOT_FOUND \c PST_PARAMETER_EMPTY
- * \c PST_PARAMETER_INVALID_FORMAT.
+ * \c PST_PARAMETER_INVALID_FORMAT \c PST_PARAMETER_VALUE_NOT_FOUND.
  */
 int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int priority, int at, char **value);
 
@@ -248,7 +248,7 @@ int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int p
  * \param	obj			Pointer to receiving pointer to \c object returned.
  * \return \c PST_OK when successful, error code otherwise. Some more common error 
  * codes: 	\c PST_INVALID_ARGUMENT,  \c PST_PARAMETER_NOT_FOUND \c PST_PARAMETER_EMPTY
- * \c PST_PARAMETER_INVALID_FORMAT \c PST_PARAMETER_UNIMPLEMENTED_OBJ.
+ * \c PST_PARAMETER_INVALID_FORMAT \c PST_PARAMETER_UNIMPLEMENTED_OBJ \c PST_PARAMETER_VALUE_NOT_FOUND.
  */
 int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int priority, int at, void **obj);
 
@@ -264,7 +264,7 @@ int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int p
  * \param	obj			Pointer to receiving pointer to \c object returned.
  * \return \c PST_OK when successful, error code otherwise. Some more common error 
  * codes: 	\c PST_INVALID_ARGUMENT,  \c PST_PARAMETER_NOT_FOUND \c PST_PARAMETER_EMPTY
- * \c PST_PARAMETER_INVALID_FORMAT \c PST_PARAMETER_UNIMPLEMENTED_OBJ.
+ * \c PST_PARAMETER_INVALID_FORMAT \c PST_PARAMETER_UNIMPLEMENTED_OBJ \c PST_PARAMETER_VALUE_NOT_FOUND.
  */
 int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *source, int priority, int at, void *ctxt, void **obj);
 
@@ -278,6 +278,7 @@ int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *sourc
  * \param	atr
  * \return \c PST_OK when successful, error code otherwise. Some more common error
  * codes: 	\c PST_INVALID_ARGUMENT,  \c PST_PARAMETER_NOT_FOUND \c PST_PARAMETER_EMPTY
+ * \c PST_PARAMETER_VALUE_NOT_FOUND
  */
 int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int priority, int at, PARAM_ATR *atr);
 
