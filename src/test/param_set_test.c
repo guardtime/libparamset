@@ -761,6 +761,34 @@ static void Test_set_include_other_set(CuTest* tc) {
 	PARAM_SET_free(set_4);
 }
 
+static void Test_set_param_atr(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	PARAM_ATR atr;
+
+	res = PARAM_SET_new("{a|aaa}{b}{c}{d}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "a", NULL, NULL, 2);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "a", "a_value", "A", 3);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_getAtr(set, "a", NULL, PST_PRIORITY_HIGHEST, PST_INDEX_LAST, &atr);
+	CuAssert(tc, "Unable to get attributes.", res == PST_OK);
+
+	CuAssert(tc, "Invalid atr.", atr.priority == 3);
+	CuAssert(tc, "Invalid atr.", strcmp(atr.name, "a") == 0);
+	CuAssert(tc, "Invalid atr.", strcmp(atr.alias, "aaa") == 0);
+	CuAssert(tc, "Invalid atr.", strcmp(atr.cstr_value, "a_value") == 0);
+	CuAssert(tc, "Invalid atr.", strcmp(atr.source, "A") == 0);
+	CuAssert(tc, "Invalid atr.", atr.contentStatus == PST_CONTENT_STATUS_OK);
+	CuAssert(tc, "Invalid atr.", atr.contentStatus == PST_FORMAT_STATUS_OK);
+
+	PARAM_SET_free(set);
+}
+
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_add_count_clear);
@@ -775,6 +803,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_set_read_from_file);
 	SUITE_ADD_TEST(suite, Test_set_read_from_file_weird_format);
 	SUITE_ADD_TEST(suite, Test_set_include_other_set);
+	SUITE_ADD_TEST(suite, Test_set_param_atr);
 	return suite;
 }
 
