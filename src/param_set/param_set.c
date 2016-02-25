@@ -496,7 +496,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 		res = PARAM_addValue(set->unknown, param, source, PST_PRIORITY_VALID_BASE);
 		if (res != PST_OK) goto cleanup;
 
-		res = PST_INVALID_FORMAT;
+		res = PST_OK;
 		goto cleanup;
 	}
 
