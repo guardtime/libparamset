@@ -79,10 +79,35 @@ enum enum_value_index {
 	PST_INDEX_FIRST = 0,
 }; 
 
+struct PARAM_ATR_st {
+	/* Name. */
+	char *name;
+
+	/* Alias. */
+	char *alias;
+
+	/* c-string value for raw argument. */
+	char *cstr_value;
+
+	/* Optional c-string source description, e.g. file, environment. */
+	char *source;
+
+	/* Priority level constraint. */
+	int priority;
+
+	/* Format status. */
+	int formatStatus;
+
+	/* Content status. */
+	int contentStatus;
+};
+
 typedef struct PARAM_VAL_st PARAM_VAL;	
 typedef struct PARAM_st PARAM;
 typedef struct PARAM_SET_st PARAM_SET;
 typedef enum PARAM_CONSTRAINTS_enum PARAM_CONSTRAINTS;	
+typedef struct PARAM_ATR_st PARAM_ATR;
+
 
 typedef struct TASK_st TASK;
 typedef struct TASK_DEFINITION_st TASK_DEFINITION;
@@ -239,6 +264,20 @@ int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int p
  * \c PST_PARAMETER_INVALID_FORMAT \c PST_PARAMETER_UNIMPLEMENTED_OBJ.
  */
 int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *source, int priority, int at, void *ctxt, void **obj);
+
+/**
+ * Extract a values attributes with the given constraints.
+ * \param	set			PARAM_SET object.
+ * \param	name		parameters name.
+ * \param	source		Constraint for the source, can be NULL.
+ * \param	priority	Priority that can be \c PST_PRIORITY_VALID_BASE (0) or higher.
+ * \param	at			Parameter index in the matching set composed with the constraints.
+ * \param	atr
+ * \return \c PST_OK when successful, error code otherwise. Some more common error
+ * codes: 	\c PST_INVALID_ARGUMENT,  \c PST_PARAMETER_NOT_FOUND \c PST_PARAMETER_EMPTY
+ */
+int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int priority, int at, PARAM_ATR *atr);
+
 /**
  * Removes all values from the specified parameter list. Parameter list is defined
  * as "p1,p2,p3 ...".
