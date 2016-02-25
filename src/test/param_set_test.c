@@ -386,7 +386,8 @@ static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	res = PARAM_SET_new("{a}{b}{c}{d}{x}{e}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	PARAM_SET_readFromCMD(argc, argv, set, 0);
+	res = PARAM_SET_readFromCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
 
 	res = PARAM_SET_getValueCount(set, "{a}{b}{c}{d}{x}{e}", NULL, PST_PRIORITY_NONE, &count);
 	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);

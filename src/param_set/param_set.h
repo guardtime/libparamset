@@ -377,11 +377,14 @@ int PARAM_SET_readFromFile(PARAM_SET *set, const char *fname, const char* source
  * --long <arg>	- long parameter with argument.
  * -i <arg>		- short parameter with argument.
  * -vxn			- bunch of flags.
- * @param[in]		argc	count of command line objects.
- * @param[in]		argv	array of command line objects.
- * @param[in/out]	set		parameter set.
+ * \param	set			parameter set.
+ * \param	argc		count of command line strings.
+ * \param	argv		array of command line strings.
+ * \param	source		Source description as c-string. Can be NULL.
+ * \param	priority	Priority that can be \c PST_PRIORITY_VALID_BASE (0) or higher.
+ * \return PST_OK if successful, error code otherwise.
  */
-void PARAM_SET_readFromCMD(int argc, char **argv, PARAM_SET *set, int priority);
+int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority);
 
 /**
  * Extracts all parameters from \c src known to \c target and appends all the
