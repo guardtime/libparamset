@@ -317,7 +317,8 @@ int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, 
  * \param	source		Constraint for the source, can be NULL.
  * \param	priority	Priority that can be \c PST_PRIORITY_VALID_BASE (0) or higher.
  * \param	count		Pointer to integer that are loaded with value count.
- * \return PST_OK if successful, error code otherwise.
+ * \return PST_OK if successful, error code otherwise. If parameter foes not exists
+ * \c PST_PARAMETER_NOT_FOUND is returned.
  */
 int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *source, int priority, int *count);
 
