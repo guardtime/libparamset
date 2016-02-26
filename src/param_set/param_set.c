@@ -525,6 +525,41 @@ static int bunch_of_flags_get_unknown_rate(PARAM_SET *set, const char *bunch_of_
 	else return (unknowns * 100) / itr;
 }
 
+static int param_set_add_typo_or_unknown(PARAM_SET *set, TYPO *typo_list, const char *source, const char *param, const char *arg) {
+	int res;
+
+	if (set == NULL || typo_list == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	if (param != NULL) {
+		if (param_set_analyze_similarity(set, param, TYPO_SENSITIVITY, TYPO_MAX_COUNT, typo_list)) {
+			res = param_set_add_typo_from_list(set, param, source, typo_list, set->count);
+			if (res != PST_OK) goto cleanup;
+		} else {
+			res = PARAM_addValue(set->unknown, param, source, PST_PRIORITY_VALID_BASE);
+			if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) goto cleanup;
+		}
+	}
+
+	if (arg != NULL) {
+		if (param_set_analyze_similarity(set, arg, TYPO_SENSITIVITY, TYPO_MAX_COUNT, typo_list)) {
+			res = param_set_add_typo_from_list(set, arg, source, typo_list, set->count);
+			if (res != PST_OK) goto cleanup;
+		} else {
+			res = PARAM_addValue(set->unknown, arg, source, PST_PRIORITY_VALID_BASE);
+			if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) goto cleanup;
+		}
+	}
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
 /**
  * This functions adds raw parameter to the set. It parses parameters formatted as:
  * --long		- long parameter without argument.
@@ -550,7 +585,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 	}
 
 
-	if(param[0] == '-' && param[1] != 0){
+	if(param[0] == '-' && param[1] != 0) {
 		flag = param + (param[1] == '-' ? 2 : 1);
 
 		/**
@@ -571,15 +606,8 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 			/**
 			 * If bunch of flags have an argument it must be a typo or unknown parameter.
              */
-			if (arg != NULL) {
-				if (param_set_analyze_similarity(set, arg, TYPO_SENSITIVITY, TYPO_MAX_COUNT, typo_list)) {
-					res = param_set_add_typo_from_list(set, arg, source, typo_list, set->count);
-					if (res != PST_OK) goto cleanup;
-				} else {
-					res = PARAM_addValue(set->unknown, arg, source, PST_PRIORITY_VALID_BASE);
-					if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) goto cleanup;
-				}
-			}
+			res = param_set_add_typo_or_unknown(set, typo_list, source, NULL, arg);
+			if (res != PST_OK) goto cleanup;
 
 			/**
 			 * Check how many flags from the group are unknown. If less than 25%
@@ -598,22 +626,15 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 					res = PST_OK;
 				}
 			} else {
-				if (param_set_analyze_similarity(set, flag, TYPO_SENSITIVITY, TYPO_MAX_COUNT, typo_list)) {
-					res = param_set_add_typo_from_list(set, flag, source, typo_list, set->count);
-					if (res != PST_OK) goto cleanup;
-				} else {
-					res = PARAM_addValue(set->unknown, flag, source, PST_PRIORITY_VALID_BASE);
-					if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) goto cleanup;
-				}
+				res = param_set_add_typo_or_unknown(set, typo_list, source, flag, NULL);
+				if (res != PST_OK) goto cleanup;
 			}
 
 		}
 	}
 	else{
-		res = PARAM_addValue(set->unknown, param, source, PST_PRIORITY_VALID_BASE);
+		res = param_set_add_typo_or_unknown(set, typo_list, source, param, arg);
 		if (res != PST_OK) goto cleanup;
-
-		res = PST_OK;
 		goto cleanup;
 	}
 
