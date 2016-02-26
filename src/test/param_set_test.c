@@ -323,7 +323,7 @@ static void Test_param_set_typos(CuTest* tc) {
 	res = PARAM_SET_add(set, "ac", NULL, NULL, 0);
 	CuAssert(tc, "Unable to add to set.", res == PST_PARAMETER_IS_TYPO);
 
-	CuAssert(tc, "Ther should be typos.", PARAM_SET_isTypoFailure(set));
+	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
 
 
 	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
@@ -790,11 +790,60 @@ static void Test_set_param_atr(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_param_set_typos_sub_str_middle(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char buf[1024];
+	char expected[] =	"Typo: Did You mean '--aggr-user' instead of 'gr'.\n"
+						"Typo: Did You mean '--aggr-pass' instead of 'gr'.\n";
+
+
+	res = PARAM_SET_new("{aggr-user}{aggr-pass}{ext-pass}{ext-user}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "gr", NULL, NULL, 0);
+	CuAssert(tc, "Unable to add to set.", res == PST_PARAMETER_IS_TYPO);
+	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
+
+
+	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
+	CuAssert(tc, "Invalid string generated.", strcmp(buf, expected) == 0);
+//	printf("%s\n", buf);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_param_set_typos_substring_at_beginning(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char buf[1024];
+
+	res = PARAM_SET_new("{log}{sign}{aggr-user}{verify}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+
+	res = PARAM_SET_add(set, "ag", NULL, NULL, 0);
+	CuAssert(tc, "Unable to add to set.", res == PST_PARAMETER_IS_TYPO);
+	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
+
+
+	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
+	CuAssert(tc, "Invalid string generated.", strcmp(buf, "Typo: Did You mean '--aggr-user' instead of 'ag'.\n") == 0);
+//	printf("A '%s' B", buf);
+
+
+
+	PARAM_SET_free(set);
+}
+
+
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_add_count_clear);
 	SUITE_ADD_TEST(suite, Test_param_invalid);
 	SUITE_ADD_TEST(suite, Test_param_set_typos);
+	SUITE_ADD_TEST(suite, Test_param_set_typos_sub_str_middle);
+	SUITE_ADD_TEST(suite, Test_param_set_typos_substring_at_beginning);
 	SUITE_ADD_TEST(suite, Test_param_set_unknown);
 	SUITE_ADD_TEST(suite, Test_param_remove_element);
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags);
