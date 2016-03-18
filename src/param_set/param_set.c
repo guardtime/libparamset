@@ -499,7 +499,7 @@ cleanup:
 	return res;
 }
 
-static int bunch_of_flags_get_unknown_rate(PARAM_SET *set, const char *bunch_of_flags) {
+static int bunch_of_flags_get_unknown_count(PARAM_SET *set, const char *bunch_of_flags) {
 	int res;
 	char str_flg[2] = {255,0};
 	int itr = 0;
@@ -521,8 +521,7 @@ static int bunch_of_flags_get_unknown_rate(PARAM_SET *set, const char *bunch_of_
 		}
 	}
 
-	if (itr == 0) return 100;
-	else return (unknowns * 100) / itr;
+	return unknowns;
 }
 
 static int param_set_add_typo_or_unknown(PARAM_SET *set, TYPO *typo_list, const char *source, const char *param, const char *arg) {
@@ -575,7 +574,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 	const char *flag = NULL;
 	unsigned len;
 	TYPO *typo_list = NULL;
-	int unknown_rate = 0;
+	int unknown_count = 0;
 	len = (unsigned)strlen(param);
 
 	typo_list = (TYPO*) malloc(set->count * sizeof(TYPO));
@@ -614,9 +613,9 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 			 * are unknown treat them as regular flags. If more than 25% are
 			 * unknown, set the whole string to typo or unknown list.
              */
-			unknown_rate = bunch_of_flags_get_unknown_rate(set, flag);
+			unknown_count = bunch_of_flags_get_unknown_count(set, flag);
 
-			if (unknown_rate <= 25) {
+			if (unknown_count < 3) {
 				while ((str_flg[0] = flag[itr++]) != '\0') {
 					res = PARAM_SET_add(set, str_flg, NULL, source, priority);
 					if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) {
@@ -1388,7 +1387,7 @@ char* PARAM_SET_unknownsToString(const PARAM_SET *set, const char *prefix, char 
 	return buf;
 }
 
-char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
+char* PARAM_SET_typosToString(PARAM_SET *set, int flags, const char *prefix, char *buf, size_t buf_len) {
 	int res;
 	const char *use_prefix = NULL;
 	PARAM_VAL *typo = NULL;
@@ -1399,6 +1398,16 @@ char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, siz
 	int n = 0;
 	const char *similar = NULL;
 	size_t count = 0;
+	char *hyphen = "";
+	char *d_hyphen = "";
+
+	if (flags & PST_TOSTR_HYPHEN) {
+		hyphen = "-";
+		d_hyphen = "-";
+	} else if (flags & PST_TOSTR_DOUBLE_HYPHEN) {
+		hyphen = "-";
+		d_hyphen = "--";
+	}
 
 	if (set == NULL || buf == NULL || buf_len == 0) {
 		return NULL;
@@ -1422,7 +1431,11 @@ char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, siz
 			res = PARAM_getObject(set->typos, name, 0, n, NULL, (void**)&similar);
 			if (res != PST_OK || similar == NULL) return NULL;
 
-			count += snprintf(buf + count, buf_len - count, "%sDid You mean '%s%s' instead of '%s'.\n",use_prefix, strlen(similar) > 1 ? "--" : "-", similar, name);
+			count += snprintf(buf + count, buf_len - count, "%sDid You mean '%s%s' instead of '%s'.\n",
+						use_prefix,
+						strlen(similar) > 1 ? d_hyphen : hyphen,
+						similar,
+						name);
 		}
 
 		i++;

@@ -326,7 +326,7 @@ static void Test_param_set_typos(CuTest* tc) {
 	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
 
 
-	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
+	PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, "Typo: ", buf, sizeof(buf));
 	CuAssert(tc, "Invalid string generated.", strcmp(buf, expected) == 0);
 
 
@@ -806,7 +806,7 @@ static void Test_param_set_typos_sub_str_middle(CuTest* tc) {
 	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
 
 
-	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
+	PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, "Typo: ", buf, sizeof(buf));
 	CuAssert(tc, "Invalid string generated.", strcmp(buf, expected) == 0);
 //	printf("%s\n", buf);
 
@@ -827,12 +827,13 @@ static void Test_param_set_typos_substring_at_beginning(CuTest* tc) {
 	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
 
 
-	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
+	PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, "Typo: ", buf, sizeof(buf));
 	CuAssert(tc, "Invalid string generated.", strcmp(buf, "Typo: Did You mean '--aggr-user' instead of 'ag'.\n") == 0);
+
+	PARAM_SET_typosToString(set, PST_TOSTR_NONE, "Typo: ", buf, sizeof(buf));
+	CuAssert(tc, "Invalid string generated.", strcmp(buf, "Typo: Did You mean 'aggr-user' instead of 'ag'.\n") == 0);
+
 //	printf("A '%s' B", buf);
-
-
-
 	PARAM_SET_free(set);
 }
 
