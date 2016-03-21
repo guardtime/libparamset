@@ -253,6 +253,43 @@ cleanup:
 	return res;
 }
 
+int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *read_count) {
+	int c;
+	size_t count = 0;
+	size_t line_coun = 0;
+	int is_line_open = 0;
+	int last = 0;
+
+	if (file == NULL || buf == NULL || len == 0) return 0;
+	buf[0] = '\0';
+
+	while ((c = fgetc(file)) && count < len - 1) {
+		if (c == EOF || (c == '\r' || c == '\n')) {
+			line_coun++;
+			if (c == EOF) break;
+		}
+
+		if (c != '\r' && c != '\n') {
+			is_line_open = 1;
+			buf[count++] = 0xff & c;
+		} else if (is_line_open) {
+			break;
+		}
+	}
+	buf[count] = '\0';
+
+	if (row_pointer != NULL) {
+		*row_pointer += line_coun;
+	}
+
+	if (read_count != NULL) {
+		*read_count = count;
+	}
+
+
+	return (c == EOF) ? EOF : 0;
+}
+
 static unsigned min_of_3(unsigned A, unsigned B,unsigned C){
 	unsigned tmp;
 	tmp = A < B ? A : B;

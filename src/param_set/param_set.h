@@ -488,6 +488,21 @@ const char* extract_next_name(const char* name_string, int (*isValidNameChar)(in
  */
 int parse_key_value_pair(const char *line, char *key, char *value, size_t buf_len);
 
+/**
+ * Read a line from a file (opend with fopen in mode r) ant track the lines.
+ * Supported line endings:
+ * MAC  \r		CR		0x0d
+ * Unix \n		LF		0x0a
+ * Win  \r\n	CRLF	0x0d0a
+ * \param	file		a file pointer that is us used for reading from.
+ * \param	buf			a buffer to store the line.
+ * \param	len			size of the buffer.
+ * \param	row_pointer	pointer to the row counting value. Initial value pointed to must be 0. If not used can be NULL.
+ * \param	read_count	pointer to character counting value. If not used can be NULL.
+ * \return Return 0 if successful, EOF if end of file.
+ */
+int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *read_count);
+
 #ifdef	__cplusplus
 }
 #endif

@@ -838,6 +838,68 @@ static void Test_param_set_typos_substring_at_beginning(CuTest* tc) {
 }
 
 
+static void Test_param_set_read_line(CuTest* tc) {
+	int res;
+	char buf[1024];
+	size_t rows = 0;
+	size_t count = 0;
+
+	FILE *f = NULL;
+
+	f = fopen(getFullResourcePath("new-lines.txt"), "r");
+
+	res = read_line(f, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "2222") == 0 && res == 0 && count == 4 && rows == 2);
+
+	res = read_line(f, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "4444") == 0 && res == 0 && count == 4 && rows == 4);
+
+	res = read_line(f, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "5") == 0 && res == 0 && count == 1 && rows == 5);
+
+	res = read_line(f, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "7") == 0 && res == 0 && count == 1 && rows == 7);
+
+	res = read_line(f, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "9") == 0 && res == 0 && count == 1 && rows == 9);
+
+	res = read_line(f, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "") == 0 && res == EOF && count == 0 && rows == 11);
+
+
+	if (f != NULL) fclose(f);
+}
+
+static void Test_param_set_read_line_2(CuTest* tc) {
+	int res;
+	char buf[1024];
+	size_t rows = 0;
+	size_t count = 0;
+
+	FILE *f1 = NULL;
+	FILE *f2 = NULL;
+
+	f1 = fopen(getFullResourcePath("new-lines-not-in-end.txt"), "r");
+	f2 = fopen(getFullResourcePath("empty.txt"), "r");
+
+	res = read_line(f1, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "1") == 0 && res == 0 && count == 1 && rows == 1);
+
+	res = read_line(f1, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "2") == 0 && res == 0 && count == 1 && rows == 2);
+
+	res = read_line(f1, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "3") == 0 && res == EOF && count == 1 && rows == 3);
+
+	rows = 0;
+	res = read_line(f2, buf, sizeof(buf), &rows, &count);
+	CuAssert(tc, "Invalid row.", strcmp(buf, "") == 0 && res == EOF && count == 0 && rows == 1);
+
+	if (f1 != NULL) fclose(f1);
+	if (f2 != NULL) fclose(f2);
+}
+
+
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_add_count_clear);
@@ -855,6 +917,8 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_set_read_from_file_weird_format);
 	SUITE_ADD_TEST(suite, Test_set_include_other_set);
 	SUITE_ADD_TEST(suite, Test_set_param_atr);
+	SUITE_ADD_TEST(suite, Test_param_set_read_line);
+	SUITE_ADD_TEST(suite, Test_param_set_read_line_2);
 	return suite;
 }
 
