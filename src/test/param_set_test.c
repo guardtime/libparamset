@@ -694,6 +694,43 @@ static void Test_set_read_from_file_weird_format(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_set_read_from_invalid_file(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char buf[1024];
+
+	char expected[] =
+				"Syntax error at line    9. Unknown character. '.sjdsdhjshdjshjdhsjhdsjdhjshdshjdjsdjhsjdhjshjdjshdjhsjdhsjd'.\n"
+				"Syntax error at line   11. Missing character '-'. 'hdhdshjds -c'.\n"
+				"Syntax error at line   14. Missing character '-'. 'x'.\n"
+				"Syntax error at line   17. Unknown character. '.'.\n";
+
+	res = PARAM_SET_new("{a}{b}{c}{test-test}{cnstr}{x}{y}{z}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_readFromFile(set, getFullResourcePath("nok-conf.conf"), NULL, 0);
+
+	CuAssert(tc, "Configurations file must be invalid.", res == PST_INVALID_FORMAT);
+	PARAM_SET_syntaxErrorsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Unexpected error message.", strcmp(buf, expected) == 0);
+
+
+	PARAM_SET_free(set);
+}
+
+static void Test_set_read_from_invalid_file_no_messages(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+
+	res = PARAM_SET_new("{a}{b}{c}{test-test}{cnstr}{x}{y}{z}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_readFromFile(set, getFullResourcePath("nok-conf.conf"), NULL, 0);
+	CuAssert(tc, "Configurations file must be invalid.", res == PST_INVALID_FORMAT);
+
+	PARAM_SET_free(set);
+}
+
 static void Test_set_include_other_set(CuTest* tc) {
 	int res;
 	PARAM_SET *set_1 = NULL;
@@ -915,6 +952,8 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_key_value_pairs);
 	SUITE_ADD_TEST(suite, Test_set_read_from_file);
 	SUITE_ADD_TEST(suite, Test_set_read_from_file_weird_format);
+	SUITE_ADD_TEST(suite, Test_set_read_from_invalid_file);
+	SUITE_ADD_TEST(suite, Test_set_read_from_invalid_file_no_messages);
 	SUITE_ADD_TEST(suite, Test_set_include_other_set);
 	SUITE_ADD_TEST(suite, Test_set_param_atr);
 	SUITE_ADD_TEST(suite, Test_param_set_read_line);
