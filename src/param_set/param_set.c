@@ -1408,6 +1408,7 @@ char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *pref
 
 
 			count += PST_snprintf(buf + count, buf_len - count, "\n");
+			if (count >= buf_len - 1) return buf;
 		}
 	}
 
@@ -1446,6 +1447,7 @@ char* PARAM_SET_unknownsToString(const PARAM_SET *set, const char *prefix, char 
 		count += PST_snprintf(buf + count, buf_len - count, "%sUnknown parameter '%s'", use_prefix, name);
 		if(source != NULL) count += PST_snprintf(buf + count, buf_len - count, " from '%s'", source);
 		count += PST_snprintf(buf + count, buf_len - count, ".\n");
+		if (count >= buf_len - 1) return buf;
 	}
 
 	buf[buf_len - 1] = '\0';
@@ -1481,6 +1483,7 @@ char* PARAM_SET_syntaxErrorsToString(const PARAM_SET *set, const char *prefix, c
 		if (res != PST_OK) return NULL;
 
 		count += PST_snprintf(buf + count, buf_len - count, "%s%s", use_prefix, name);
+		if (count >= buf_len - 1) return buf;
 	}
 
 	buf[buf_len - 1] = '\0';
@@ -1536,12 +1539,12 @@ char* PARAM_SET_typosToString(PARAM_SET *set, int flags, const char *prefix, cha
 						strlen(similar) > 1 ? d_hyphen : hyphen,
 						similar,
 						name);
+			if (count >= buf_len - 1) return buf;
 		}
 
 		i++;
 	}
 
-	buf[buf_len - 1] = '\0';
 	return buf;
 }
 
