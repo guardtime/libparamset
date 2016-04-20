@@ -46,13 +46,13 @@ static void Test_parameterConstraints(CuTest* tc) {
 	PARAM *single_per_prio = NULL;
 	int count = 0xf;
 
-	res = PARAM_new("test1", NULL, 0, &multiple);
+	res = PARAM_new("test1", NULL, 0, 0, &multiple);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("test2", NULL, PARAM_SINGLE_VALUE, &single);
+	res = PARAM_new("test2", NULL, PARAM_SINGLE_VALUE, 0, &single);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("test3", NULL, PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL, &single_per_prio);
+	res = PARAM_new("test3", NULL, PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL, 0, &single_per_prio);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	/* It is mostly covered by PARAM_VAL tests*/
@@ -148,7 +148,7 @@ static void Test_parameterGetValue(CuTest* tc) {
 	char *value = NULL;
 	int prio = 0xffff;
 
-	res = PARAM_new("test1", NULL, 0, &multiple);
+	res = PARAM_new("test1", NULL, 0, 0, &multiple);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	res = PARAM_getValue(multiple, NULL, PST_PRIORITY_NONE, 0, &val);
@@ -206,16 +206,16 @@ static void Test_SetValuesAndControl(CuTest* tc) {
 	PARAM_VAL *value_2 = NULL;
 	int count = 0xffff;
 
-	res = PARAM_new("test1", NULL, 0, &p1);
+	res = PARAM_new("test1", NULL, 0, 0, &p1);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("test2", NULL, 0, &p2);
+	res = PARAM_new("test2", NULL, 0, 0, &p2);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("test3", NULL, 0, &p3);
+	res = PARAM_new("test3", NULL, 0, 0, &p3);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("test4", NULL, 0, &p4);
+	res = PARAM_new("test4", NULL, 0, 0, &p4);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 
@@ -343,19 +343,19 @@ static void Test_ObjectGetter(CuTest* tc) {
 	/**
 	 * Create some parameter objects.
      */
-	res = PARAM_new("string", NULL, 0, &p1);
+	res = PARAM_new("string", NULL, 0, 0, &p1);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("int", NULL, 0, &p2);
+	res = PARAM_new("int", NULL, 0, 0, &p2);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("double", NULL, 0, &p3);
+	res = PARAM_new("double", NULL, 0, 0, &p3);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("default", NULL, 0, &p4);
+	res = PARAM_new("default", NULL, 0, 0, &p4);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res = PARAM_new("null", NULL, 0, &p5);
+	res = PARAM_new("null", NULL, 0, 0, &p5);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	/**

@@ -112,7 +112,7 @@ static int wrapper_returnStr(void *extra, const char* str, void** obj){
 	return PST_OK;
 }
 
-int PARAM_new(const char *flagName,const char *flagAlias, int constraints, PARAM **newObj){
+int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int pars_opt, PARAM **newObj){
 	int res;
 	PARAM *tmp = NULL;
 	char *tmpFlagName = NULL;
@@ -134,6 +134,7 @@ int PARAM_new(const char *flagName,const char *flagAlias, int constraints, PARAM
 	tmp->arg = NULL;
 	tmp->highestPriority = 0;
 	tmp->constraints = constraints;
+	tmp->parsing_options = pars_opt;
 	tmp->argCount = 0;
 	tmp->controlFormat = NULL;
 	tmp->controlContent = NULL;

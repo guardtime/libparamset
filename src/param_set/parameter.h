@@ -44,6 +44,7 @@ enum PARAM_CONSTRAINTS_enum {
  * \param	flagName	The parameters name.
  * \param	flagAlias	The alias for the name. Can be NULL.
  * \param	constraint	Constraints for the parameter and its values (see \c PARAM_FLAGS).
+ * \param	pars_opt	Parsing Options.
  * \param	newObj		Pointer to receiving pointer to new object.
  * \return \c PST_OK when successful, error code otherwise.
  * 
@@ -52,7 +53,7 @@ enum PARAM_CONSTRAINTS_enum {
  * When parameter constraints are broken its validity check fails - see 
  * \ref PARAM_checkConstraints.
  */
-int PARAM_new(const char *flagName,const char *flagAlias, int constraint, PARAM **newObj);
+int PARAM_new(const char *flagName, const char *flagAlias, int constraint, int pars_opt, PARAM **newObj);
 
 /**
  * Function to free PARAM object.

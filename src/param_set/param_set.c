@@ -748,13 +748,13 @@ int PARAM_SET_new(const char *names, PARAM_SET **set){
 	/**
 	 * Initialize two special parameters to hold and extract unknown parameters.
      */
-	res = PARAM_new("unknown", NULL, 0, &tmp_unknwon);
+	res = PARAM_new("unknown", NULL, 0, 0, &tmp_unknwon);
 	if(res != PST_OK) goto cleanup;
 
-	res = PARAM_new("typo", NULL, 0, &tmp_typo);
+	res = PARAM_new("typo", NULL, 0, 0, &tmp_typo);
 	if(res != PST_OK) goto cleanup;
 
-	res = PARAM_new("syntax", NULL, 0, &tmp_syntax);
+	res = PARAM_new("syntax", NULL, 0, 0, &tmp_syntax);
 	if(res != PST_OK) goto cleanup;
 
 	res = PARAM_setObjectExtractor(tmp_typo, NULL);
@@ -779,7 +779,7 @@ int PARAM_SET_new(const char *names, PARAM_SET **set){
 	i = 0;
 	pName = names;
 	while((pName = getParametersName(pName, buf, alias, sizeof(buf), &flags)) != NULL){
-		res = PARAM_new(buf, alias[0] ? alias : NULL, flags, &tmp->parameter[i]);
+		res = PARAM_new(buf, alias[0] ? alias : NULL, flags, 0, &tmp->parameter[i]);
 		if(res != PST_OK) goto cleanup;
 		i++;
 	}
