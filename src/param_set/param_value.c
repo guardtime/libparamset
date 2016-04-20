@@ -117,7 +117,6 @@ cleanup:
 }
 
 void PARAM_VAL_free(PARAM_VAL *rootValue) {
-	PARAM_VAL *current = NULL;
 	PARAM_VAL *next = NULL;
 	PARAM_VAL *to_be_freed = NULL;
 

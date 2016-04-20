@@ -255,7 +255,6 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
 	size_t count = 0;
 	size_t line_coun = 0;
 	int is_line_open = 0;
-	int last = 0;
 
 	if (file == NULL || buf == NULL || len == 0) return 0;
 	buf[0] = '\0';
@@ -1185,7 +1184,6 @@ int PARAM_SET_isSyntaxError(const PARAM_SET *set){
 int PARAM_SET_readFromFile(PARAM_SET *set, const char *fname, const char* source, int priority) {
 	int res;
 	FILE *file = NULL;
-	char *ln = NULL;
 	char line[1024];
 	char flag[1024];
 	char arg[1024];
