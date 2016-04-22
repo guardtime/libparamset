@@ -194,6 +194,12 @@ int PARAM_addControl(PARAM *obj,
 	return PST_OK;
 }
 
+int PARAM_setParseOption(PARAM *obj, int option) {
+	if (obj == NULL) return PST_INVALID_ARGUMENT;
+	obj->parsing_options = option;
+	return PST_OK;
+}
+
 int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void *, const char *, void**)) {
 	if (obj == NULL) return PST_INVALID_ARGUMENT;
 
