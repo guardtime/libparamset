@@ -458,8 +458,8 @@ static void assert_value_pop_and_clean(CuTest* tc,
 
 	if (pop->next != NULL || pop->previous != NULL || strcmp(pop->cstr_value, popped) != 0) {
 		count += snprintf(buf + count, sizeof(buf) - count,
-				"Invalid pop next->%i, previous->%i, value '%s', but expected '%s'.",
-				(int)(pop->next), (int)(pop->previous), pop->cstr_value, popped);
+				"Invalid pop next->%p, previous->%p, value '%s', but expected '%s'.",
+				(void*)(pop->next), (void*)(pop->previous), pop->cstr_value, popped);
 		CuAssert(tc, buf, 0);
 	}
 

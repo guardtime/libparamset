@@ -70,7 +70,7 @@ static void assert_value(CuTest* tc,
 static void Test_param_set_from_cmd_flags_bacward_compatibility(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
-	const char *argv[] = {"<path>", "-abc", "-x", "-e", "e_value", NULL};
+	char *argv[] = {"<path>", "-abc", "-x", "-e", "e_value", NULL};
 	int argc = 0;
 	int count = 0;
 	char *value = NULL;
@@ -102,7 +102,7 @@ static void Test_param_set_from_cmd_flags_bacward_compatibility(CuTest* tc) {
 static void Test_param_set_cmd_special(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
-	const char *argv[] = {
+	char *argv[] = {
 		"<path>",					/* A default path at the first place. */
 		"-ywv", "unk_1", "unk_2",	/* Fits bunch of flags and some unknown parameters. (Default parsing). */
 		"-x", "x1", "--xtra", "x2",	/* A short and a long representation. (Default parsing). */
@@ -114,7 +114,6 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 	int argc = 0;
 	int count = 0;
 	char *value = NULL;
-	char buf[0xfff];
 
 	while(argv[argc] != NULL) argc++;
 
@@ -159,7 +158,7 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
-	const char *argv[] = {
+	char *argv[] = {
 		"<path>",					/* A default path at the first place. */
 		"--mb", "v0", "v1", "-x",	/* Array ended by an existing parameter. */
 		"-e", "e_value_1",

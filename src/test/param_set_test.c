@@ -367,7 +367,7 @@ static void Test_param_set_unknown(CuTest* tc) {
 static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
-	const char *argv[] = {"<path>", "-abc", "-x", "-e", "e_value", NULL};
+	char *argv[] = {"<path>", "-abc", "-x", "-e", "e_value", NULL};
 	int argc = 0;
 	int count = 0;
 	char *value = NULL;

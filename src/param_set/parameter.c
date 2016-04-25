@@ -206,7 +206,6 @@ int PARAM_isParsOptionSet(PARAM *param, int state) {
 }
 
 int PARAM_setParseOption(PARAM *obj, int option) {
-	int state = 0;
 	if (obj == NULL) return PST_INVALID_ARGUMENT;
 
 	/**

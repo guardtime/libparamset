@@ -1297,7 +1297,7 @@ cleanup:
 	return res;
 }
 
-static char *remove_dashes(char *str) {
+static const char *remove_dashes(const char *str) {
 	int i = 0;
 	if (str == NULL)  return NULL;
 	while (str[i] == '-') i++;
@@ -1347,7 +1347,7 @@ static char* token_type_to_string(int type, char *buf, size_t len) {
 static char* pars_flags_to_string(int type, char *buf, size_t len) {
 	PST_snprintf(buf, len, "$[%s%s%s%s%s%s%s]",
 			(type == PST_PRSCMD_NONE) ? "-" : "",
-			(type & PST_PRSCMD_DEFAULT == PST_PRSCMD_DEFAULT) ? "D:" : "",
+			((type & PST_PRSCMD_DEFAULT) == PST_PRSCMD_DEFAULT) ? "D:" : "",
 			(type & PST_PRSCMD_HAS_NO_VALUE) ? "NV:" : "",
 			(type & PST_PRSCMD_HAS_VALUE) ? "V:" : "",
 			(type & PST_PRSCMD_HAS_MULTIPLE_INSTANCES) ? "M:" : "",
@@ -1371,27 +1371,21 @@ static char* break_type_to_string(int type, char *buf, size_t len) {
 
 int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority) {
 	int res;
+	TYPO *typo_helper = NULL;
 	int i = 0;
 	char *token = NULL;
-	char *arg = NULL;
-	const char *param_name = NULL;
+	int token_type = 0;
 	PARAM *tmp_parameter = NULL;
-	TYPO *typo_helper = NULL;
 	char buf[1024];
 	char buf2[1024];
-
-	PARAM *opend_parameter = NULL;
-
 	int is_parameter_opend = 0;
 	int token_match_existing = 0;
 	int token_match_break = 0;
 	int token_dash_break = 0;
 	int token_no_param_break = 0;
 	int value_saturation_break = 0;
-
+	PARAM *opend_parameter = NULL;
 	size_t value_counter = 0;
-	int token_type = 0;
-	int value_needed = 0;
 
 	if(set == NULL || argc == 0 || argv == NULL) {
 		res = PST_INVALID_ARGUMENT;
