@@ -59,6 +59,8 @@ enum param_set_err {
 	PST_TASK_SET_NOT_ANALYZED,
 	PST_TASK_UNABLE_TO_ANALYZE_PARAM_SET_CHANGED,
 	PST_UNDEFINED_BEHAVIOUR,
+	/* Unable to set the combination of command-line parser options. */
+	PST_PRSCMD_INVALID_COMBINATION,
 	PST_UNKNOWN_ERROR,
 };
 
@@ -395,6 +397,11 @@ int PARAM_SET_readFromFile(PARAM_SET *set, const char *fname, const char* source
  * \return PST_OK if successful, error code otherwise.
  */
 int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority);
+
+
+int PARAM_SET_setParseOptions(PARAM_SET *set, const char *names, int options);
+
+
 
 /**
  * Extracts all parameters from \c src known to \c target and appends all the

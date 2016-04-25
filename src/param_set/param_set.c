@@ -748,13 +748,13 @@ int PARAM_SET_new(const char *names, PARAM_SET **set){
 	/**
 	 * Initialize two special parameters to hold and extract unknown parameters.
      */
-	res = PARAM_new("unknown", NULL, 0, 0, &tmp_unknwon);
+	res = PARAM_new("unknown", NULL, 0, PST_PRSCMD_NONE, &tmp_unknwon);
 	if(res != PST_OK) goto cleanup;
 
-	res = PARAM_new("typo", NULL, 0, 0, &tmp_typo);
+	res = PARAM_new("typo", NULL, 0, PST_PRSCMD_NONE, &tmp_typo);
 	if(res != PST_OK) goto cleanup;
 
-	res = PARAM_new("syntax", NULL, 0, 0, &tmp_syntax);
+	res = PARAM_new("syntax", NULL, 0, PST_PRSCMD_NONE, &tmp_syntax);
 	if(res != PST_OK) goto cleanup;
 
 	res = PARAM_setObjectExtractor(tmp_typo, NULL);
@@ -779,7 +779,7 @@ int PARAM_SET_new(const char *names, PARAM_SET **set){
 	i = 0;
 	pName = names;
 	while((pName = getParametersName(pName, buf, alias, sizeof(buf), &flags)) != NULL){
-		res = PARAM_new(buf, alias[0] ? alias : NULL, flags, 0, &tmp->parameter[i]);
+		res = PARAM_new(buf, alias[0] ? alias : NULL, flags, PST_PRSCMD_DEFAULT, &tmp->parameter[i]);
 		if(res != PST_OK) goto cleanup;
 		i++;
 	}
@@ -847,13 +847,33 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 	return PST_OK;
 }
 
+int PARAM_SET_setParseOptions(PARAM_SET *set, const char *names, int options){
+	int res;
+	PARAM *tmp = NULL;
+	const char *pName = NULL;
+	char buf[1024];
+
+	if (set == NULL || names == NULL) return PST_INVALID_ARGUMENT;
+
+	pName = names;
+	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
+		res = param_set_getParameterByName(set, buf, &tmp);
+		if (res != PST_OK) return res;
+
+		res = PARAM_setParseOption(tmp, options);
+		if (res != PST_OK) return res;
+	}
+
+	return PST_OK;
+}
+
 int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const char *source, int priority) {
 	int res;
 	PARAM *param = NULL;
 	TYPO *typo_list = NULL;
 	if (set == NULL || name == NULL) {
 		res = PST_INVALID_ARGUMENT;
-		goto cleanup;;
+		goto cleanup;
 	}
 
 	typo_list = (TYPO*) malloc(set->count * sizeof(TYPO));
