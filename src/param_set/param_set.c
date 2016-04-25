@@ -1297,6 +1297,200 @@ cleanup:
 	return res;
 }
 
+static char *remove_dashes(char *str) {
+	int i = 0;
+	if (str == NULL)  return NULL;
+	while (str[i] == '-') i++;
+	return &str[i];
+}
+
+enum {
+	TOKEN_IS_VALUE = 0x01,
+	TOKEN_HAS_DASH = 0x02,
+	TOKEN_HAS_DOUBLE_DASH = 0x04,
+	TOKEN_MATCHES_PARAMETER = 0x08,
+	TOKEN_UNKNOW = 0x80
+};
+
+static int get_parameter_from_token(PARAM_SET *set, const char *token, int *token_type, PARAM **param) {
+	PARAM *tmp = NULL;
+	int type = TOKEN_UNKNOW;
+	int res = 0;
+	if (set == NULL || token == NULL || param == NULL) return PST_INVALID_ARGUMENT;
+
+	if (token[0] != '-') {
+		type = TOKEN_IS_VALUE;
+	} else {
+		res = param_set_getParameterByName(set, remove_dashes(token), &tmp);
+		if (res != PST_OK && res != PST_PARAMETER_NOT_FOUND) return res;
+		type = 0;
+		type |= (res == PST_OK) ? TOKEN_MATCHES_PARAMETER : 0;
+		type |= (token[0] == '-' && token[1] == '-') ? TOKEN_HAS_DOUBLE_DASH : TOKEN_HAS_DASH;
+	}
+
+	*param = tmp;
+	*token_type = type;
+
+	return PST_OK;
+}
+
+static char* token_type_to_string(int type, char *buf, size_t len) {
+	PST_snprintf(buf, len, "[%s%s%s%s%s]",
+			(type & TOKEN_IS_VALUE) ? "V" : "",
+			(type & TOKEN_HAS_DASH) ? "D" : "",
+			(type & TOKEN_HAS_DOUBLE_DASH) ? "DD" : "",
+			(type & TOKEN_MATCHES_PARAMETER) ? "M" : "",
+			(type & TOKEN_UNKNOW) ? "?" : "");
+	return buf;
+}
+
+static char* pars_flags_to_string(int type, char *buf, size_t len) {
+	PST_snprintf(buf, len, "$[%s%s%s%s%s%s%s]",
+			(type == PST_PRSCMD_NONE) ? "-" : "",
+			(type & PST_PRSCMD_DEFAULT == PST_PRSCMD_DEFAULT) ? "D:" : "",
+			(type & PST_PRSCMD_HAS_NO_VALUE) ? "NV:" : "",
+			(type & PST_PRSCMD_HAS_VALUE) ? "V:" : "",
+			(type & PST_PRSCMD_HAS_MULTIPLE_INSTANCES) ? "M:" : "",
+			(type & PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX) ? "DBR:" : "",
+			(type & PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH) ? "MBR:" : "");
+	return buf;
+}
+
+static char* break_type_to_string(int type, char *buf, size_t len) {
+	PST_snprintf(buf, len, "[%s%s%s%s]",
+			(type & 1) ? "MATCH_BREAK  " : "",
+			(type & 2) ? "DASH_BREAK   " : "",
+			(type & 4) ? "NO_PARA_BREAK" : "",
+			(type & 8) ? "VAL_SAT_BREAK" : "");
+	return buf;
+}
+
+//#define dpgprint printf
+#define dummy_macro();
+#define dpgprint dummy_macro();
+
+int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority) {
+	int res;
+	int i = 0;
+	char *token = NULL;
+	char *arg = NULL;
+	const char *param_name = NULL;
+	PARAM *tmp_parameter = NULL;
+	TYPO *typo_helper = NULL;
+	char buf[1024];
+	char buf2[1024];
+
+	PARAM *opend_parameter = NULL;
+
+	int is_parameter_opend = 0;
+	int token_match_existing = 0;
+	int token_match_break = 0;
+	int token_dash_break = 0;
+	int token_no_param_break = 0;
+	int value_saturation_break = 0;
+
+	size_t value_counter = 0;
+	int token_type = 0;
+	int value_needed = 0;
+
+	if(set == NULL || argc == 0 || argv == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	typo_helper = (TYPO*) malloc(set->count * sizeof(TYPO));
+	if (typo_helper == NULL) {
+		res = PST_OUT_OF_MEMORY;
+		goto cleanup;
+	}
+
+	for (i = 1; i < argc; i++) {
+		token = argv[i];
+
+		/**
+		 * Analyze the tokens.
+         */
+		res = get_parameter_from_token(set, token, &token_type, &tmp_parameter);
+		if (res != PST_OK) goto cleanup;
+		dpgprint("Token '%10s' %8s %10s\n", token, token_type_to_string(token_type, buf, sizeof(buf)),
+				pars_flags_to_string(tmp_parameter != NULL ? tmp_parameter->parsing_options : 0, buf2, sizeof(buf2)));
+
+		token_match_existing = (token_type & TOKEN_MATCHES_PARAMETER) ? 1 : 0;
+
+		if (is_parameter_opend) {
+			token_match_break = (token_match_existing && PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH)) ? 1 : 0;
+			token_dash_break = (token[0] == '-' && PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX)) ? 2 : 0;
+			token_no_param_break = PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_HAS_NO_VALUE) ? 4 : 0;
+
+
+			if (!token_no_param_break && !token_dash_break && !token_match_break) {
+					res = PARAM_addValue(opend_parameter, token, source, priority);
+					if (res != PST_OK) goto cleanup;
+					dpgprint("P:VALUE++ (%s = %s)\n", opend_parameter->flagName, token);
+					value_counter++;
+			}
+
+			value_saturation_break = (value_counter && (PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_DEFAULT) || PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_HAS_VALUE))) ? 8 : 0;
+
+			if (token_match_break || token_dash_break || token_no_param_break || value_saturation_break) {
+				dpgprint("P:CLOSE (%s = NULL)%s\n", opend_parameter->flagName, break_type_to_string(token_match_break + token_dash_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
+				dpgprint("----------------------------------\n");
+				if (value_counter == 0) {
+					res = PARAM_SET_add(set, opend_parameter->flagName, NULL, source, priority);
+				}
+
+				is_parameter_opend = 0;
+				value_counter = 0;
+				opend_parameter = NULL;
+			}
+		if (value_saturation_break) continue;
+		}
+
+		/** Value saturation occurs when a single vale parameter is willed with current token, continue to the next token. */
+
+		/* If parameter is not opened and the match is found, set is_parameter_opend flag and initialize opend_parameter.*/
+		if (!is_parameter_opend && token_match_existing) {
+			dpgprint("----------------------------------\n");
+			dpgprint("P:OPEN %s\n", token);
+			is_parameter_opend = 1;
+			value_counter = 0;
+			opend_parameter = tmp_parameter;
+			/* Parameter opened, go to the next token. */
+			continue;
+		}
+
+		/**
+		 * If parameter is not opened and the next value is not a command line option, it must be a typo or unknown.
+		 */
+		if (!is_parameter_opend) {
+			if (token_type & TOKEN_HAS_DOUBLE_DASH) {
+				res = param_set_add_typo_or_unknown(set, typo_helper, source, remove_dashes(token), NULL);
+				if (res != PST_OK) goto cleanup;
+				dpgprint("Typo added '%s'\n", token);
+				/* Typo added, go to the next token. */
+				continue;
+			} else if (token_type & TOKEN_HAS_DASH) {
+				dpgprint("------------BUNCH OF FLAGS-----------------\n");
+				res = param_set_addRawParameter(token, NULL, source, set, priority);
+				if (res != PST_OK) goto cleanup;
+				dpgprint("------------------  DONE   -----------------\n");
+
+				/* Bunch of flags processed, go to the next token. */
+				continue;
+			}
+		}
+	}
+
+	res = PST_OK;
+
+cleanup:
+
+	if (typo_helper != NULL) free(typo_helper);
+
+	return res;
+}
+#undef dpgprint
+
 int PARAM_SET_IncludeSet(PARAM_SET *target, PARAM_SET *src) {
 	int res;
 	int i;

@@ -36,6 +36,7 @@ enum param_set_err {
 	PST_OK = 0,
 	PST_INVALID_ARGUMENT = PARAM_SET_ERROR_BASE,
 	PST_INVALID_FORMAT,
+	/* Currently used only if TASK_DEFINITION_MAX_COUNT exceeded. */
 	PST_INDEX_OVF,
 	/** Parameter with the given name does not exist it the given set. */
 	PST_PARAMETER_NOT_FOUND,
@@ -401,7 +402,7 @@ int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *sou
 
 int PARAM_SET_setParseOptions(PARAM_SET *set, const char *names, int options);
 
-
+int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority);
 
 /**
  * Extracts all parameters from \c src known to \c target and appends all the
