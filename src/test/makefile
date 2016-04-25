@@ -22,6 +22,7 @@ BIN_DIR = ..\..\out\bin
 
 TOOL_OBJ = \
 	$(OBJ_DIR)\all_tests.obj \
+	$(OBJ_DIR)\command_line_test.obj \
 	$(OBJ_DIR)\param_value_test.obj \
 	$(OBJ_DIR)\parameter_test.obj \
 	$(OBJ_DIR)\param_set_test.obj \
