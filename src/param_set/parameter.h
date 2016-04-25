@@ -153,7 +153,29 @@ void PARAM_free(PARAM *obj);
  */
 int PARAM_addControl(PARAM *obj, int (*controlFormat)(const char *), int (*controlContent)(const char *), int (*convert)(const char*, char*, unsigned));
 
+/**
+ * Check if parsing parameter or a group is set (can be concatenated together
+ * with |). See See \ref PARAM_PARS_OPTIONS_enum and \ref PARAM_setParseOption
+ * and \ref PARAM_SET_parseCMD for more information.
+ *
+ * \param param		A parameter object.
+ * \param state		A state to be controlled.
+ * \return \c PST_OK when successful, error code otherwise.
+ */
+int PARAM_isParsOptionSet(PARAM *param, int state);
+
+/**
+ * Add parsing options to parameter. See \ref PARAM_PARS_OPTIONS_enum and \ref
+ * PARAM_SET_parseCMD for more information.
+ *
+ * \param param		A parameter object.
+ * \param state		A state to be sett.
+ * \return \c PST_OK when successful, error code otherwise.
+ * Error \c PST_PRSCMD_INVALID_COMBINATION is returned if conflicting parsing flag
+ * combination is feed to the function.
+ */
 int PARAM_setParseOption(PARAM *obj, int option);
+
 /**
  * Set object extractor to the parameter that implements \ref PARAM_getObject. If
  * extractor allocates memory it must be freed by the user. As PARAM_getObject value

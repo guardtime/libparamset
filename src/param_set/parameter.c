@@ -194,8 +194,32 @@ int PARAM_addControl(PARAM *obj,
 	return PST_OK;
 }
 
+static int is_flag_set(int field, int flag) {
+	if (((field & flag) == flag) ||
+			(field == PST_PRSCMD_NONE && flag == PST_PRSCMD_NONE)) return 1;
+	return 0;
+}
+
+int PARAM_isParsOptionSet(PARAM *param, int state) {
+	if (param == NULL) return 0;
+	return is_flag_set(param->parsing_options, state);
+}
+
 int PARAM_setParseOption(PARAM *obj, int option) {
+	int state = 0;
 	if (obj == NULL) return PST_INVALID_ARGUMENT;
+
+	/**
+	 * Give an error on some invalid configurations.
+	 */
+	if ((is_flag_set(option, PST_PRSCMD_HAS_NO_VALUE) || is_flag_set(option, PST_PRSCMD_DEFAULT))
+		&& (is_flag_set(option, PST_PRSCMD_HAS_MULTIPLE_INSTANCES) || is_flag_set(option, PST_PRSCMD_HAS_VALUE) ||
+			(is_flag_set(option, PST_PRSCMD_HAS_NO_VALUE) && is_flag_set(option, PST_PRSCMD_DEFAULT))))
+		{
+		return PST_PRSCMD_INVALID_COMBINATION;
+	}
+
+
 	obj->parsing_options = option;
 	return PST_OK;
 }
