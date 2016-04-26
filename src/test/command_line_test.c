@@ -96,6 +96,10 @@ static void Test_param_set_from_cmd_flags_bacward_compatibility(CuTest* tc) {
 	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, &value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_PARAMETER_EMPTY);
 
+
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+	CuAssert(tc, "There should be no unknowns.", !PARAM_SET_isUnknown(set));
+
 	PARAM_SET_free(set);
 }
 
@@ -106,14 +110,15 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 		"<path>",					/* A default path at the first place. */
 		"-ywv", "unk_1", "unk_2",	/* Fits bunch of flags and some unknown parameters. (Default parsing). */
 		"-x", "x1", "--xtra", "x2",	/* A short and a long representation. (Default parsing). */
-		"-a", "unk_2",				/* A single parameter. (PST_PRSCMD_HAS_NO_VALUE). */
-		"-bc","unk_3",				/* A bunch of flags. (PST_PRSCMD_HAS_NO_VALUE). */
+		"-a", "unk_3",				/* A single parameter. (PST_PRSCMD_HAS_NO_VALUE). */
+		"-bc","unk_4",				/* A bunch of flags. (PST_PRSCMD_HAS_NO_VALUE). */
 		"-d", "d1", "d2", "d3", "-d4", /* An Array. (Break at first known parameter). */
 		"-e", "e_value",			/* A short parameter with a value. (Default parsing). */
 		"-f", "-f", NULL};			/* A short parameter with a value. (PST_PRSCMD_HAS_VALUE). */
 	int argc = 0;
 	int count = 0;
 	char *value = NULL;
+	char buf[1024];
 
 	while(argv[argc] != NULL) argc++;
 
@@ -152,6 +157,18 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 
 	CuAssert(tc, "z should not be set.", !PARAM_SET_isSetByName(set, "z"));
 
+	/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+
+	buf[0] = '\0';
+	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'unk_1'.\n"
+																"Unknown parameter 'unk_2'.\n"
+																"Unknown parameter 'unk_3'.\n"
+																"Unknown parameter 'unk_4'.\n") == 0);
+
 	PARAM_SET_free(set);
 }
 
@@ -162,7 +179,10 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 		"<path>",					/* A default path at the first place. */
 		"--mb", "v0", "v1", "-x",	/* Array ended by an existing parameter. */
 		"-e", "e_value_1",
+		"notdef_1",
 		"--db", "v-2", "v3-",			/* Array ended by a beginning dash (-). */
+		"-notdef_2",
+		"notdef_3",
 		"-e", "e_value_2",
 		"--mdb", "v4", "v5",		/* Array ended by an existing parameter or beginning dash (-). */
 		"-e", "e_value_3",
@@ -238,7 +258,11 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 
 	buf[0] = '\0';
 	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
-	CuAssert(tc, "One typo should be detected.", strcmp(buf, "Unknown parameter 'unknown'.\nUnknown parameter '-'.\n") == 0);
+	CuAssert(tc, "Five unknown should be detected.", strcmp(buf, "Unknown parameter 'notdef_1'.\n"
+																"Unknown parameter 'notdef_2'.\n"
+																"Unknown parameter 'notdef_3'.\n"
+																"Unknown parameter 'unknown'.\n"
+																"Unknown parameter '-'.\n") == 0);
 
 	PARAM_SET_free(set);
 }
