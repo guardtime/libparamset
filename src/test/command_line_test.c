@@ -46,7 +46,7 @@ static void assert_param_set_value_count(CuTest* tc,
 static void assert_value(CuTest* tc,
 		PARAM_SET *set, const char *name, int at,
 		const char *file, int line,
-		const char *expected) {
+		const char *expected, int must_fail) {
 	int res;
 	char *V = NULL;
 	char buf[2048];
@@ -55,10 +55,20 @@ static void assert_value(CuTest* tc,
 	count += snprintf(buf + count, sizeof(buf) - count, "Invalid value '%s' at line %i. ", file, line);
 
 	res = PARAM_SET_getStr(set, name, NULL, PST_PRIORITY_NONE, at, &V);
-	if (res != PST_OK) {
-		count += snprintf(buf + count, sizeof(buf) - count, " Unable to get value from '%s' at %i.", name, at);
-		CuAssert(tc, buf, 0);
+	if (must_fail) {
+		if (res == PST_PARAMETER_VALUE_NOT_FOUND) {
+			return;
+		} else {
+			count += snprintf(buf + count, sizeof(buf) - count, "The value should not be extracted (err %X).", res);
+			CuAssert(tc, buf, 0);
+		}
+	} else {
+		if (res != PST_OK) {
+			count += snprintf(buf + count, sizeof(buf) - count, " Unable to get value from '%s' at %i.", name, at);
+			CuAssert(tc, buf, 0);
+		}
 	}
+
 
 	if (((expected != NULL && V != NULL) && strcmp(V, expected) != 0)
 			|| ((expected == NULL && V != NULL) || (expected != NULL && V == NULL))) {
@@ -139,21 +149,21 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
 	CuAssert(tc, "Invalid value count.", count == 14);
 
-	assert_value(tc, set, "d", 0, __FILE__, __LINE__, "d1");
-	assert_value(tc, set, "d", 1, __FILE__, __LINE__, "d2");
-	assert_value(tc, set, "d", 2, __FILE__, __LINE__, "d3");
-	assert_value(tc, set, "d", 3, __FILE__, __LINE__, "-d4");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "d", NULL, PST_PRIORITY_NONE, 4, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "d", 0, __FILE__, __LINE__, "d1", 0);
+	assert_value(tc, set, "d", 1, __FILE__, __LINE__, "d2", 0);
+	assert_value(tc, set, "d", 2, __FILE__, __LINE__, "d3", 0);
+	assert_value(tc, set, "d", 3, __FILE__, __LINE__, "-d4", 0);
+	assert_value(tc, set, "d", 4, __FILE__, __LINE__, NULL, 1);
 
-	assert_value(tc, set, "x", 0, __FILE__, __LINE__, "x1");
-	assert_value(tc, set, "x", 1, __FILE__, __LINE__, "x2");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "x", NULL, PST_PRIORITY_NONE, 2, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "x", 0, __FILE__, __LINE__, "x1", 0);
+	assert_value(tc, set, "x", 1, __FILE__, __LINE__, "x2", 0);
+	assert_value(tc, set, "x", 2, __FILE__, __LINE__, NULL, 1);
 
-	assert_value(tc, set, "f", 0, __FILE__, __LINE__, "-f");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "f", NULL, PST_PRIORITY_NONE, 1, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "f", 0, __FILE__, __LINE__, "-f", 0);
+	assert_value(tc, set, "f", 1, __FILE__, __LINE__, NULL, 1);
 
-	assert_value(tc, set, "e", 0, __FILE__, __LINE__, "e_value");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "e", NULL, PST_PRIORITY_NONE, 1, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "e", 0, __FILE__, __LINE__, "e_value", 0);
+	assert_value(tc, set, "e", 1, __FILE__, __LINE__, NULL, 1);
 
 	CuAssert(tc, "z should not be set.", !PARAM_SET_isSetByName(set, "z"));
 
@@ -219,33 +229,34 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
 	CuAssert(tc, "Invalid value count.", count == 18);
 
-	assert_value(tc, set, "mb", 0, __FILE__, __LINE__, "v0");
-	assert_value(tc, set, "mb", 1, __FILE__, __LINE__, "v1");
-	assert_value(tc, set, "mb", 2, __FILE__, __LINE__, "-x");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "mb", NULL, PST_PRIORITY_NONE, 3, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "mb", 0, __FILE__, __LINE__, "v0", 0);
+	assert_value(tc, set, "mb", 1, __FILE__, __LINE__, "v1", 0);
+	assert_value(tc, set, "mb", 2, __FILE__, __LINE__, "-x", 0);
+	assert_value(tc, set, "mb", 3, __FILE__, __LINE__, NULL, 1);
 
-	assert_value(tc, set, "db", 0, __FILE__, __LINE__, "v-2");
-	assert_value(tc, set, "db", 1, __FILE__, __LINE__, "v3-");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "db", NULL, PST_PRIORITY_NONE, 2, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
 
-	assert_value(tc, set, "mdb", 0, __FILE__, __LINE__, "v4");
-	assert_value(tc, set, "mdb", 1, __FILE__, __LINE__, "v5");
-	assert_value(tc, set, "mdb", 2, __FILE__, __LINE__, "v6");
-	assert_value(tc, set, "mdb", 3, __FILE__, __LINE__, "v7");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "mdb", NULL, PST_PRIORITY_NONE, 4, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "db", 0, __FILE__, __LINE__, "v-2", 0);
+	assert_value(tc, set, "db", 1, __FILE__, __LINE__, "v3-", 0);
+	assert_value(tc, set, "db", 2, __FILE__, __LINE__, NULL, 1);
 
-	assert_value(tc, set, "e", 0, __FILE__, __LINE__, "e_value_1");
-	assert_value(tc, set, "e", 1, __FILE__, __LINE__, "e_value_2");
-	assert_value(tc, set, "e", 2, __FILE__, __LINE__, "e_value_3");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "e", NULL, PST_PRIORITY_NONE, 3, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "mdb", 0, __FILE__, __LINE__, "v4", 0);
+	assert_value(tc, set, "mdb", 1, __FILE__, __LINE__, "v5", 0);
+	assert_value(tc, set, "mdb", 2, __FILE__, __LINE__, "v6", 0);
+	assert_value(tc, set, "mdb", 3, __FILE__, __LINE__, "v7", 0);
+	assert_value(tc, set, "mdb", 4, __FILE__, __LINE__, NULL, 1);
 
-	assert_value(tc, set, "all", 0, __FILE__, __LINE__, "-e");
-	assert_value(tc, set, "all", 1, __FILE__, __LINE__, "-x");
-	assert_value(tc, set, "all", 2, __FILE__, __LINE__, "--mdb");
-	assert_value(tc, set, "all", 3, __FILE__, __LINE__, "--");
-	assert_value(tc, set, "all", 4, __FILE__, __LINE__, "-f");
-	assert_value(tc, set, "all", 5, __FILE__, __LINE__, "-f");
-	CuAssert(tc, "Value should not be found.", PARAM_SET_getStr(set, "all", NULL, PST_PRIORITY_NONE, 6, &value) == PST_PARAMETER_VALUE_NOT_FOUND);
+	assert_value(tc, set, "e", 0, __FILE__, __LINE__, "e_value_1", 0);
+	assert_value(tc, set, "e", 1, __FILE__, __LINE__, "e_value_2", 0);
+	assert_value(tc, set, "e", 2, __FILE__, __LINE__, "e_value_3", 0);
+	assert_value(tc, set, "e", 3, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "all", 0, __FILE__, __LINE__, "-e", 0);
+	assert_value(tc, set, "all", 1, __FILE__, __LINE__, "-x", 0);
+	assert_value(tc, set, "all", 2, __FILE__, __LINE__, "--mdb", 0);
+	assert_value(tc, set, "all", 3, __FILE__, __LINE__, "--", 0);
+	assert_value(tc, set, "all", 4, __FILE__, __LINE__, "-f", 0);
+	assert_value(tc, set, "all", 5, __FILE__, __LINE__, "-f", 0);
+	assert_value(tc, set, "all", 6, __FILE__, __LINE__, NULL, 1);
 
 	CuAssert(tc, "f should not be set.", !PARAM_SET_isSetByName(set, "f"));
 
