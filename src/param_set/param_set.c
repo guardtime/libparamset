@@ -1300,7 +1300,7 @@ cleanup:
 static const char *remove_dashes(const char *str) {
 	int i = 0;
 	if (str == NULL)  return NULL;
-	while (str[i] == '-') i++;
+	while (str[i] == '-' && i < 2) i++;
 	return &str[i];
 }
 
