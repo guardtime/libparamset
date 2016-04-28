@@ -1418,6 +1418,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 	int token_dash_break = 0;
 	int token_no_param_break = 0;
 	int value_saturation_break = 0;
+	int last_token_brake = 0;
 	int permit_parse_break = 0;
 	int permit_dash_collect = 0;
 	int permit_flag_collect = 0;
@@ -1449,6 +1450,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 	}
 
 	for (i = 1; i < argc; i++) {
+		last_token_brake = (i + 1 == argc) ? 1 : 0;
 		token = argv[i];
 
 		/**
@@ -1467,7 +1469,6 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 				token_dash_break = (token[0] == '-' && PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX)) ? 2 : 0;
 				token_no_param_break = PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_HAS_NO_VALUE) ? 4 : 0;
 
-
 				if (!token_no_param_break && !token_dash_break && !token_match_break) {
 						res = PARAM_addValue(opend_parameter, token, source, priority);
 						if (res != PST_OK) goto cleanup;
@@ -1477,11 +1478,13 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 
 				value_saturation_break = (value_counter && (PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_DEFAULT) || PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_HAS_VALUE))) ? 8 : 0;
 
-				if (token_match_break || token_dash_break || token_no_param_break || value_saturation_break) {
-					dpgprint("P:CLOSE (%s = NULL)%s\n", opend_parameter->flagName, break_type_to_string(token_match_break + token_dash_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
+				if (token_match_break || token_dash_break || token_no_param_break || value_saturation_break || last_token_brake) {
 					dpgprint("----------------------------------\n");
 					if (value_counter == 0) {
 						res = PARAM_SET_add(set, opend_parameter->flagName, NULL, source, priority);
+						dpgprint("P:CLOSE (%s = NULL)%s\n", opend_parameter->flagName, break_type_to_string(token_match_break + token_dash_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
+					} else {
+						dpgprint("P:CLOSE (%s ---)%s\n", opend_parameter->flagName, break_type_to_string(token_match_break + token_dash_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
 					}
 
 					is_parameter_opend = 0;
@@ -1489,7 +1492,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 					opend_parameter = NULL;
 				}
 
-				if (value_saturation_break) continue;
+				if (value_saturation_break || last_token_brake) continue;
 			}
 
 			/** Value saturation occurs when a single vale parameter is willed with current token, continue to the next token. */
@@ -1501,7 +1504,11 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 				is_parameter_opend = 1;
 				value_counter = 0;
 				opend_parameter = tmp_parameter;
-				/* Parameter opened, go to the next token. */
+
+				if (last_token_brake && value_counter == 0) {
+					res = PARAM_SET_add(set, opend_parameter->flagName, NULL, source, priority);
+				}
+
 				continue;
 			}
 		}
@@ -1509,9 +1516,6 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 		/**
 		 * If parameter is not opened and the next value is not a command line option, it must be a typo or unknown.
 		 */
-
-		//TOKEN_IS_NULL_HAS_LONG_DASH
-
 		if (!is_parameter_opend) {
 			if (!isParsingClosed && permit_parse_break && TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type)) {
 				dpgprint("--------------PARSING CLOSED %X\n", token_type );
