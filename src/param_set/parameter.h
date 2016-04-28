@@ -105,6 +105,27 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * how to define one argument with multiple values.
 	 */
 	PST_PRSCMD_DEFAULT = 0x0001 | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX,
+	
+	/**
+	 * Collect all elements that has no dash prefix.
+	 */
+	PST_PRSCMD_COLLECT_LOOSE_VALUES = 0x0040,
+	
+	/**
+	 * Collect all loose (No typos or unknowns are detected) flags.
+	 */
+	PST_PRSCMD_COLLECT_LOOSE_FLAGS = 0x0080,
+	
+	/**
+	 * Collect all loose dashes.
+	 */
+	PST_PRSCMD_COLLECT_LOOSE_DASHES = 0x0100,
+	
+	/**
+	 * Enable loose element collector to stop command line parsing and redirect
+	 * all tokens to parameter pointed with loose element flag.
+	 */
+	PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS = 0x0200,
 };
 
 /**

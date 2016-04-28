@@ -127,7 +127,6 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 		"-f", "-f", NULL};			/* A short parameter with a value. (PST_PRSCMD_HAS_VALUE). */
 	int argc = 0;
 	int count = 0;
-	char *value = NULL;
 	char buf[1024];
 
 	while(argv[argc] != NULL) argc++;
@@ -202,7 +201,6 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 		"-f", "-f", NULL};
 	int argc = 0;
 	int count = 0;
-	char *value = NULL;
 	char buf[0xfff];
 
 	while(argv[argc] != NULL) argc++;
@@ -269,7 +267,7 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 
 	buf[0] = '\0';
 	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
-	CuAssert(tc, "Five unknown should be detected.", strcmp(buf, "Unknown parameter 'notdef_1'.\n"
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'notdef_1'.\n"
 																"Unknown parameter 'notdef_2'.\n"
 																"Unknown parameter 'notdef_3'.\n"
 																"Unknown parameter 'unknown'.\n"
@@ -279,6 +277,188 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 }
 
 
+static void Test_param_set_loose_parameters_end_of_commands(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "plah",					/* A default path at the first place. */
+		"-a", "-b", "v1", "--unk_1",	/* Array ended by an existing parameter. */
+		"-c", "-x",
+		"-d", "-fname",
+		"-e", "--unk_2","--",
+		"-c", "e_value_1", "-",
+		"-f", "f", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[0xfff];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{a}{b}{c}{d}{e}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS);
+	res += PARAM_SET_setParseOptions(set, "{d}", PST_PRSCMD_HAS_VALUE);
+	res += PARAM_SET_setParseOptions(set, "{e}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_getValueCount(set, "{a}{b}{c}{d}{e}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 11);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "a", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, "v1", 0);
+	assert_value(tc, set, "b", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "plah", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, "-x", 0);
+	assert_value(tc, set, "c", 2, __FILE__, __LINE__, "-c", 0);
+	assert_value(tc, set, "c", 3, __FILE__, __LINE__, "e_value_1", 0);
+	assert_value(tc, set, "c", 4, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "c", 5, __FILE__, __LINE__, "-f", 0);
+	assert_value(tc, set, "c", 6, __FILE__, __LINE__, "f", 0);
+	assert_value(tc, set, "c", 7, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "d", 0, __FILE__, __LINE__, "-fname", 0);
+	assert_value(tc, set, "d", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "e", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "e", 1, __FILE__, __LINE__, NULL, 1);
+
+		/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+
+	buf[0] = '\0';
+	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'unk_1'.\n"
+																"Unknown parameter 'unk_2'.\n") == 0);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_param_set_loose_parameters_collect_no_dashes(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "plah",					/* A default path at the first place. */
+		"-ab", "-", "-",	/* Array ended by an existing parameter. */
+		"-c", "x", "--",
+		"-f", "f", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[0xfff];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{a}{b}{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_DEFAULT | PST_PRSCMD_COLLECT_LOOSE_VALUES);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_getValueCount(set, "{a}{b}{c}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 5);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "a", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "b", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "plah", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, "x", 0);
+	assert_value(tc, set, "c", 2, __FILE__, __LINE__, "f", 0);
+	assert_value(tc, set, "c", 3, __FILE__, __LINE__, NULL, 1);
+
+	/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+
+	buf[0] = '\0';
+	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter '-'.\n"
+																"Unknown parameter '-'.\n"
+																"Unknown parameter '--'.\n"
+																"Unknown parameter 'f'.\n") == 0);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_param_set_loose_parameters_collect_dashes(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "plah",					/* A default path at the first place. */
+		"-ab", "-", "-",	/* Array ended by an existing parameter. */
+		"-c", "x", "--",
+		"-f", "f", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[0xfff];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{a}{b}{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_LOOSE_DASHES);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_getValueCount(set, "{a}{b}{c}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 8);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "a", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "b", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "plah", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "c", 2, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "c", 3, __FILE__, __LINE__, "x", 0);
+	assert_value(tc, set, "c", 4, __FILE__, __LINE__, "--", 0);
+	assert_value(tc, set, "c", 5, __FILE__, __LINE__, "f", 0);
+	assert_value(tc, set, "c", 6, __FILE__, __LINE__, NULL, 1);
+
+	/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+
+	buf[0] = '\0';
+	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'f'.\n") == 0);
+
+//	printf("\n%s\n", PARAM_SET_toString(set, buf, sizeof(buf)));
+//	printf("\n%s\n", PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf)));
+//	printf("\n%s\n", PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, NULL, buf, sizeof(buf)));
+
+	PARAM_SET_free(set);
+}
+
 
 
 CuSuite* Command_LineTest_getSuite(void) {
@@ -286,6 +466,9 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags_bacward_compatibility);
 	SUITE_ADD_TEST(suite, Test_param_set_cmd_special);
 	SUITE_ADD_TEST(suite, Test_param_set_cmd_special_array_break);
+	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_end_of_commands);
+	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_collect_no_dashes);
+	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_collect_dashes);
 	return suite;
 }
 
