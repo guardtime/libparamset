@@ -1334,7 +1334,7 @@ static int is_flag_set(int field, int flag) {
 
 #define TOKEN_IS_VALID_FOR_OPEN(type) (TOKEN_IS_MATCH(type) && (TOKEN_IS_LONG_PARAM(type) || TOKEN_IS_SHORT_PARAM(type) || TOKEN_IS_SHORT_PARAM_LONG_DASH(type)))
 
-static int get_parameter_from_token(PARAM_SET *set, const char *token, int permit_parse_breake, int *token_type, PARAM **param) {
+static int get_parameter_from_token(PARAM_SET *set, const char *token, int *token_type, PARAM **param) {
 	PARAM *tmp = NULL;
 	int type = TOKEN_UNKNOW;
 	int res = 0;
@@ -1423,6 +1423,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 	int permit_dash_collect = 0;
 	int permit_flag_collect = 0;
 	int collect_limiter_on = 0;
+	int collect_prio = priority;
 	int isParsingClosed = 0;
 	int last_token_type = 0;
 	PARAM *opend_parameter = NULL;
@@ -1449,9 +1450,13 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 			permit_dash_collect = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_DASHES);
 			permit_flag_collect = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_FLAGS);
 			collect_limiter_on = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LIMITER_ON);
+
+			if (PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY)) {
+				collect_prio = (priority - 1) < 0 ? 0 : (priority - 1);
+			}
+
 			if (collect_limiter_on) {
 				max_loose_count = (set->parameter[i]->parsing_options & PST_PRSCMD_COLLECT_LIMITER_MAX_MASK) / PST_PRSCMD_COLLECT_LIMITER_1X;
-				printf("Collect limiter count is %i\n", max_loose_count);
 			}
 
 			break;
@@ -1467,7 +1472,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
          */
 		if (!isParsingClosed) {
 			last_token_type = token_type;
-			res = get_parameter_from_token(set, token, 0, &token_type, &tmp_parameter);
+			res = get_parameter_from_token(set, token, &token_type, &tmp_parameter);
 			if (res != PST_OK) goto cleanup;
 
 			dpgprint("Token '%10s' %8s %10s\n", token, token_type_to_string(token_type, buf, sizeof(buf)), pars_flags_to_string(tmp_parameter != NULL ? tmp_parameter->parsing_options : 0, buf2, sizeof(buf2)));
@@ -1549,7 +1554,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 					|| (permit_dash_collect && (TOKEN_IS_NULL_HAS_DASH(token_type) || TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type)))
 					|| (permit_flag_collect && (TOKEN_IS_PARAM(token_type) || TOKEN_IS_SHORT_PARAM_LONG_DASH(token_type)))
 					)) {
-				res = PARAM_addValue(loose_parameters, token, source, priority);
+				res = PARAM_addValue(loose_parameters, token, source, collect_prio);
 				if (res != PST_OK) goto cleanup;
 				loose_count++;
 				if (collect_limiter_on && loose_count == max_loose_count) {

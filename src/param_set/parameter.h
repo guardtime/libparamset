@@ -121,11 +121,17 @@ enum PARAM_PARS_OPTIONS_enum {
 	 */
 	PST_PRSCMD_COLLECT_LOOSE_DASHES = 0x0100,
 	
+	
 	/**
 	 * Enable loose element collector to stop command line parsing and redirect
 	 * all tokens to parameter pointed with loose element flag.
 	 */
 	PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS = 0x0200,
+	
+	/**
+	 * Collect has lower priority.
+	 */
+	PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY = 0x0400,
 	
 	PST_PRSCMD_COLLECT_LIMITER_ON       = 0x00008000,
 	PST_PRSCMD_COLLECT_LIMITER_1X       = 0x00010000,
