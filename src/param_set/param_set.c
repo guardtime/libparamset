@@ -1514,7 +1514,8 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 					opend_parameter = NULL;
 				}
 
-				if (value_saturation_break || last_token_brake) continue;
+				if (value_saturation_break) continue;
+				if ((!token_match_break) && last_token_brake) continue;
 			}
 
 			/** Value saturation occurs when a single vale parameter is willed with current token, continue to the next token. */

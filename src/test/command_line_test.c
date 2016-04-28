@@ -713,6 +713,47 @@ static void Test_command_line_collect_has_no_flag_no_ignore_typos(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_command_line_parameter_with_value_in_the_end_2(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "-i", "-o", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[1024];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{i}{o}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{i}{o}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_getValueCount(set, "{i}{o}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 2);
+
+	assert_value(tc, set, "i", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "i", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "o", 0, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "o", 1, __FILE__, __LINE__, NULL, 1);
+
+	/**
+	 * Check for unknown and typos.
+	 */
+
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+	CuAssert(tc, "There should be no unknown.", !PARAM_SET_isUnknown(set));
+
+
+	PARAM_SET_free(set);
+}
+
 CuSuite* Command_LineTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags_bacward_compatibility);
@@ -727,6 +768,7 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_command_line_limited_loose_collect);
 	SUITE_ADD_TEST(suite, Test_command_line_collect_lower_priority);
 	SUITE_ADD_TEST(suite, Test_command_line_collect_has_no_flag_no_ignore_typos);
+	SUITE_ADD_TEST(suite, Test_command_line_parameter_with_value_in_the_end_2);
 	return suite;
 }
 
