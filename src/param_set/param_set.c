@@ -1422,10 +1422,13 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 	int permit_parse_break = 0;
 	int permit_dash_collect = 0;
 	int permit_flag_collect = 0;
+	int collect_limiter_on = 0;
 	int isParsingClosed = 0;
 	int last_token_type = 0;
 	PARAM *opend_parameter = NULL;
 	size_t value_counter = 0;
+	size_t max_loose_count = 0;
+	size_t loose_count = 0;
 	PARAM *loose_parameters = NULL;
 
 	if(set == NULL || argc == 0 || argv == NULL) {
@@ -1445,6 +1448,12 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 			permit_parse_break = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS);
 			permit_dash_collect = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_DASHES);
 			permit_flag_collect = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_FLAGS);
+			collect_limiter_on = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LIMITER_ON);
+			if (collect_limiter_on) {
+				max_loose_count = (set->parameter[i]->parsing_options & PST_PRSCMD_COLLECT_LIMITER_MAX_MASK) / PST_PRSCMD_COLLECT_LIMITER_1X;
+				printf("Collect limiter count is %i\n", max_loose_count);
+			}
+
 			break;
 		}
 	}
@@ -1542,6 +1551,12 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 					)) {
 				res = PARAM_addValue(loose_parameters, token, source, priority);
 				if (res != PST_OK) goto cleanup;
+				loose_count++;
+				if (collect_limiter_on && loose_count == max_loose_count) {
+					loose_parameters = NULL;
+					dpgprint("$$ End of loose parameters '%s'\n", token);
+
+				}
 				dpgprint("$$ Lose param added '%s'\n", token);
 			} else {
 				if (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type) || TOKEN_IS_NULL_HAS_DASH(token_type)) {

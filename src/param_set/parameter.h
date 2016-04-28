@@ -126,6 +126,10 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * all tokens to parameter pointed with loose element flag.
 	 */
 	PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS = 0x0200,
+	
+	PST_PRSCMD_COLLECT_LIMITER_ON       = 0x00008000,
+	PST_PRSCMD_COLLECT_LIMITER_1X       = 0x00010000,
+	PST_PRSCMD_COLLECT_LIMITER_MAX_MASK = 0xffff0000
 };
 
 /**
