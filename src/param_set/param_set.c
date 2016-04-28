@@ -445,6 +445,9 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 		int alias_difference = 100;
 		int isSubstring = 0;
 		int isSubstringAtTheBeginning = 0;
+
+		if (PARAM_isParsOptionSet(array[i], PST_PRSCMD_NO_TYPOS)) continue;
+
 		/**
 		 * Examine both the name and its alias and calculate how big is the difference
 		 * compared with input string. If alias exists select the one that is more
@@ -1347,8 +1350,13 @@ static int get_parameter_from_token(PARAM_SET *set, const char *token, int *toke
 	} else {
 		res = param_set_getParameterByName(set, remove_dashes(token), &tmp);
 		if (res != PST_OK && res != PST_PARAMETER_NOT_FOUND) return res;
+
 		type = 0;
-		type |= (res == PST_OK) ? TOKEN_MATCHES_PARAMETER : 0;
+
+		if (res == PST_OK && !PARAM_isParsOptionSet(tmp, PST_PRSCMD_HAS_NO_FLAG)) {
+			type |= TOKEN_MATCHES_PARAMETER;
+		}
+
 		type |= (token[0] == '-' && token[1] == '-') ? TOKEN_HAS_DOUBLE_DASH : TOKEN_HAS_DASH;
 
 		len = strlen(token) - (type & TOKEN_HAS_DASH ? 1 : 2);

@@ -133,6 +133,17 @@ enum PARAM_PARS_OPTIONS_enum {
 	 */
 	PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY = 0x0400,
 	
+	/**
+	 * New flag to ignore a parameter from command line to be parsed.
+	 * Parameter can be added from code.
+	 */
+	PST_PRSCMD_HAS_NO_FLAG = 0x0800,
+	
+	/**
+	 * With this parameter no typos are generated for a parameter.
+	 */
+	PST_PRSCMD_NO_TYPOS = 0x1000,
+	
 	PST_PRSCMD_COLLECT_LIMITER_ON       = 0x00008000,
 	PST_PRSCMD_COLLECT_LIMITER_1X       = 0x00010000,
 	PST_PRSCMD_COLLECT_LIMITER_MAX_MASK = 0xffff0000

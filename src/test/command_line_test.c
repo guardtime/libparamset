@@ -665,6 +665,54 @@ static void Test_command_line_collect_lower_priority(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_command_line_collect_has_no_flag_no_ignore_typos(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "a1", "a2", "-c", "a3", "a4", "a5", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[1024];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_HAS_NO_FLAG | PST_PRSCMD_NO_TYPOS);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "c", "c_value", "code", 0);
+
+	res = PARAM_SET_getValueCount(set, "{c}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 6);
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "a1", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, "a2", 0);
+	assert_value(tc, set, "c", 2, __FILE__, __LINE__, "a3", 0);
+	assert_value(tc, set, "c", 3, __FILE__, __LINE__, "a4", 0);
+	assert_value(tc, set, "c", 4, __FILE__, __LINE__, "a5", 0);
+	assert_value(tc, set, "c", 5, __FILE__, __LINE__, "c_value", 0);
+	assert_value(tc, set, "c", 6, __FILE__, __LINE__, NULL, 1);
+
+
+	/**
+	 * Check for unknown and typos.
+	 */
+
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+
+	buf[0] = '\0';
+	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'c'.\n") == 0);
+
+	PARAM_SET_free(set);
+}
+
 CuSuite* Command_LineTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags_bacward_compatibility);
@@ -678,6 +726,7 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_command_line_short_and_long);
 	SUITE_ADD_TEST(suite, Test_command_line_limited_loose_collect);
 	SUITE_ADD_TEST(suite, Test_command_line_collect_lower_priority);
+	SUITE_ADD_TEST(suite, Test_command_line_collect_has_no_flag_no_ignore_typos);
 	return suite;
 }
 
