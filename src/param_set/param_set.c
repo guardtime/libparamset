@@ -1515,7 +1515,13 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 				}
 
 				if (value_saturation_break) continue;
-				if ((!token_match_break) && last_token_brake) continue;
+				/**
+				 * 1) Don't exit the loop if the last token brake occurred simultaneously
+				 *    with the token match brake. Maybe a last parameter must be opened!
+				 * 2) Don't exit the loop if the last token brake occurred simultaneously
+				 *    with the token_no_param_break. The last value must be parsed.
+                 */
+				if ((!token_match_break) && (!token_no_param_break) && last_token_brake) continue;
 			}
 
 			/** Value saturation occurs when a single vale parameter is willed with current token, continue to the next token. */
