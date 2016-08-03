@@ -86,12 +86,6 @@ static int category_get_missing_flag_count(const char* category, PARAM_SET *set)
 	return missedFlags;
 }
 
-static int category_is_first_flag_set(const char* category, PARAM_SET *set){
-	char buf[1024];
-	category_extract_name(category, buf, sizeof(buf), NULL);
-	return PARAM_SET_isSetByName(set, buf);
-}
-
 static int task_definition_getAtLeastOneSetMetrica(TASK_DEFINITION *def, PARAM_SET *set, int *count, int *missing){
 	int atleastOneOfCount = 0;
 	int atleastOneOfMissing = 0;
@@ -119,38 +113,6 @@ static int task_definition_getAtLeastOneSetMetrica(TASK_DEFINITION *def, PARAM_S
 	}
 	return PST_OK;
 }
-
-static int taskDefinition_getDefManCount(TASK_DEFINITION *def){
-	if (def == NULL)
-		return -1;
-
-	return (category_get_parameter_count(def->mandatory) + ((def->atleast_one == NULL || def->atleast_one[0] == '\0') ? 0 : 1));
-}
-
-static int getConsistency(TASK_DEFINITION **def, int def_count, int getLowest, double *max) {
-	int i;
-	double tmp;
-
-	if (def == NULL || def[0] == NULL || def_count == 0 || max == NULL) {
-		return PST_INVALID_ARGUMENT;
-	}
-
-	tmp = def[0]->consistency;
-	for (i = 0; i < def_count; i++) {
-		if (def[i] == NULL) return PST_INVALID_ARGUMENT;
-
-		/* Extract the highest or the lowest consistency. */
-		if (getLowest) {
-			if (tmp > def[i]->consistency) tmp = def[i]->consistency;
-		} else {
-			if (tmp < def[i]->consistency) tmp = def[i]->consistency;
-		}
-	}
-
-	*max = tmp;
-	return PST_OK;
-}
-
 
 static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **new){
 	TASK *tmp = NULL;

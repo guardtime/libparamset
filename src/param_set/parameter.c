@@ -44,14 +44,6 @@ static int param_isFlagSet(PARAM *obj, int state) {
 	return 0;
 }
 
-static int param_isFlagNotSet(PARAM *obj, int state) {
-	if (obj == NULL) return 0;
-	if ((obj->constraints & (~state)) == obj->constraints ||
-			(obj->constraints != 0 && state == 0)) return 1;
-
-	return 0;
-}
-
 static int param_get_value(PARAM *param, const char *source, int prio, unsigned at,
 		int (*value_getter)(PARAM_VAL *, const char*, int, int, PARAM_VAL**),
 		PARAM_VAL **value) {

@@ -328,7 +328,7 @@ static int editDistance_levenshtein(const char *A, const char *B){
 	for(j=1; j<M_W; j++){
 		for(i=1; i<M_H; i++){
 			if(A[i-1] == B[j-1]) m[i][j] = DIAG(m,i,j);
-			else m[i][j] = 0xff & min_of_3(UP(m,i,j), LEFT(m,i,j), DIAG(m,i,j)) + 1;
+			else m[i][j] = (0xff & min_of_3(UP(m,i,j), LEFT(m,i,j), DIAG(m,i,j))) + 1;
 		}
 	}
 	edit_distance = m[i-1][j-1];
@@ -1408,9 +1408,9 @@ static char* break_type_to_string(int type, char *buf, size_t len) {
 
 
 
+static void print_nothing(const char* format, ...) {(void)(format);}
 //#define dpgprint printf
-#define dummy_macro();
-#define dpgprint dummy_macro();
+#define dpgprint print_nothing
 
 int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority) {
 	int res;

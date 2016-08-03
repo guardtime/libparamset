@@ -201,7 +201,7 @@ static int param_val_get_element(PARAM_VAL *rootValue, const char* source, int p
 		/* Increase count if (priority matches AND source matches). */
 		if ((prio == PST_PRIORITY_NONE || prio == current->priority)
 				&& (source == NULL || (source != NULL && current->source != NULL && strcmp(source, current->source) == 0))
-				&& (onlyInvalid == 0 || onlyInvalid && (current->contentStatus != 0 || current->formatStatus != 0))) {
+				&& (onlyInvalid == 0 || (onlyInvalid && (current->contentStatus != 0 || current->formatStatus != 0)))) {
 
 			last_match = current;
 
