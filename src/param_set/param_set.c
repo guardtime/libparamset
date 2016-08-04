@@ -1669,7 +1669,7 @@ static size_t param_value_add_errorstring_to_buf(PARAM *parameter, PARAM_VAL *in
 	const char *source = NULL;
 	int formatStatus = 0;
 	int contentStatus = 0;
-	char *use_prefix = NULL;
+	const char *use_prefix = NULL;
 
 	use_prefix = prefix == NULL ? "" : prefix;
 
@@ -1941,6 +1941,32 @@ char* PARAM_SET_toString(PARAM_SET *set, char *buf, size_t buf_len) {
 		}
 	}
 	count += PST_snprintf(buf + count, buf_len - count, "\n");
+
+	buf[buf_len - 1] = '\0';
+	return buf;
+}
+
+char* PARAM_SET_constraintErrorToString(const PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
+	int i;
+	size_t count = 0;
+	PARAM *parameter = NULL;
+	char tmp[1024];
+	char *p = NULL;
+
+	if (set == NULL || buf == NULL || buf_len == 0) {
+		return NULL;
+	}
+
+	for (i = 0; i < set->count; i++) {
+		tmp[0] = '\0';
+		parameter = set->parameter[i];
+		p = PARAM_constraintErrorToString(parameter, prefix, tmp, sizeof(tmp));
+
+		if (p != NULL && p[0] != '\0') {
+			count += PST_snprintf(buf + count, buf_len - count, "%s", p);
+			if (count >= buf_len - 1) return buf;
+		}
+	}
 
 	buf[buf_len - 1] = '\0';
 	return buf;

@@ -455,6 +455,8 @@ char* PARAM_SET_unknownsToString(const PARAM_SET *set, const char *prefix, char 
  */
 char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString)(int), char *buf, size_t buf_len);
 
+char* PARAM_SET_constraintErrorToString(const PARAM_SET *set, const char *prefix, char *buf, size_t buf_len);
+
 /**
  * Converts PST_ Error codes to string.
  * \param err

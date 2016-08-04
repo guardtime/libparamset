@@ -927,6 +927,28 @@ static void Test_param_set_read_line_2(CuTest* tc) {
 	if (f2 != NULL) fclose(f2);
 }
 
+static void Test_param_set_constraint_errors(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char buf[1024];
+	char expected[] =	"Error: Duplicated parameters -a.\n";
+
+
+	res = PARAM_SET_new("{a}{b}*", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_add(set, "a", NULL, NULL, 0);
+	res += PARAM_SET_add(set, "b", NULL, NULL, 0);
+	res += PARAM_SET_add(set, "b", NULL, NULL, 0);
+	res += PARAM_SET_add(set, "a", NULL, NULL, 0);
+
+	CuAssert(tc, "There should be typos.", res == PST_OK);
+
+	PARAM_SET_constraintErrorToString(set, "Error: ", buf, sizeof(buf));
+	CuAssert(tc, "Unexpected error message.", strcmp(buf, expected) == 0);
+
+	PARAM_SET_free(set);
+}
 
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
@@ -949,6 +971,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_set_param_atr);
 	SUITE_ADD_TEST(suite, Test_param_set_read_line);
 	SUITE_ADD_TEST(suite, Test_param_set_read_line_2);
+	SUITE_ADD_TEST(suite, Test_param_set_constraint_errors);
 	return suite;
 }
 

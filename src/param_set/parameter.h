@@ -349,13 +349,15 @@ int PARAM_getInvalidCount(PARAM *param, const char *source, int prio, int *count
  * \return 0 if all constraints are satisfied, concatenated constraints otherwise.
  * If failure due to null pointer .etc \c PARAM_INVALID_CONSTRAINT is returned.
  */
-int PARAM_checkConstraints(PARAM *param, int constraints);
+int PARAM_checkConstraints(const PARAM *param, int constraints);
 
 int PARAM_clearAll(PARAM *param);
 
 int PARAM_clearValue(PARAM *param, const char *source, int priority, int at);
 
 int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, int priority, int at);
+
+char* PARAM_constraintErrorToString(const PARAM *param, const char *prefix, char *buf, size_t buf_len);
 
 #ifdef	__cplusplus
 }
