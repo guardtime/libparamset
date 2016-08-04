@@ -44,7 +44,7 @@ static int param_isFlagSet(PARAM *obj, int state) {
 	return 0;
 }
 
-static int param_get_value(PARAM *param, const char *source, int prio, unsigned at,
+static int param_get_value(PARAM *param, const char *source, int prio, int at,
 		int (*value_getter)(PARAM_VAL *, const char*, int, int, PARAM_VAL**),
 		PARAM_VAL **value) {
 	int res;
@@ -278,7 +278,7 @@ cleanup:
 	return res;
 }
 
-int PARAM_getValue(PARAM *param, const char *source, int prio, unsigned at, PARAM_VAL **value) {
+int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value) {
 	return param_get_value(param, source, prio, at, PARAM_VAL_getElement, value);
 }
 
@@ -329,7 +329,7 @@ cleanup:
 	return res;
 }
 
-int PARAM_getInvalid(PARAM *param, const char *source, int prio, unsigned at, PARAM_VAL **value) {
+int PARAM_getInvalid(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value) {
 	return param_get_value(param, source, prio, at, PARAM_VAL_getInvalid, value);
 }
 
@@ -382,7 +382,7 @@ int PARAM_checkConstraints(PARAM *param, int constraints) {
 	return ret;
 }
 
-int PARAM_getObject(PARAM *param, const char *source, int prio, unsigned at, void *extra, void **obj) {
+int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void *extra, void **obj) {
 	int res;
 	PARAM_VAL *value = NULL;
 

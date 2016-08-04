@@ -713,6 +713,46 @@ static void Test_command_line_collect_has_no_flag_no_ignore_typos(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+int control_format_i_j(const char* a) {
+	if (a == NULL || a[0] == 'c') return 0;
+	else return 1;
+}
+
+static void Test_command_line_check_for_highest_priority_last_element_errors(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "-i", "a", "-i", "b", "-i", "c", "-j", "c", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[1024];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{i}{j}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_addControl(set,"{i}{j}", control_format_i_j, NULL, NULL, NULL);
+	res += PARAM_SET_setParseOptions(set, "{i}", PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE | PST_PRSCMD_DEFAULT);
+	//CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	CuAssert(tc, "There should not be format errors.", PARAM_SET_isFormatOK(set) == 1);
+
+	res = PARAM_SET_add(set, "j", "a", NULL, 2);
+	CuAssert(tc, "Unable to add a new value.", res == PST_OK);
+
+	CuAssert(tc, "There should be format erros.", PARAM_SET_isFormatOK(set) == 0);
+
+	buf[0] = '\0';
+	PARAM_SET_invalidParametersToString(set, NULL, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Error: 0x1. Parameter -j 'a'.\n") == 0);
+
+	PARAM_SET_free(set);
+}
+
 static void Test_command_line_parameter_with_value_in_the_end_2(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
@@ -855,6 +895,7 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_command_line_parameter_with_value_in_the_end_2);
 	SUITE_ADD_TEST(suite, Test_command_last_value_after_flag_type_parameteter);
 	SUITE_ADD_TEST(suite, Test_command_test_1);
+	SUITE_ADD_TEST(suite, Test_command_line_check_for_highest_priority_last_element_errors);
 	return suite;
 }
 

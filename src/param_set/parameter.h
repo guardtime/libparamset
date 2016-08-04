@@ -42,7 +42,7 @@ enum PARAM_CONSTRAINTS_enum {
  * command line is parsed:
  * 1) Token is found from command-line that matches parameter (this param) in set.
  * 2) Parameter has a parsing option set.
- * 3) Parser is prepared accordingly (by this param) to parse next toke from command-line.
+ * 3) Parser is prepared accordingly (by this param) to parse next token from command-line.
  */
 enum PARAM_PARS_OPTIONS_enum {
 	PST_PRSCMD_NONE = 0x0000,
@@ -143,6 +143,14 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * With this parameter no typos are generated for a parameter.
 	 */
 	PST_PRSCMD_NO_TYPOS = 0x1000,
+
+	/**
+	 * With this parameter only the highest priority last parameters format is
+	 * checked in functions \c PARAM_SET_isFormatOK and
+	 * \c PARAM_SET_invalidParametersToString. The error status is set in spite
+	 * of the given flag flag.
+	 */
+	PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE = 0x2000,
 	
 	PST_PRSCMD_COLLECT_LIMITER_ON       = 0x00008000,
 	PST_PRSCMD_COLLECT_LIMITER_1X       = 0x00010000,
@@ -268,9 +276,8 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
  * \return \c PST_OK when successful, error code otherwise. When value is not found
  * \c PST_PARAMETER_VALUE_NOT_FOUND is returned. If parameter is empty \c PST_PARAMETER_EMPTY
  * is returned.
- * \note See \ref 
  */
-int PARAM_getValue(PARAM *param, const char *source, int prio, unsigned at, PARAM_VAL **value);
+int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value);
 
 /**
  * Same as get value, but values that have been controlled and failed by the
@@ -305,9 +312,9 @@ int PARAM_getValue(PARAM *param, const char *source, int prio, unsigned at, PARA
  * \return \c PST_OK when successful, error code otherwise.
  * \note Returned value must be freed by the user if the implementation needs it.
  */
-int PARAM_getObject(PARAM *param, const char *source, int prio, unsigned at, void *extra, void **value);
+int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void *extra, void **value);
 
-int PARAM_getInvalid(PARAM *param, const char *source, int prio, unsigned at, PARAM_VAL **value);
+int PARAM_getInvalid(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value);
 
 /**
  * Return parameters value count according to the constraints set. 

@@ -1159,7 +1159,7 @@ int PARAM_SET_isSetByName(const PARAM_SET *set, const char *name){
 }
 
 int PARAM_SET_isFormatOK(const PARAM_SET *set){
-int res;
+	int res;
 	int i = 0;
 	PARAM *parameter = NULL;
 	PARAM_VAL *invalid = NULL;
@@ -1169,18 +1169,25 @@ int res;
 	}
 
 	/**
-	 * Scan all parameter values from errors.
+	 * Extract all invalid values from parameter. If flag
+	 * PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE is set
+	 * check only the last highest priority value.
 	 */
 	for (i = 0; i < set->count; i++) {
 		parameter = set->parameter[i];
 		invalid = NULL;
-		/**
-		 * Extract all invalid values from parameter.
-         */
-		res = PARAM_getInvalid(parameter, NULL, PST_PRIORITY_NONE, 0, &invalid);
-		if (res == PST_PARAMETER_VALUE_NOT_FOUND || res == PST_PARAMETER_EMPTY) continue;
-		else if (res == PST_OK && invalid != NULL) return 0;
-		else return 0;
+		if (PARAM_isParsOptionSet(parameter, PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE)) {
+			res = PARAM_getValue(parameter, NULL, PST_PRIORITY_HIGHEST, PST_INDEX_LAST, &invalid);
+			if (res == PST_PARAMETER_VALUE_NOT_FOUND || res == PST_PARAMETER_EMPTY) continue;
+
+			if (invalid->contentStatus != 0 || invalid->formatStatus != 0) return 0;
+		} else {
+			res = PARAM_getInvalid(parameter, NULL, PST_PRIORITY_NONE, 0, &invalid);
+			if (res == PST_PARAMETER_VALUE_NOT_FOUND || res == PST_PARAMETER_EMPTY) continue;
+			else if (res == PST_OK && invalid != NULL) return 0;
+			else return 0;
+		}
+
 	}
 
 	return 1;
@@ -1655,83 +1662,108 @@ cleanup:
 	return res;
 }
 
-char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString)(int), char *buf, size_t buf_len) {
+static size_t param_value_add_errorstring_to_buf(PARAM *parameter, PARAM_VAL *invalid, const char *prefix, const char* (*getErrString)(int), char *buf, size_t buf_len) {
 	int res;
-	const char *use_prefix = NULL;
-	int i = 0;
-	int n = 0;
-	PARAM *parameter = NULL;
-	PARAM_VAL *invalid = NULL;
+	size_t count = 0;
 	const char *value = NULL;
 	const char *source = NULL;
 	int formatStatus = 0;
 	int contentStatus = 0;
+	char *use_prefix = NULL;
+
+	use_prefix = prefix == NULL ? "" : prefix;
+
+	if (parameter == NULL || invalid == NULL || buf == NULL || buf_len == 0) return 0;
+	/**
+	 * Extract error codes, if not set exit the function.
+     */
+	res = PARAM_VAL_getErrors(invalid, &formatStatus, &contentStatus);
+	if (res != PST_OK) return 0;
+
+	if (formatStatus == 0 && contentStatus == 0) return 0;
+
+	res = PARAM_VAL_extract(invalid, &value, &source, NULL);
+	if (res != PST_OK) return 0;
+
+
+	count += PST_snprintf(buf + count, buf_len - count, "%s", use_prefix);
+	/**
+	 * Add Error string or error code.
+	 */
+	if (getErrString != NULL) {
+		if (formatStatus != 0) {
+			count += PST_snprintf(buf + count, buf_len - count, "%s.", getErrString(formatStatus));
+		} else {
+			count += PST_snprintf(buf + count, buf_len - count, "%s.", getErrString(contentStatus));
+		}
+	} else {
+		if (formatStatus != 0) {
+			count += PST_snprintf(buf + count, buf_len - count, "Error: 0x%0x.", formatStatus);
+		} else {
+			count += PST_snprintf(buf + count, buf_len - count, "Error: 0x%0x.", contentStatus);
+		}
+	}
+
+	/**
+	 * Add the source, if NULL not included.
+	 */
+	if(source != NULL) {
+		count += PST_snprintf(buf + count, buf_len - count, " Parameter (from '%s') ", source);
+	} else {
+		count += PST_snprintf(buf + count, buf_len - count, " Parameter ");
+	}
+
+	/**
+	 * Add the parameter and its value.
+	 */
+	count += PST_snprintf(buf + count, buf_len - count, "%s%s '%s'.",
+							strlen(parameter->flagName) > 1 ? "--" : "-",
+							parameter->flagName,
+							value != NULL ? value : ""
+							);
+
+
+
+	count += PST_snprintf(buf + count, buf_len - count, "\n");
+
+	return count;
+}
+
+char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString)(int), char *buf, size_t buf_len) {
+	int res;
+	int i = 0;
+	int n = 0;
+	PARAM *parameter = NULL;
+	PARAM_VAL *invalid = NULL;
 	size_t count = 0;
 
 	if (set == NULL || buf == NULL || buf_len == 0) {
 		return NULL;
 	}
 
-
-	use_prefix = prefix == NULL ? "" : prefix;
-
 	/**
-	 * Scan all parameter values from errors.
+	 * Scan all parameter values for errors.
 	 */
 	for (i = 0; i < set->count; i++) {
 		parameter = set->parameter[i];
 		n = 0;
 
 		/**
-		 * Extract all invalid values from parameter.
-         */
-		while (PARAM_getInvalid(parameter, NULL, PST_PRIORITY_NONE, n++, &invalid) == PST_OK) {
-			res = PARAM_VAL_extract(invalid, &value, &source, NULL);
-			if (res != PST_OK) return NULL;
+		 * Extract all invalid values from parameter. If flag
+		 * PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE is set
+		 * check only the last highest priority value.
+		 */
+		if (PARAM_isParsOptionSet(parameter, PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE)) {
+			res = PARAM_getValue(parameter, NULL, PST_PRIORITY_HIGHEST, PST_INDEX_LAST, &invalid);
 
-			res = PARAM_VAL_getErrors(invalid, &formatStatus, &contentStatus);
-			if (res != PST_OK) return NULL;
+			if (res != PST_OK && res != PST_PARAMETER_EMPTY && res != PST_PARAMETER_VALUE_NOT_FOUND) return NULL;
+			count += param_value_add_errorstring_to_buf(parameter, invalid, prefix, getErrString, buf + count, buf_len - count);
+		} else {
+			while (PARAM_getInvalid(parameter, NULL, PST_PRIORITY_NONE, n++, &invalid) == PST_OK) {
+				count += param_value_add_errorstring_to_buf(parameter, invalid, prefix, getErrString, buf + count, buf_len - count);
 
-			count += PST_snprintf(buf + count, buf_len - count, "%s", use_prefix);
-			/**
-			 * Add Error string or error code.
-			 */
-			if (getErrString != NULL) {
-				if (formatStatus != 0) {
-					count += PST_snprintf(buf + count, buf_len - count, "%s.", getErrString(formatStatus));
-				} else {
-					count += PST_snprintf(buf + count, buf_len - count, "%s.", getErrString(contentStatus));
-				}
-			} else {
-				if (formatStatus != 0) {
-					count += PST_snprintf(buf + count, buf_len - count, "Error: 0x%0x.", formatStatus);
-				} else {
-					count += PST_snprintf(buf + count, buf_len - count, "Error: 0x%0x.", contentStatus);
-				}
+				if (count >= buf_len - 1) return buf;
 			}
-
-			/**
-			 * Add the source, if NULL not included.
-			 */
-			if(source != NULL) {
-				count += PST_snprintf(buf + count, buf_len - count, " Parameter (from '%s') ", source);
-			} else {
-				count += PST_snprintf(buf + count, buf_len - count, " Parameter ");
-			}
-
-			/**
-			 * Add the parameter and its value.
-			 */
-			count += PST_snprintf(buf + count, buf_len - count, "%s%s '%s'.",
-									strlen(parameter->flagName) > 1 ? "--" : "-",
-									parameter->flagName,
-									value != NULL ? value : ""
-									);
-
-
-
-			count += PST_snprintf(buf + count, buf_len - count, "\n");
-			if (count >= buf_len - 1) return buf;
 		}
 	}
 
