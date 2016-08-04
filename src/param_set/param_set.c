@@ -138,8 +138,10 @@ static char *getParametersName(const char* list_of_names, char *name, char *alia
 			tmp_flags |= PARAM_SINGLE_VALUE;
 	}
 	if(pName[i] == '}'){
-		if(pName[i+1] == '>')
+		if(pName[i+1] == '>') {
 			tmp_flags |= PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL;
+			tmp_flags &= ~(PARAM_SINGLE_VALUE);
+		}
 	}
 
 

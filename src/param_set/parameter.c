@@ -348,9 +348,14 @@ int PARAM_checkConstraints(const PARAM *param, int constraints) {
 	int res;
 	int ret = 0;
 
-	if (param->arg == NULL || param == NULL) {
+	if (param == NULL) {
 		return PARAM_INVALID_CONSTRAINT;
 	}
+
+	if (param->arg == NULL) {
+		return 0;
+	}
+	
 	/** PARAM_SINGLE_VALUE.*/
 	if (constraints & PARAM_SINGLE_VALUE) {
 		if (param_constraint_isFlagSet(param, PARAM_SINGLE_VALUE) && param->argCount > 1) {
