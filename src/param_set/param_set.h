@@ -350,6 +350,12 @@ int PARAM_SET_isSetByName(const PARAM_SET *set, const char *name);
 int PARAM_SET_isFormatOK(const PARAM_SET *set);
 
 /**
+ * Controls if the the constraints are violated.
+ * \param	set		PARAM_SET object.
+ * \return 0 if constraints are OK, 1 otherwise. -1 if an error occurred.
+ */
+int PARAM_SET_isConstraintViolation(const PARAM_SET *set);
+/**
  * Controls if there are some undefined parameters red from command-line or
  * file, similar to the defined ones.
  * \param	set		PARAM_SET object.

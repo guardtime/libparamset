@@ -1193,6 +1193,30 @@ int PARAM_SET_isFormatOK(const PARAM_SET *set){
 	return 1;
 }
 
+int PARAM_SET_isConstraintViolation(const PARAM_SET *set){
+	int i = 0;
+	PARAM *parameter = NULL;
+
+	if (set == NULL) {
+		return -1;
+	}
+
+	/**
+	 * Extract all invalid values from parameter. If flag
+	 * PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE is set
+	 * check only the last highest priority value.
+	 */
+	for (i = 0; i < set->count; i++) {
+		parameter = set->parameter[i];
+
+		if (PARAM_checkConstraints(parameter, PARAM_SINGLE_VALUE | PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) != 0) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 int PARAM_SET_isTypoFailure(const PARAM_SET *set){
 	int count = 0;
 	PARAM_getValueCount(set->typos, NULL, PST_PRIORITY_NONE, &count);

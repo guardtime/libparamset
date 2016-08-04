@@ -940,9 +940,12 @@ static void Test_param_set_constraint_errors(CuTest* tc) {
 	res += PARAM_SET_add(set, "a", NULL, NULL, 0);
 	res += PARAM_SET_add(set, "b", NULL, NULL, 0);
 	res += PARAM_SET_add(set, "b", NULL, NULL, 0);
-	res += PARAM_SET_add(set, "a", NULL, NULL, 0);
+	CuAssert(tc, "Constraints should be OK.", PARAM_SET_isConstraintViolation(set) == 0);
 
-	CuAssert(tc, "There should be typos.", res == PST_OK);
+	res += PARAM_SET_add(set, "a", NULL, NULL, 0);
+	CuAssert(tc, "Constraints should be violated.", PARAM_SET_isConstraintViolation(set) == 1);
+
+	CuAssert(tc, "Unable to add parameters.", res == PST_OK);
 
 	PARAM_SET_constraintErrorToString(set, "Error: ", buf, sizeof(buf));
 	CuAssert(tc, "Unexpected error message.", strcmp(buf, expected) == 0);
