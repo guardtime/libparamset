@@ -339,9 +339,20 @@ int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *sourc
  *
  * \param	set		PARAM_SET object.
  * \param	names	parameter name list.
- * \return PST_OK if successful, error code otherwise.
+ * \return 1 if yes, 0 otherwise.
  */
 int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names);
+
+/**
+ * Searches for a parameter defined in the list by name and checks if one of the
+ * parameters have values set. Parameter list is defined as "p1,p2,p3 ...".
+ * Even if the values format or content is invalid, true is returned.
+ *
+ * \param	set		PARAM_SET object.
+ * \param	names	parameter name list.
+ * \return 1 if yes, 0 otherwise.
+ */
+int PARAM_SET_isOneOfSetByName(const PARAM_SET *set, const char *names);
 
 /**
  * Controls if the format and content of the parameters is OK.

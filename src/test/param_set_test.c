@@ -967,10 +967,10 @@ static void Test_param_set_is_set_by_name(CuTest* tc) {
 	/**
 	 * Add all kind of valid parameters.
 	 */
-	CuAssert(tc, "1 is not set.", !PARAM_SET_isSetByName(set, "1"));
+	CuAssert(tc, "1 is not set.", !PARAM_SET_isSetByName(set, "1") && !PARAM_SET_isOneOfSetByName(set, "1, 2, 3"));
 	res = PARAM_SET_add(set, "1", NULL, NULL, 0);
 	CuAssert(tc, "Unable to set parameter 1.", res == PST_OK);
-	CuAssert(tc, "1 is set!", PARAM_SET_isSetByName(set, "1"));
+	CuAssert(tc, "1 is set!", PARAM_SET_isSetByName(set, "1") && PARAM_SET_isOneOfSetByName(set, "1, 2, 3"));
 
 	CuAssert(tc, "2 is not set.", !PARAM_SET_isSetByName(set, "2"));
 	res = PARAM_SET_add(set, "2", NULL, NULL, 0);
@@ -980,7 +980,8 @@ static void Test_param_set_is_set_by_name(CuTest* tc) {
 	CuAssert(tc, "3 is not set.", !PARAM_SET_isSetByName(set, "3"));
 
 	CuAssert(tc, "1 and 2 are both set.", PARAM_SET_isSetByName(set, "1 2"));
-	CuAssert(tc, "1 and 2 and 3 are not all set.", !PARAM_SET_isSetByName(set, "1 2 4"));
+	CuAssert(tc, "1 and 2 and 3 are not all set.", !PARAM_SET_isSetByName(set, "1 2 3"));
+	CuAssert(tc, "One of 1, 2 or 3 is set.", PARAM_SET_isOneOfSetByName(set, "1 2 3"));
 
 	PARAM_SET_free(set);
 }

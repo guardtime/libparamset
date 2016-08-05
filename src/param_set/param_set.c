@@ -1144,23 +1144,56 @@ cleanup:
 	return res;
 }
 
-int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names){
+static int param_set_count_parameters_set_by_name(const PARAM_SET *set, const char *names, int *set_count, int *unset_count){
 	int res;
 	PARAM *tmp = NULL;
 	const char *pName = NULL;
 	char buf[1024];
+	int set_c = 0;
+	int uset_c = 0;
 
-	if (set == NULL || names == NULL) return 0;
+
+	if (set == NULL || names == NULL || (set_count == NULL && unset_count == NULL)) return PST_INVALID_ARGUMENT;
 
 	pName = names;
 	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
 		res = param_set_getParameterByName(set, buf, &tmp);
-		if (res != PST_OK && res != PST_PARAMETER_EMPTY) return 0;
+		if (res != PST_OK && res != PST_PARAMETER_EMPTY) return res;
 
-		if (tmp->argCount == 0) return 0;
+		if (tmp->argCount > 0) set_c++;
+		else uset_c++;
 	}
 
-	return 1;
+	if (set_count != NULL) {
+		*set_count = set_c;
+	}
+
+	if (unset_count != NULL) {
+		*unset_count = uset_c;
+	}
+
+	return PST_OK;
+}
+
+int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names){
+	int unset_count = 0;
+	int set_count = 0;
+
+	if (set == NULL || names == NULL) return 0;
+
+	if (param_set_count_parameters_set_by_name(set, names, &set_count, &unset_count) != PST_OK) return 0;
+
+	return (set_count > 0 && unset_count == 0) ? 1 : 0;
+}
+
+int PARAM_SET_isOneOfSetByName(const PARAM_SET *set, const char *names){
+	int set_count = 0;
+
+	if (set == NULL || names == NULL) return 0;
+
+	if (param_set_count_parameters_set_by_name(set, names, &set_count, NULL) != PST_OK) return 0;
+
+	return (set_count > 0) ? 1 : 0;
 }
 
 int PARAM_SET_isFormatOK(const PARAM_SET *set){
