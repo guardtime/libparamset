@@ -953,6 +953,37 @@ static void Test_param_set_constraint_errors(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_param_set_is_set_by_name(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	int i = 0;
+
+	/**
+	 * Create set and add control functions.
+	 */
+	res = PARAM_SET_new("{1}{2}{3}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	/**
+	 * Add all kind of valid parameters.
+	 */
+	CuAssert(tc, "1 is not set.", !PARAM_SET_isSetByName(set, "1"));
+	res = PARAM_SET_add(set, "1", NULL, NULL, 0);
+	CuAssert(tc, "Unable to set parameter 1.", res == PST_OK);
+	CuAssert(tc, "1 is set!", PARAM_SET_isSetByName(set, "1"));
+
+	CuAssert(tc, "2 is not set.", !PARAM_SET_isSetByName(set, "2"));
+	res = PARAM_SET_add(set, "2", NULL, NULL, 0);
+	CuAssert(tc, "Unable to set parameter 2.", res == PST_OK);
+	CuAssert(tc, "1 is set!", PARAM_SET_isSetByName(set, "1"));
+
+	CuAssert(tc, "3 is not set.", !PARAM_SET_isSetByName(set, "3"));
+
+	CuAssert(tc, "1 and 2 are both set.", PARAM_SET_isSetByName(set, "1 2"));
+	CuAssert(tc, "1 and 2 and 3 are not all set.", !PARAM_SET_isSetByName(set, "1 2 4"));
+
+	PARAM_SET_free(set);
+}
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_add_count_clear);
@@ -975,6 +1006,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_read_line);
 	SUITE_ADD_TEST(suite, Test_param_set_read_line_2);
 	SUITE_ADD_TEST(suite, Test_param_set_constraint_errors);
+	SUITE_ADD_TEST(suite, Test_param_set_is_set_by_name);
 	return suite;
 }
 

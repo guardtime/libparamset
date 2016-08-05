@@ -298,6 +298,7 @@ int PARAM_clearAll(PARAM *param) {
 
 	PARAM_VAL_free(param->arg);
 	param->arg = NULL;
+	param->argCount = 0;
 	res = PST_OK;
 
 cleanup:
@@ -355,7 +356,7 @@ int PARAM_checkConstraints(const PARAM *param, int constraints) {
 	if (param->arg == NULL) {
 		return 0;
 	}
-	
+
 	/** PARAM_SINGLE_VALUE.*/
 	if (constraints & PARAM_SINGLE_VALUE) {
 		if (param_constraint_isFlagSet(param, PARAM_SINGLE_VALUE) && param->argCount > 1) {

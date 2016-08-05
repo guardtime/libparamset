@@ -333,14 +333,15 @@ int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, 
 int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *source, int priority, int *count);
 
 /**
- * Searches for a parameter by name and checks if its value is present. Even if
- * the values format or content is invalid, true is returned.
+ * Searches for a parameter defined in the list by name and checks if all the
+ * parameters have values set. Parameter list is defined as "p1,p2,p3 ...".
+ * Even if the values format or content is invalid, true is returned.
  *
  * \param	set		PARAM_SET object.
- * \param	name	parameter name.
+ * \param	names	parameter name list.
  * \return PST_OK if successful, error code otherwise.
  */
-int PARAM_SET_isSetByName(const PARAM_SET *set, const char *name);
+int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names);
 
 /**
  * Controls if the format and content of the parameters is OK.

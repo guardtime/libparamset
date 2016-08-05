@@ -1108,7 +1108,7 @@ int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *sourc
 
 	/**
 	 * Count the values according to the input parameters.
-     */
+	 */
 	if (names != NULL) {
 		pName = names;
 
@@ -1144,20 +1144,23 @@ cleanup:
 	return res;
 }
 
-int PARAM_SET_isSetByName(const PARAM_SET *set, const char *name){
+int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names){
 	int res;
 	PARAM *tmp = NULL;
-	int count = 0;
+	const char *pName = NULL;
+	char buf[1024];
 
-	if (set == NULL || name == NULL) return PST_INVALID_ARGUMENT;
+	if (set == NULL || names == NULL) return 0;
 
-	res = param_set_getParameterByName(set, name, &tmp);
-	if (res != PST_OK) return 0;
+	pName = names;
+	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
+		res = param_set_getParameterByName(set, buf, &tmp);
+		if (res != PST_OK && res != PST_PARAMETER_EMPTY) return 0;
 
-	res = PARAM_getValueCount(tmp, NULL, PST_PRIORITY_NONE, &count);
-	if (res != PST_OK) return 0;
+		if (tmp->argCount == 0) return 0;
+	}
 
-	return count == 0 ? 0 : 1;
+	return 1;
 }
 
 int PARAM_SET_isFormatOK(const PARAM_SET *set){
