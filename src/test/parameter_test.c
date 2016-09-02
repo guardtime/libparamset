@@ -436,13 +436,13 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParsOptionSet(p1, PST_PRSCMD_NONE));
 	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_DEFAULT));
 
-	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX);
-	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX));
+	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
+	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER));
 	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH | PST_PRSCMD_DEFAULT));
 
 	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH);
 	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH));
-	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
+	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
 
 	/**
 	 * Some invalid cases.
@@ -463,7 +463,7 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	CuAssert(tc, "This combinations should not be possible to be applied.", res == PST_PRSCMD_INVALID_COMBINATION);
 
 	CuAssert(tc, "Parameter must not be changed after multiple unsuccessful function calls.", PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH));
-	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
+	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
 
 	PARAM_free(p1);
 }

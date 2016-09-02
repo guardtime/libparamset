@@ -59,7 +59,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * If set the parameter must have a single value after its definition.
 	 * The next token read from the command-line is interpreted as its value.
 	 * See flags below to set some constraints for parsing the values:
-	 * \ref PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX and
+	 * \ref PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER and
 	 * \ref PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH
 	 */
 	PST_PRSCMD_HAS_VALUE = 0x0004,
@@ -71,19 +71,22 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * By default the break is reached by default next possible command-line
 	 * argument (prefix "-" or "--") or end of tokens.
 	 * See flags below to set some constraints for parsing the values:
-	 * \ref PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX and
+	 * \ref PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER and
 	 * \ref PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH
 	 */
 	PST_PRSCMD_HAS_MULTIPLE_INSTANCES = 0x0008,
 
 	/**
-	 * If set and the next token has dash in prefix, the value is interpreted as
-	 * next parameter. If used with \ref PST_PRSCMD_HAS_VALUE, the las parameter
+	 * If set and the next token has dash in prefix (is a potential parameter
+	 * -e.q.-x, -xy, --zzz, ---), the value is interpreted as
+	 * next parameter. If used with \ref PST_PRSCMD_HAS_VALUE, the last parameter
 	 * is closed and value is set to NULL.
 	 * If Used with \ref PST_PRSCMD_HAS_MULTIPLE_INSTANCES and some values are
 	 * found parameter is closed, if not NULL is set.
+	 * If PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS is set -- will end the
+	 * parsing.
 	 */
-	PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX = 0x0010,
+	PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER = 0x0010,
 
 	/**
 	 * If set and the next token matches with existing parameter, the value is
@@ -104,7 +107,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * See \ref PST_PRSCMD_HAS_MULTIPLE_INSTANCES for more information to learn
 	 * how to define one argument with multiple values.
 	 */
-	PST_PRSCMD_DEFAULT = 0x0001 | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX,
+	PST_PRSCMD_DEFAULT = 0x0001 | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER,
 	
 	/**
 	 * Collect all elements that has no dash prefix.
@@ -124,7 +127,8 @@ enum PARAM_PARS_OPTIONS_enum {
 	
 	/**
 	 * Enable loose element collector to stop command line parsing and redirect
-	 * all tokens to parameter pointed with loose element flag.
+	 * all tokens to parameter pointed with loose element flag. Parameter -- is used
+	 * to mark the end of commands.
 	 */
 	PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS = 0x0200,
 	

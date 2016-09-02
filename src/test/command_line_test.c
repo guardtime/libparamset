@@ -196,7 +196,7 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 		"--mdb", "v4", "v5",		/* Array ended by an existing parameter or beginning dash (-). */
 		"-e", "e_value_3",
 		"--unknown",
-		"--mdb", "v6", "v7","-","--dbm",
+		"--mdb", "v6", "v7","-", "--", "---","--dbm",
 		"--all", "-e", "-x", "--mdb", "--",
 		"-f", "-f", NULL};
 	int argc = 0;
@@ -212,9 +212,9 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 	res += PARAM_SET_setParseOptions(set, "{mb}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
-	res += PARAM_SET_setParseOptions(set, "{db}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX);
+	res += PARAM_SET_setParseOptions(set, "{db}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
-	res += PARAM_SET_setParseOptions(set, "{mdb}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX);
+	res += PARAM_SET_setParseOptions(set, "{mdb}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 	res += PARAM_SET_setParseOptions(set, "{all}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
@@ -225,7 +225,7 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 
 	res = PARAM_SET_getValueCount(set, "{mb}{db}{mdb}{all}{e}{f}", NULL, PST_PRIORITY_NONE, &count);
 	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
-	CuAssert(tc, "Invalid value count.", count == 18);
+	CuAssert(tc, "Invalid value count.", count == 20);
 
 	assert_value(tc, set, "mb", 0, __FILE__, __LINE__, "v0", 0);
 	assert_value(tc, set, "mb", 1, __FILE__, __LINE__, "v1", 0);
@@ -241,7 +241,9 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 	assert_value(tc, set, "mdb", 1, __FILE__, __LINE__, "v5", 0);
 	assert_value(tc, set, "mdb", 2, __FILE__, __LINE__, "v6", 0);
 	assert_value(tc, set, "mdb", 3, __FILE__, __LINE__, "v7", 0);
-	assert_value(tc, set, "mdb", 4, __FILE__, __LINE__, NULL, 1);
+	assert_value(tc, set, "mdb", 4, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "mdb", 5, __FILE__, __LINE__, "--", 0);
+	assert_value(tc, set, "mdb", 6, __FILE__, __LINE__, NULL, 1);
 
 	assert_value(tc, set, "e", 0, __FILE__, __LINE__, "e_value_1", 0);
 	assert_value(tc, set, "e", 1, __FILE__, __LINE__, "e_value_2", 0);
@@ -300,7 +302,7 @@ static void Test_param_set_loose_parameters_end_of_commands(CuTest* tc) {
 	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
 	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS);
 	res += PARAM_SET_setParseOptions(set, "{d}", PST_PRSCMD_HAS_VALUE);
-	res += PARAM_SET_setParseOptions(set, "{e}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_DASH_PREFIX);
+	res += PARAM_SET_setParseOptions(set, "{e}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
 
