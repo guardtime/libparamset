@@ -235,13 +235,13 @@ int PARAM_setParseOption(PARAM *obj, int option);
  * extractor allocates memory it must be freed by the user. As PARAM_getObject value
  * pointer is given directly to the extractor it is possible to initialize existing
  * objects or create a new ones. It all depends how the extractor method is implemented.
- * 
+ *
  * int extractObject(void *extra, const char *str, void **obj)
  * extra - optional pointer to data structure.
  * str - c-string value that belongs to PARAM_VAL object.
  * obj - pointer to receiving pointer to desired object.
  * Returns PST_OK if successful, error code otherwise.
- * 
+ *
  * \param	obj				Parameter object.
  * \param	extractObject	Object extractor.
  * \return \c PST_OK when successful, error code otherwise.
@@ -362,6 +362,41 @@ int PARAM_clearValue(PARAM *param, const char *source, int priority, int at);
 int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, int priority, int at);
 
 char* PARAM_constraintErrorToString(const PARAM *param, const char *prefix, char *buf, size_t buf_len);
+
+/**
+ A function to expand tokens that contain wildcard character (WC) to array of
+ * new values. Characters '?' and '*' are WC. Values containing WC are removed and
+ * replaced with the expanded values.
+ *
+ *
+ * int expand_wildcard(PARAM_VAL *param_value, void *ctx, int *value_shift)
+ *   param-value - Parameter that contains value string with WC in it.
+ *   ctx - additional context for the function (e.g. some string massive or database)
+ *   value_shift - exact count of values extracted.
+ *   returns: PST_OK if successful, error code otherwise.
+ *   expand_wildcard function must not remove param_value from the linked list
+ *   as it is done by higher level functions. New values must be appended right
+ *   after the param_value.
+ *
+ * The function can be activated by manual call to PARAM_expandWildcard or by
+ * setting PST_PRSCMD_EXPAND_WILDCARD for the parameter and calling
+ * PARAM_SET_parseCMD.
+ *
+ * \param obj - Parameter OBJ where all values as examined for WC and if found replaced with expanded values.
+ * \param ctx - Additional context for expanding the WC.
+ * \param expand_wildcard - A function that expands the strings containing WC.
+ * \return PST_OK if successful, error code otherwise.
+ */
+int PARAM_setWildcardExpander(PARAM *obj, void *ctx, int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));
+
+/**
+ * Expand the values containing wildcard characters (WC). Before using WC expander
+ * function must be configured. See \ref PARAM_setWildcardExpander.
+ * \param obj - Parameter OBJ where all values as examined for WC and if found replaced with expanded values.
+ * \param The count of new values inserted.
+ * \return PST_OK if successful, error code otherwise.
+ */
+int PARAM_expandWildcard(PARAM *param, int *count);
 
 #ifdef	__cplusplus
 }
