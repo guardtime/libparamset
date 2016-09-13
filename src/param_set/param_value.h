@@ -40,6 +40,19 @@ extern "C" {
 int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL **newObj);
 
 /**
+ * Extracts element from PARAM_VAL linked list (see \c PARAM_VAL_getElement) and
+ * appends a value right after the value found.
+ *
+ * \param	target		The first PARAM_VAL link in the linked list.
+ * \param	source		Constraint for the source.
+ * \param	priority	Constraint for the priority.
+ * \param	at			Parameter index in the matching set composed with the constraints.
+ * \param	obj			New obj to be inserted.
+ * \return \c PST_OK when successful, error code otherwise..
+ */
+int PARAM_VAL_insert(PARAM_VAL *target, const char* source, int priority, int at, PARAM_VAL *obj);
+
+/**
  * Free parameter value object.
  * \param rootValue	Object to be freed.
  */

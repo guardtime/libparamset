@@ -33,6 +33,40 @@ static char *new_string(const char *str) {
 	return strcpy(tmp, str);
 }
 
+int PARAM_VAL_insert(PARAM_VAL *target, const char* source, int priority, int at, PARAM_VAL *obj) {
+	int res;
+	PARAM_VAL *insert_to = NULL;
+
+	if (target == NULL || obj == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	res = PARAM_VAL_getElement(target, source, priority, at, &insert_to);
+	if (res != PST_OK) goto cleanup;
+
+	/**
+	 * If a value is found, new obj is appended to the list after the value found.
+	 */
+
+	/* Initialize the new value. */
+	obj->previous = insert_to;
+	obj->next = insert_to->next;
+
+	/* Fix the old previous value. */
+	if (insert_to->next != NULL) {
+		insert_to->next->previous = obj;
+	}
+
+	/* Fix the insert_to value. */
+	insert_to->next = obj;
+
+
+
+cleanup:
+	return res;
+}
+
 int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL **newObj) {
 	int res;
 	PARAM_VAL *tmp = NULL;
@@ -93,12 +127,8 @@ int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL
 	} else {
 		PARAM_VAL *current = *newObj;
 
-		while (current->next != NULL) {
-			current = current->next;
-		}
-
-		tmp->previous = current;
-		current->next = tmp;
+		res = PARAM_VAL_insert(current, NULL, PST_PRIORITY_NONE, PST_INDEX_LAST, tmp);
+		if (res != PST_OK) goto cleanup;
 	}
 
 	tmp = NULL;
