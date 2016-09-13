@@ -155,6 +155,16 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * of the given flag flag.
 	 */
 	PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE = 0x2000,
+
+	/**
+	 * If set, searches for the wildcard characters (WC) * and ?. If found the
+	 * token containing the WC is removed and replaced with the matching tokens.
+	 * The WC expanding is performed by WC expander function that MUST BE configured.
+	 * See \ref PARAM_expandWildcard, \ref PARAM_setWildcardExpander and \ref
+	 * PARAM_SET_wildcardExpander for more details how to specify the implementation.
+	 * If not implemented parsing fails.
+	 */
+	PST_PRSCMD_EXPAND_WILDCARD = 0x4000,
 	
 	PST_PRSCMD_COLLECT_LIMITER_ON       = 0x00008000,
 	PST_PRSCMD_COLLECT_LIMITER_1X       = 0x00010000,
@@ -364,7 +374,7 @@ int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, 
 char* PARAM_constraintErrorToString(const PARAM *param, const char *prefix, char *buf, size_t buf_len);
 
 /**
- A function to expand tokens that contain wildcard character (WC) to array of
+ * A function to expand tokens that contain wildcard character (WC) to array of
  * new values. Characters '?' and '*' are WC. Values containing WC are removed and
  * replaced with the expanded values.
  *

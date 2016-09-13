@@ -540,6 +540,17 @@ int parse_key_value_pair(const char *line, char *key, char *value, size_t buf_le
  */
 int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *read_count);
 
+/**
+ * Süecify a function to expand tokens that contain wildcard character (WC) to array of
+ * new values. Characters '?' and '*' are WC. Values containing WC are removed and
+ * replaced with the expanded values. See \ref PARAM_expandWildcard,
+ * \ref PARAM_setWildcardExpander, \ref PARAM_SET_wildcardExpander and \ref
+ * PST_PRSCMD_EXPAND_WILDCARD for more details.
+ */
+int PARAM_SET_wildcardExpander(PARAM_SET *set, const char *names,
+		void *ctx,
+		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));
+
 #ifdef	__cplusplus
 }
 #endif

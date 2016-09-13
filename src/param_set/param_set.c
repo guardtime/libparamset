@@ -260,7 +260,7 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
 	if (file == NULL || buf == NULL || len == 0) return 0;
 	buf[0] = '\0';
 
-	while ((c = fgetc(file)) && count < len - 1) {
+	while ((c = fgetc(file)) != 0 && count < len - 1) {
 		if (c == EOF || (c == '\r' || c == '\n')) {
 			line_coun++;
 			if (c == EOF) break;
@@ -845,6 +845,28 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 		if (res != PST_OK) return res;
 
 		res = PARAM_setObjectExtractor(tmp, extractObject);
+		if (res != PST_OK) return res;
+	}
+
+	return PST_OK;
+}
+
+int PARAM_SET_wildcardExpander(PARAM_SET *set, const char *names,
+		void *ctx,
+		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)){
+	int res;
+	PARAM *tmp = NULL;
+	const char *pName = NULL;
+	char buf[1024];
+
+	if (set == NULL || names == NULL) return PST_INVALID_ARGUMENT;
+
+	pName = names;
+	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
+		res = param_set_getParameterByName(set, buf, &tmp);
+		if (res != PST_OK) return res;
+
+		res = PARAM_setWildcardExpander(tmp, ctx, expand_wildcard);
 		if (res != PST_OK) return res;
 	}
 
@@ -1659,6 +1681,16 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 				continue;
 			}
 
+		}
+	}
+
+	/**
+	 * Expand wildcards when enabled and configured.
+	 */
+	for (i = 0; i < set->count; i++) {
+		if (PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_EXPAND_WILDCARD)) {
+			res = PARAM_expandWildcard(set->parameter[i], NULL);
+			if (res != PST_OK) goto cleanup;
 		}
 	}
 

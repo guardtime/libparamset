@@ -132,6 +132,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 	tmp->controlContent = NULL;
 	tmp->convert = NULL;
 	tmp->extractObject = wrapper_returnStr;
+	tmp->expand_wildcard = NULL;
 
 
 	tmpFlagName = new_string(flagName);
