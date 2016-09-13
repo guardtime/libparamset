@@ -49,6 +49,8 @@ enum param_set_err {
 	PST_PARAMETER_IS_UNKNOWN,
 	/** Object extractor function is not implemented. */
 	PST_PARAMETER_UNIMPLEMENTED_OBJ,
+	/* The function for extracting wildcard is not implemented. */
+	PST_PARAMETER_UNIMPLEMENTED_WILDCARD,
 	PST_OUT_OF_MEMORY,
 	PST_IO_ERROR,
 	PST_NEGATIVE_PRIORITY,
@@ -58,6 +60,7 @@ enum param_set_err {
 	PST_TASK_SET_HAS_NO_DEFINITIONS,
 	PST_TASK_SET_NOT_ANALYZED,
 	PST_TASK_UNABLE_TO_ANALYZE_PARAM_SET_CHANGED,
+	PST_WILDCARD_ERROR,
 	PST_UNDEFINED_BEHAVIOUR,
 	/* Unable to set the combination of command-line parser options. */
 	PST_PRSCMD_INVALID_COMBINATION,

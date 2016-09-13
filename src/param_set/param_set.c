@@ -2074,6 +2074,10 @@ const char* PARAM_SET_errorToString(int err) {
 		return "Task definition not analyzed.";
 	case PST_TASK_UNABLE_TO_ANALYZE_PARAM_SET_CHANGED:
 		return "Unable to analyze with different PARAM_SET.";
+	case PST_WILDCARD_ERROR:
+		return "Unable to expand wildcard.";
+	case PST_PARAMETER_UNIMPLEMENTED_WILDCARD:
+		return "Wildcard expander function not specified.";
 	case PST_UNDEFINED_BEHAVIOUR:
 		return "PARAM_SET undefined behaviour.";
 	case PST_UNKNOWN_ERROR:
