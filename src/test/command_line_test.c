@@ -876,6 +876,113 @@ static void Test_command_test_1(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static int expand_wildcard_len3str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
+	 const char *input = NULL;
+	 int res;
+	 char **accepted_strs = (char**)ctx;
+	 char *str = NULL;
+	 char *src = NULL;
+	 int prio = 0;
+	 int i = 0;
+	 PARAM_VAL *tmp = NULL;
+	 int count = 0;
+
+	 if (param_value == NULL || ctx == NULL || value_shift == NULL) {
+		 res = PST_INVALID_ARGUMENT;
+		 goto cleanup;
+	 }
+
+	 res = PARAM_VAL_extract(param_value, &input, &src, &prio);
+	 if (res != PST_OK) return res;
+
+	 if (strlen(input) != 3) return PST_INVALID_FORMAT;
+
+	 while ((str = accepted_strs[i++]) != NULL) {
+		if ((input[0] == '?' || input[0] == str[0])
+			&& (input[1] == '?' || input[1] == str[1])
+			&& (input[2] == '?' || input[2] == str[2])){
+
+			res = PARAM_VAL_new(str, src, prio, &tmp);
+			if (res != PST_OK) goto cleanup;
+
+			res = PARAM_VAL_insert(param_value, NULL, PST_PRIORITY_NONE, count, tmp);
+			if (res != PST_OK) goto cleanup;
+
+			count++;
+			tmp = NULL;
+		}
+	 }
+
+	*value_shift = count;
+	res = PST_OK;
+
+ cleanup:
+
+	 PARAM_VAL_free(tmp);
+	 return res;
+ }
+
+static void Test_expand_WC_on_CMD_WC_not_configured_no_WC_input(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "xxx", "zzz", "abc", "dbg", NULL};
+	int argc = 0;
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{i}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{i}", PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_EXPAND_WILDCARD);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);
+	CuAssert(tc, "Unable to parse command line.", res == PST_PARAMETER_UNIMPLEMENTED_WILDCARD);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_expand_WC_on_CMD_WC_configured_WC_as_input(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *data[] = {
+		"fbg", "xzy", "hgj", "xzz", NULL};
+	char *argv[] = {
+		"<path>", "xxx", "f?g", "zzz", "abc", "xz?", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[1024];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{i}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setParseOptions(set, "{i}", PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_EXPAND_WILDCARD);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+	res = PARAM_SET_wildcardExpander(set, "i", data, expand_wildcard_len3str);
+	CuAssert(tc, "Unable to configure wildcard expander.", res == PST_OK);
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_getValueCount(set, "{i}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 6);
+
+	assert_value(tc, set, "i", 0, __FILE__, __LINE__, "xxx", 0);
+	assert_value(tc, set, "i", 1, __FILE__, __LINE__, "fbg", 0);
+	assert_value(tc, set, "i", 2, __FILE__, __LINE__, "zzz", 0);
+	assert_value(tc, set, "i", 3, __FILE__, __LINE__, "abc", 0);
+	assert_value(tc, set, "i", 4, __FILE__, __LINE__, "xzy", 0);
+	assert_value(tc, set, "i", 5, __FILE__, __LINE__, "xzz", 0);
+	assert_value(tc, set, "i", 6, __FILE__, __LINE__, NULL, 1);
+
+	PARAM_SET_free(set);
+}
+
+
 CuSuite* Command_LineTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_set_from_cmd_flags_bacward_compatibility);
@@ -894,6 +1001,8 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_command_last_value_after_flag_type_parameteter);
 	SUITE_ADD_TEST(suite, Test_command_test_1);
 	SUITE_ADD_TEST(suite, Test_command_line_check_for_highest_priority_last_element_errors);
+	SUITE_ADD_TEST(suite, Test_expand_WC_on_CMD_WC_not_configured_no_WC_input);
+	SUITE_ADD_TEST(suite, Test_expand_WC_on_CMD_WC_configured_WC_as_input);
 	return suite;
 }
 
