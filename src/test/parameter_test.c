@@ -468,6 +468,123 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	PARAM_free(p1);
 }
 
+ static int expand_wildcard_len3str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
+	 const char *input = NULL;
+	 int res;
+	 char **accepted_strs = (char**)ctx;
+	 char *str = NULL;
+	 char *src = NULL;
+	 int prio = 0;
+	 int i = 0;
+	 PARAM_VAL *tmp = NULL;
+	 int count = 0;
+
+	 if (param_value == NULL || ctx == NULL || value_shift == NULL) {
+		 res = PST_INVALID_ARGUMENT;
+		 goto cleanup;
+	 }
+
+	 res = PARAM_VAL_extract(param_value, &input, &src, &prio);
+	 if (res != PST_OK) return res;
+
+	 if (strlen(input) != 3) return PST_INVALID_FORMAT;
+
+	 while ((str = accepted_strs[i++]) != NULL) {
+		if ((input[0] == '?' || input[0] == str[0])
+			&& (input[1] == '?' || input[1] == str[1])
+			&& (input[2] == '?' || input[2] == str[2])){
+
+			res = PARAM_VAL_new(str, src, prio, &tmp);
+			if (res != PST_OK) goto cleanup;
+
+			res = PARAM_VAL_insert(param_value, NULL, PST_PRIORITY_NONE, count, tmp);
+			if (res != PST_OK) goto cleanup;
+
+			count++;
+			tmp = NULL;
+		}
+	 }
+
+	*value_shift = count;
+	res = PST_OK;
+
+ cleanup:
+
+	 PARAM_VAL_free(tmp);
+	 return res;
+ }
+
+
+static void Test_WildcarcExpander(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	PARAM_VAL *value = NULL;
+	char *argv[] = {"abc", "cba", "efx", "ebc", "eee", NULL};
+	int value_count = 0;
+	int expand_count = 0;
+
+	/**
+	 * Create some parameter objects.
+     */
+	res = PARAM_new("string", NULL, 0, PST_PRSCMD_DEFAULT, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res += PARAM_addValue(param, "xxx", NULL, 0);
+	res += PARAM_addValue(param, "?x?", NULL, 0);
+	res += PARAM_addValue(param, "?b?", NULL, 0);
+	res += PARAM_addValue(param, "yyy", NULL, 0);
+	res += PARAM_addValue(param, "e??", NULL, 0);
+	CuAssert(tc, "Unable to add valid parameters.", res == PST_OK);
+
+	res = PARAM_getValueCount(param, NULL, PST_PRIORITY_NONE, &value_count);
+	CuAssert(tc, "Unable to get value count.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", value_count == 5);
+
+	res = PARAM_setWildcardExpander(param, argv, expand_wildcard_len3str);
+	CuAssert(tc, "Unable to set wildcard expander.", res == PST_OK);
+
+	res = PARAM_expandWildcard(param, &expand_count);
+	CuAssert(tc, "Unable to expand wildcard.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", expand_count == 6);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "xxx") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 1, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "abc") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 2, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "cba") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 3, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 4, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "yyy") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 5, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "efx") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 6, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 7, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "eee") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 8, &value);
+	CuAssert(tc, "There should not be more values.", res == PST_PARAMETER_VALUE_NOT_FOUND);
+
+	PARAM_free(param);
+}
+
 
 CuSuite* ParameterTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
@@ -477,6 +594,7 @@ CuSuite* ParameterTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_SetValuesAndControl);
 	SUITE_ADD_TEST(suite, Test_ObjectGetter);
 	SUITE_ADD_TEST(suite, Test_ParseOptionSetter);
+	SUITE_ADD_TEST(suite, Test_WildcarcExpander);
 
 	return suite;
 }
