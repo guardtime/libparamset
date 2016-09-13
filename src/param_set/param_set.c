@@ -30,7 +30,7 @@
 #define TYPO_SENSITIVITY 10
 #define TYPO_MAX_COUNT 5
 
-typedef struct INT_st {int value;} INT;
+//typedef struct INT_st {int value;} INT;
 
 static int isValidNameChar(int c) {
 	if ((ispunct(c) || isspace(c)) && c != '_' && c != '-') return 0;

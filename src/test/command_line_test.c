@@ -625,7 +625,6 @@ static void Test_command_line_collect_lower_priority(CuTest* tc) {
 		"<path>", "a1", "a2", "-c", "a3", "a4", "a5", NULL};
 	int argc = 0;
 	int count = 0;
-	char buf[1024];
 
 	while(argv[argc] != NULL) argc++;
 
@@ -726,7 +725,6 @@ static void Test_command_line_check_for_highest_priority_last_element_errors(CuT
 	char *argv[] = {
 		"<path>", "-i", "a", "-i", "b", "-i", "c", "-j", "c", NULL};
 	int argc = 0;
-	int count = 0;
 	char buf[1024];
 
 	while(argv[argc] != NULL) argc++;
@@ -762,7 +760,6 @@ static void Test_command_line_parameter_with_value_in_the_end_2(CuTest* tc) {
 		"<path>", "-i", "-o", NULL};
 	int argc = 0;
 	int count = 0;
-	char buf[1024];
 
 	while(argv[argc] != NULL) argc++;
 
@@ -843,7 +840,6 @@ static void Test_command_test_1(CuTest* tc) {
 		"<path>", "-o", "test_1", "-d", "-h", NULL};
 	int argc = 0;
 	int count = 0;
-	char buf[1024];
 	while(argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{o}{d}{h}", &set);

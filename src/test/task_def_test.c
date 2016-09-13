@@ -688,7 +688,7 @@ static void Test_task_set_suggestions(CuTest* tc) {
 	res = TASK_SET_getConsistentTask(tasks, &cons_task);
 	CuAssert(tc, "Unable to add task.", res == PST_TASK_MULTIPLE_CONSISTENT_TASKS && cons_task == NULL);
 
-	printf("%s", TASK_SET_suggestions_toString(tasks, 6, buf, sizeof(buf)));
+//	printf("%s", TASK_SET_suggestions_toString(tasks, 6, buf, sizeof(buf)));
 
 
 	PARAM_SET_free(set);

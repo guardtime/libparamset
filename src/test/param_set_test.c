@@ -956,7 +956,6 @@ static void Test_param_set_constraint_errors(CuTest* tc) {
 static void Test_param_set_is_set_by_name(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
-	int i = 0;
 
 	/**
 	 * Create set and add control functions.
