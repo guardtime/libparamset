@@ -408,6 +408,8 @@ int PARAM_setWildcardExpander(PARAM *obj, void *ctx, int (*expand_wildcard)(PARA
  */
 int PARAM_expandWildcard(PARAM *param, int *count);
 
+char* PARAM_toString(const PARAM *param, char *buf, size_t buf_len);
+
 #ifdef	__cplusplus
 }
 #endif

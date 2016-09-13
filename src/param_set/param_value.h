@@ -134,6 +134,8 @@ int PARAM_VAL_getPriority(PARAM_VAL *rootValue, int current, int *nextPrio);
 int PARAM_VAL_getErrors(PARAM_VAL *rootValue, int *format, int* content);
 
 int PARAM_VAL_getInvalid(PARAM_VAL *rootValue, const char* source, int priority, int at, PARAM_VAL** val);
+
+char* PARAM_VAL_toString(const PARAM_VAL *value, char *buf, size_t buf_len);
 #ifdef	__cplusplus
 }
 #endif

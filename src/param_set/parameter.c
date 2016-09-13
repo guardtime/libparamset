@@ -524,3 +524,16 @@ cleanup:
 
 	return res;
 }
+
+char* PARAM_toString(const PARAM *param, char *buf, size_t buf_len)  {
+	char sub_buf[2048];
+	size_t count = 0;
+
+	if (param == NULL || buf == NULL || buf_len == 0) return 0;
+
+
+	count += PST_snprintf(buf + count, buf_len - count, "%s(%i)->%s", param->flagName, param->argCount,
+			PARAM_VAL_toString(param->arg, sub_buf, sizeof(sub_buf)));
+
+	return buf;
+}

@@ -24,6 +24,7 @@
 #include "param_set_obj_impl.h"
 #include "param_value.h"
 #include "param_set.h"
+#include "strn.h"
 
 static char *new_string(const char *str) {
 	char *tmp = NULL;
@@ -471,4 +472,22 @@ int PARAM_VAL_getPriority(PARAM_VAL *rootValue, int current, int *nextPrio) {
 cleanup:
 
 	return res;
+}
+
+char* PARAM_VAL_toString(const PARAM_VAL *value, char *buf, size_t buf_len) {
+	PARAM_VAL *root = value;
+	size_t count = 0;
+
+	if (value == NULL || buf == NULL || buf_len == 0) return NULL;
+
+	while (root->previous != NULL) {
+		root = root->previous;
+	}
+
+	while (root != NULL) {
+		count += PST_snprintf(buf + count, buf_len - count, "%s ->", root->cstr_value);
+		root = root->next;
+	}
+
+	return buf;
 }
