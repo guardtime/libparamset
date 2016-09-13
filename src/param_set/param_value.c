@@ -279,13 +279,18 @@ int PARAM_VAL_popElement(PARAM_VAL **rootValue, const char* source, int priority
 	next = tmp->next;
 
 	/**
-	 * Repair the chain and root value.
+	 * If the previous element existed, repair its next value, as it is removed
+	 * from the list. Set the new root as previous.
 	 */
 	if (previous != NULL) {
 		previous->next = next;
 		newRoot = previous;
 	}
 
+	/**
+	* If the next element existed, fix its previous link as it is removed from
+	* the list.
+	*/
 	if (next != NULL) {
 		newRoot = (newRoot != NULL) ? newRoot : next;
 		next->previous = previous;
