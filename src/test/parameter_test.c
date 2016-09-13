@@ -529,6 +529,7 @@ static void Test_WildcarcExpander(CuTest* tc) {
 	res = PARAM_new("string", NULL, 0, PST_PRSCMD_DEFAULT, &param);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
+	res += PARAM_addValue(param, "ef?", NULL, 0);
 	res += PARAM_addValue(param, "xxx", NULL, 0);
 	res += PARAM_addValue(param, "?x?", NULL, 0);
 	res += PARAM_addValue(param, "?b?", NULL, 0);
@@ -538,48 +539,52 @@ static void Test_WildcarcExpander(CuTest* tc) {
 
 	res = PARAM_getValueCount(param, NULL, PST_PRIORITY_NONE, &value_count);
 	CuAssert(tc, "Unable to get value count.", res == PST_OK);
-	CuAssert(tc, "Invalid value count.", value_count == 5);
+	CuAssert(tc, "Invalid value count.", value_count == 6);
 
 	res = PARAM_setWildcardExpander(param, argv, expand_wildcard_len3str);
 	CuAssert(tc, "Unable to set wildcard expander.", res == PST_OK);
 
 	res = PARAM_expandWildcard(param, &expand_count);
 	CuAssert(tc, "Unable to expand wildcard.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", expand_count == 6);
+	CuAssert(tc, "Wrong expand count.", expand_count == 7);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 0, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "xxx") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "efx") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 1, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "abc") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "xxx") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 2, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "cba") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "abc") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 3, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "cba") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 4, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "yyy") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 5, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "efx") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "yyy") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 6, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "efx") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 7, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "eee") == 0);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 8, &value);
+	CuAssert(tc, "Unable to get value.", res == PST_OK);
+	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "eee") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 9, &value);
 	CuAssert(tc, "There should not be more values.", res == PST_PARAMETER_VALUE_NOT_FOUND);
 
 	PARAM_free(param);

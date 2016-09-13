@@ -510,6 +510,9 @@ int PARAM_expandWildcard(PARAM *param, int *count) {
 			res = PARAM_VAL_popElement(&value, NULL, PST_PRIORITY_NONE, 0, &pop);
 			if (res != PST_OK) goto cleanup;
 
+			param->argCount += expanded_count - 1;
+			param->arg = value;
+
 			PARAM_VAL_free(pop);
 			parameter_shif_correction += -1 + expanded_count;
 			counter += expanded_count;
