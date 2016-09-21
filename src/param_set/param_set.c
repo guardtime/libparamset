@@ -2094,8 +2094,10 @@ const char* PARAM_SET_errorToString(int err) {
 		return "Parameters is unknown.";
 	case PST_PARAMETER_UNIMPLEMENTED_OBJ:
 		return "Parameters object extractor unimplemented.";
-	case PST_NEGATIVE_PRIORITY:
+	case PST_PRIORITY_NEGATIVE:
 		return "Negative priority.";
+	case PST_PRIORITY_TOO_LARGE:
+		return "Too large priority.";
 	case PST_TASK_ZERO_CONSISTENT_TASKS:
 		return "None consistent task.";
 	case PST_TASK_MULTIPLE_CONSISTENT_TASKS:

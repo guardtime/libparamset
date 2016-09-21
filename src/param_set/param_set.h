@@ -53,7 +53,8 @@ enum param_set_err {
 	PST_PARAMETER_UNIMPLEMENTED_WILDCARD,
 	PST_OUT_OF_MEMORY,
 	PST_IO_ERROR,
-	PST_NEGATIVE_PRIORITY,
+	PST_PRIORITY_NEGATIVE,
+	PST_PRIORITY_TOO_LARGE,
 	PST_PARAMETER_INVALID_FORMAT,
 	PST_TASK_ZERO_CONSISTENT_TASKS,
 	PST_TASK_MULTIPLE_CONSISTENT_TASKS,
@@ -69,10 +70,33 @@ enum param_set_err {
 
 enum enum_priority {
 	PST_PRIORITY_NOTDEFINED = -4,
+	
+	/* Priority for the most significant priority level. */
 	PST_PRIORITY_HIGHEST = -3,
+	
+	/* Priority for the least significant priority level. */
 	PST_PRIORITY_LOWEST = -2,
+	
+	/* Priority level is not used when filtering elements. */
 	PST_PRIORITY_NONE = -1,
-	PST_PRIORITY_VALID_BASE = 0
+	
+	/* Count of possible priority values beginning from PST_PRIORITY_VALID_BASE. */
+	PST_PRIORITY_COUNT = 0xffff,
+	
+	/* The valid base for priority level. */
+	PST_PRIORITY_VALID_BASE = 0,
+		
+	/* The valid highest priority level.*/
+	PST_PRIORITY_VALID_ROOF = PST_PRIORITY_VALID_BASE + PST_PRIORITY_COUNT - 1 ,
+	
+	/* To extract values higher than A, use priority A + PST_PRIORITY_HIGHER_THAN*/
+	PST_PRIORITY_HIGHER_THAN = PST_PRIORITY_VALID_ROOF + 1,
+	
+	/* To extract values lower than A, use priority A + PST_PRIORITY_LOWER_THAN*/
+	PST_PRIORITY_LOWER_THAN = PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_COUNT,
+	
+	 /* Priorities greater than that are all invalid. */
+	PST_PRIORITY_FIELD_OUT_OF_RANGE = PST_PRIORITY_LOWER_THAN + PST_PRIORITY_COUNT
 };
 
 enum enum_status {
