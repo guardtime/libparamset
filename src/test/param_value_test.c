@@ -237,6 +237,76 @@ static void Test_param_value(CuTest* tc) {
 	assert_value_count(tc, value, "C", PST_PRIORITY_HIGHEST, __FILE__, __LINE__, i);
 	assert_value_unable_to_extract(tc, value, "C", PST_PRIORITY_HIGHEST, i++, __FILE__, __LINE__ );
 
+	/* Extract from priority level PST_PRIORITY_HIGHER than 1, source NULL. */
+	i = 0;
+	assert_value(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + 1, i++, __FILE__, __LINE__ , "3_p2");
+	assert_value(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + 1, i++, __FILE__, __LINE__ , "b4_p2");
+	assert_value(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + 1, i++, __FILE__, __LINE__ , "c1_p2");
+	assert_value_unable_to_extract(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + 1, i++, __FILE__, __LINE__ );
+
+	/* Extract from priority level PST_PRIORITY_LOWER_THAN than 2, source NULL. */
+	i = 0;
+	assert_value(tc, value, NULL, PST_PRIORITY_LOWER_THAN + 2, i++, __FILE__, __LINE__ , "1_p0");
+	assert_value(tc, value, NULL, PST_PRIORITY_LOWER_THAN + 2, i++, __FILE__, __LINE__ , "b1_p0");
+	assert_value(tc, value, NULL, PST_PRIORITY_LOWER_THAN + 2, i++, __FILE__, __LINE__ , "2_p0");
+	assert_value(tc, value, NULL, PST_PRIORITY_LOWER_THAN + 2, i++, __FILE__, __LINE__ , "b2_p1");
+	assert_value(tc, value, NULL, PST_PRIORITY_LOWER_THAN + 2, i++, __FILE__, __LINE__ , "b3_p0");
+	assert_value_unable_to_extract(tc, value, NULL, PST_PRIORITY_LOWER_THAN + 2, i++, __FILE__, __LINE__ );
+
+	PARAM_VAL_free(value);
+}
+
+static void Test_param_value_priority_limits(CuTest* tc) {
+	int res;
+	PARAM_VAL *value = NULL;
+	int i;
+
+	/**
+	 * Create linked list.
+     */
+	res = PARAM_VAL_new("error", NULL, PST_PRIORITY_NOTDEFINED, &value);
+	CuAssert(tc, "It should be impossible to create value with negative priority.", res == PST_PRIORITY_NEGATIVE);
+
+	res = PARAM_VAL_new("error", NULL, PST_PRIORITY_NOTDEFINED - 1, &value);
+	CuAssert(tc, "It should be impossible to create value with negative priority.", res == PST_PRIORITY_NEGATIVE);
+
+	res = PARAM_VAL_new("error", NULL, PST_PRIORITY_VALID_BASE - 1, &value);
+	CuAssert(tc, "It should be impossible to create value with negative priority.", res == PST_PRIORITY_NEGATIVE);
+
+	res = PARAM_VAL_new("error", NULL, PST_PRIORITY_VALID_ROOF + 1, &value);
+	CuAssert(tc, "It should be impossible to create value higher priority than the valid roof.", res == PST_PRIORITY_TOO_LARGE);
+
+
+	res = PARAM_VAL_new("base", NULL, PST_PRIORITY_VALID_BASE, &value);
+	CuAssert(tc, "It should be possible to create a value with priority < valid roof and > valid base.", res == PST_OK);
+
+	res = PARAM_VAL_new("roof-1", NULL, PST_PRIORITY_VALID_ROOF - 1, &value);
+	CuAssert(tc, "It should be possible to create a value with priority <= valid roof.", res == PST_OK);
+
+	res = PARAM_VAL_new("roof", NULL, PST_PRIORITY_VALID_ROOF, &value);
+	CuAssert(tc, "It should be possible to create a value with priority <= valid roof.", res == PST_OK);
+
+	/**
+	 * Validate the linked list extraction and counting.
+     */
+
+	i = 0;
+	assert_value(tc, value, NULL, PST_PRIORITY_LOWER_THAN + PST_PRIORITY_VALID_ROOF, i++, __FILE__, __LINE__ , "base");
+	assert_value(tc, value, NULL, PST_PRIORITY_LOWER_THAN + PST_PRIORITY_VALID_ROOF, i++, __FILE__, __LINE__ , "roof-1");
+	assert_value_count(tc, value, NULL, PST_PRIORITY_LOWER_THAN + PST_PRIORITY_VALID_ROOF, __FILE__, __LINE__, i);
+	assert_value_unable_to_extract(tc, value, NULL, PST_PRIORITY_LOWER_THAN + PST_PRIORITY_VALID_ROOF, i++, __FILE__, __LINE__ );
+
+	i = 0;
+	assert_value(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_VALID_BASE, i++, __FILE__, __LINE__ , "roof-1");
+	assert_value(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_VALID_BASE, i++, __FILE__, __LINE__ , "roof");
+	assert_value_count(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_VALID_BASE, __FILE__, __LINE__, i);
+	assert_value_unable_to_extract(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_VALID_BASE, i++, __FILE__, __LINE__ );
+
+	/**
+     * Check if priority borders do exists.
+     */
+	assert_value_unable_to_extract(tc, value, NULL, PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_VALID_ROOF, 0, __FILE__, __LINE__ );
+	assert_value_unable_to_extract(tc, value, NULL, PST_PRIORITY_LOWER_THAN + PST_PRIORITY_VALID_BASE, 0, __FILE__, __LINE__ );
 
 	PARAM_VAL_free(value);
 }
@@ -564,6 +634,7 @@ CuSuite* ParamValueTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 
 	SUITE_ADD_TEST(suite, Test_param_value);
+	SUITE_ADD_TEST(suite, Test_param_value_priority_limits);
 	SUITE_ADD_TEST(suite, Test_param_extract_last_higest_priority);
 	SUITE_ADD_TEST(suite, Test_param_extractPriority);
 	SUITE_ADD_TEST(suite, Test_param_extractInvalid);
