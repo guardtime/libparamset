@@ -526,7 +526,7 @@ static void Test_WildcarcExpander(CuTest* tc) {
 	/**
 	 * Create some parameter objects.
      */
-	res = PARAM_new("string", NULL, 0, PST_PRSCMD_DEFAULT, &param);
+	res = PARAM_new("string", NULL, 0, PST_PRSCMD_DEFAULT | PST_PRSCMD_EXPAND_WILDCARD, &param);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	res += PARAM_addValue(param, "ef?", NULL, 0);
