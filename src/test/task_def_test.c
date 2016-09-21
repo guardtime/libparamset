@@ -603,7 +603,6 @@ static void Test_task_set_suggestions(CuTest* tc) {
 	TASK_SET *tasks = NULL;
 	PARAM_SET *set = NULL;
 	TASK *cons_task = NULL;
-	char buf[1024];
 
 	/**
 	 * Create and configure TASK set.

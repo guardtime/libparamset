@@ -951,7 +951,6 @@ static void Test_expand_WC_on_CMD_WC_configured_WC_as_input(CuTest* tc) {
 		"<path>", "xxx", "f?g", "zzz", "abc", "xz?", NULL};
 	int argc = 0;
 	int count = 0;
-	char buf[1024];
 
 	while(argv[argc] != NULL) argc++;
 

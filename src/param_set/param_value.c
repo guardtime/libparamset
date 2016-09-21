@@ -355,7 +355,7 @@ static int param_val_get_element_count(PARAM_VAL *rootValue, const char *source,
 		goto cleanup;
 	}
 
-	while (1) {
+	for (;;) {
 		res = value_getter(rootValue, source, prio, i, &tmp);
 		if (res != PST_OK && res != PST_PARAMETER_VALUE_NOT_FOUND) {
 			goto cleanup;
