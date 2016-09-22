@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <limits.h>
 #include "param_set_obj_impl.h"
 #include "param_value.h"
 #include "parameter.h"
@@ -1502,6 +1503,156 @@ static void print_nothing(const char* format, ...) {(void)(format);}
 //#define dpgprint printf
 #define dpgprint print_nothing
 
+typedef struct COL_REC_st {
+	PARAM *parameter;
+	int collect_values;
+	int collect_flags;
+	int collect_when_parsing_is_closed;
+	int reduced_priority;
+	int collect_limiter;
+	int max_collect_count;
+	int collected;
+} COL_REC;
+
+#define MAX_COL_COUNT 32
+
+typedef struct COLLECTORS_st {
+	int count;
+	int close_parsing_permited;
+	int parsing_is_closed;
+	COL_REC rec[MAX_COL_COUNT];
+} COLLECTORS;
+
+static void COLLECTORS_free(COLLECTORS *obj) {
+	if (obj == NULL) return;
+	free(obj);
+}
+
+static int COLLECTORS_new(PARAM_SET *set, COLLECTORS **new) {
+	int res = PST_UNKNOWN_ERROR;
+	int i = 0;
+	COLLECTORS *tmp = NULL;
+
+	if (set == NULL || new == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	tmp = (COLLECTORS*)malloc(sizeof(COLLECTORS) * 1);
+	if (tmp == NULL) {
+		res = PST_OUT_OF_MEMORY;
+		goto cleanup;
+	}
+
+	tmp->close_parsing_permited = 0;
+	tmp->parsing_is_closed = 0;
+	tmp->count = 0;
+
+	for (i = 0; i < MAX_COL_COUNT; i++) {
+		tmp->rec[i].collect_flags = 0;
+		tmp->rec[i].collect_values = 0;
+		tmp->rec[i].collect_when_parsing_is_closed = 0;
+		tmp->rec[i].reduced_priority = 0;
+		tmp->rec[i].collect_limiter = 0;
+		tmp->rec[i].max_collect_count = 0;
+		tmp->rec[i].collected = 0;
+		tmp->rec[i].parameter = NULL;
+	}
+
+	for (i = 0; i < set->count && tmp->count < MAX_COL_COUNT; i++) {
+		PARAM *p = set->parameter[i];
+
+		if (p->parsing_options & (PST_PRSCMD_CLOSE_PARSING | PST_PRSCMD_COLLECT_LOOSE_FLAGS
+				| PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED | PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY)) {
+			if (PARAM_isParsOptionSet(p, PST_PRSCMD_CLOSE_PARSING)) tmp->close_parsing_permited = 1;
+			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_LOOSE_FLAGS)) tmp->rec[tmp->count].collect_flags = 1;
+			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_LOOSE_VALUES)) tmp->rec[tmp->count].collect_values = 1;
+			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED)) tmp->rec[tmp->count].collect_when_parsing_is_closed = 1;
+			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY)) tmp->rec[tmp->count].reduced_priority = 1;
+
+			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_LIMITER_ON)) {
+				tmp->rec[tmp->count].collect_limiter = 1;
+				tmp->rec[tmp->count].max_collect_count = (p->parsing_options & PST_PRSCMD_COLLECT_LIMITER_MAX_MASK) / PST_PRSCMD_COLLECT_LIMITER_1X;
+			}
+			tmp->rec[tmp->count].parameter = p;
+			tmp->count++;
+		}
+	}
+
+
+	*new = tmp;
+	tmp = NULL;
+	res = PST_OK;
+
+cleanup:
+
+	COLLECTORS_free(tmp);
+
+	return res;
+}
+
+int COLLECTORS_disableParsing(COLLECTORS *obj, int token_type) {
+	if (obj == NULL) return 0;
+	if (obj->close_parsing_permited && obj->parsing_is_closed == 0 && TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type)) {
+		obj->parsing_is_closed = 1;
+		return 1;
+	}
+	return 0;
+}
+
+int COLLECTORS_isParsingClosed(COLLECTORS *obj) {
+	if (obj == NULL) return 0;
+	if (obj->parsing_is_closed) return 1;
+	else return 0;
+}
+
+int COLLECTORS_doCollectorsExist(COLLECTORS *obj) {
+	if (obj == NULL) return 0;
+	if (obj->count > 0) return 1;
+	else return 0;
+}
+
+int COLLECTORS_add(COLLECTORS *obj, int token_type, const char *src, int priority, const char *token) {
+	int res = PST_UNKNOWN_ERROR;
+	int ret = 0;
+	int i = 0;
+
+
+	if (obj == NULL || token == NULL) {
+		goto cleanup;
+	}
+
+	/**
+	 * Go through the list of collectors and fill the values as configured.
+	 */
+	for (i = 0; i < obj->count; i++) {
+		COL_REC *col = &obj->rec[i];
+		PARAM *p = col->parameter;
+		int values = (col->collect_values && !obj->parsing_is_closed && (TOKEN_IS_VALUE_PARAM(token_type) || TOKEN_IS_NULL_HAS_DASH(token_type) || TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type)));
+		int flags = (col->collect_flags && (TOKEN_IS_PARAM(token_type) || TOKEN_IS_SHORT_PARAM_LONG_DASH(token_type)) && !obj->parsing_is_closed);
+		int after_parsing_is_closed = col->collect_when_parsing_is_closed && obj->parsing_is_closed;
+		int prio = (col->reduced_priority && priority > 0) ? priority - 1 : priority;
+
+		if (values || flags || after_parsing_is_closed) {
+			if (col->collect_limiter && col->collected >= col->max_collect_count) {
+				continue;
+			} else {
+				res = PARAM_addValue(p, token, src, prio);
+				if (res != PST_OK) goto cleanup;
+				col->collected++;
+				ret++;
+			}
+		}
+
+
+	}
+
+
+cleanup:
+
+	return ret;
+}
+
 int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority) {
 	int res;
 	TYPO *typo_helper = NULL;
@@ -1517,18 +1668,11 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 	int token_no_param_break = 0;
 	int value_saturation_break = 0;
 	int last_token_brake = 0;
-	int permit_parse_break = 0;
-	int permit_dash_collect = 0;
-	int permit_flag_collect = 0;
-	int collect_limiter_on = 0;
-	int collect_prio = priority;
-	int isParsingClosed = 0;
 	int last_token_type = 0;
 	PARAM *opend_parameter = NULL;
 	size_t value_counter = 0;
-	size_t max_loose_count = 0;
-	size_t loose_count = 0;
-	PARAM *loose_parameters = NULL;
+	COLLECTORS *collector = NULL;
+
 
 	if(set == NULL || argc == 0 || argv == NULL) {
 		res = PST_INVALID_ARGUMENT;
@@ -1541,25 +1685,8 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 		goto cleanup;
 	}
 
-	for (i = 0; i < set->count; i++) {
-		if (PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_VALUES)) {
-			loose_parameters = set->parameter[i];
-			permit_parse_break = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS);
-			permit_dash_collect = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_DASHES);
-			permit_flag_collect = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LOOSE_FLAGS);
-			collect_limiter_on = PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_LIMITER_ON);
-
-			if (PARAM_isParsOptionSet(set->parameter[i], PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY)) {
-				collect_prio = (priority - 1) < 0 ? 0 : (priority - 1);
-			}
-
-			if (collect_limiter_on) {
-				max_loose_count = (set->parameter[i]->parsing_options & PST_PRSCMD_COLLECT_LIMITER_MAX_MASK) / PST_PRSCMD_COLLECT_LIMITER_1X;
-			}
-
-			break;
-		}
-	}
+	res = COLLECTORS_new(set, &collector);
+	if (res != PST_OK) goto cleanup;
 
 	for (i = 1; i < argc; i++) {
 		last_token_brake = (i + 1 == argc) ? 1 : 0;
@@ -1568,7 +1695,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 		/**
 		 * Analyze the tokens.
 		*/
-		if (!isParsingClosed) {
+		if (!COLLECTORS_isParsingClosed(collector)) {
 			last_token_type = token_type;
 			res = get_parameter_from_token(set, token, &token_type, &tmp_parameter);
 			if (res != PST_OK) goto cleanup;
@@ -1579,7 +1706,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 			if (is_parameter_opend) {
 				token_match_break = (TOKEN_IS_MATCH(token_type) && PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH)) ? 1 : 0;
 				token_pot_param_break = ((TOKE_IS_VALID_POT_PARAM_BREAKER(token_type)
-						|| (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type) && loose_parameters))
+						|| (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type) && COLLECTORS_doCollectorsExist(collector)))
 						&& PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER)) ? 2 : 0;
 				token_no_param_break = PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_HAS_NO_VALUE) ? 4 : 0;
 
@@ -1638,9 +1765,8 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 		 * If parameter is not opened and the next value is not a command line option, it must be a typo or unknown.
 		 */
 		if (!is_parameter_opend) {
-			if (!isParsingClosed && permit_parse_break && TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type)) {
+			if (COLLECTORS_disableParsing(collector, token_type)) {
 				dpgprint("--------------PARSING CLOSED %X\n", token_type );
-				isParsingClosed = 1;
 				token_type = 0;
 				last_token_type = 0;
 				continue;
@@ -1657,19 +1783,9 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 				if (res != PST_OK) goto cleanup;
 				dpgprint("------------------  DONE   -----------------\n");
 				continue;
-			} else if (loose_parameters != NULL && (isParsingClosed || TOKEN_IS_VALUE_PARAM(token_type)
-					|| (permit_dash_collect && (TOKEN_IS_NULL_HAS_DASH(token_type) || TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type)))
-					|| (permit_flag_collect && (TOKEN_IS_PARAM(token_type) || TOKEN_IS_SHORT_PARAM_LONG_DASH(token_type)))
-					)) {
-				res = PARAM_addValue(loose_parameters, token, source, collect_prio);
-				if (res != PST_OK) goto cleanup;
-				loose_count++;
-				if (collect_limiter_on && loose_count == max_loose_count) {
-					loose_parameters = NULL;
-					dpgprint("$$ End of loose parameters '%s'\n", token);
-
-				}
-				dpgprint("$$ Lose param added '%s'\n", token);
+			} else if (COLLECTORS_add(collector, token_type, source, priority, token) > 0) {
+				dpgprint("Collected '%s'.\n", token);
+				continue;
 			} else {
 				if (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type) || TOKEN_IS_NULL_HAS_DASH(token_type)) {
 					res = param_set_add_typo_or_unknown(set, typo_helper, source, token, NULL);

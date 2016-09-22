@@ -300,7 +300,7 @@ static void Test_param_set_loose_parameters_end_of_commands(CuTest* tc) {
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
 	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
-	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_LOOSE_PERMIT_END_OF_COMMANDS);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_CLOSE_PARSING | PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED);
 	res += PARAM_SET_setParseOptions(set, "{d}", PST_PRSCMD_HAS_VALUE);
 	res += PARAM_SET_setParseOptions(set, "{e}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
@@ -347,60 +347,6 @@ static void Test_param_set_loose_parameters_end_of_commands(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
-static void Test_param_set_loose_parameters_collect_no_dashes(CuTest* tc) {
-	int res;
-	PARAM_SET *set = NULL;
-	char *argv[] = {
-		"<path>", "plah",					/* A default path at the first place. */
-		"-ab", "-", "-",	/* Array ended by an existing parameter. */
-		"-c", "x", "--",
-		"-f", "f", NULL};
-	int argc = 0;
-	int count = 0;
-	char buf[0xfff];
-
-	while(argv[argc] != NULL) argc++;
-
-	res = PARAM_SET_new("{a}{b}{c}", &set);
-	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
-
-	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
-	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_DEFAULT | PST_PRSCMD_COLLECT_LOOSE_VALUES);
-	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
-
-
-	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
-	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
-
-	res = PARAM_SET_getValueCount(set, "{a}{b}{c}", NULL, PST_PRIORITY_NONE, &count);
-	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
-	CuAssert(tc, "Invalid value count.", count == 5);
-
-	assert_value(tc, set, "a", 0, __FILE__, __LINE__, NULL, 0);
-	assert_value(tc, set, "a", 1, __FILE__, __LINE__, NULL, 1);
-
-	assert_value(tc, set, "b", 0, __FILE__, __LINE__, NULL, 0);
-	assert_value(tc, set, "b", 1, __FILE__, __LINE__, NULL, 1);
-
-	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "plah", 0);
-	assert_value(tc, set, "c", 1, __FILE__, __LINE__, "x", 0);
-	assert_value(tc, set, "c", 2, __FILE__, __LINE__, "f", 0);
-	assert_value(tc, set, "c", 3, __FILE__, __LINE__, NULL, 1);
-
-	/**
-	 * Check for unknown and typos.
-	 */
-	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
-
-	buf[0] = '\0';
-	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
-	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter '-'.\n"
-																"Unknown parameter '-'.\n"
-																"Unknown parameter '--'.\n"
-																"Unknown parameter 'f'.\n") == 0);
-
-	PARAM_SET_free(set);
-}
 
 static void Test_param_set_loose_parameters_collect_dashes(CuTest* tc) {
 	int res;
@@ -420,7 +366,7 @@ static void Test_param_set_loose_parameters_collect_dashes(CuTest* tc) {
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
 	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
-	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_LOOSE_DASHES);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
 
@@ -988,7 +934,6 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_cmd_special);
 	SUITE_ADD_TEST(suite, Test_param_set_cmd_special_array_break);
 	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_end_of_commands);
-	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_collect_no_dashes);
 	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_collect_dashes);
 	SUITE_ADD_TEST(suite, Test_param_last_parameter_without_mandatory_value);
 	SUITE_ADD_TEST(suite, Test_param_last_token_bunch_of_flags);
