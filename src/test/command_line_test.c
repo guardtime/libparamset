@@ -927,6 +927,125 @@ static void Test_expand_WC_on_CMD_WC_configured_WC_as_input(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_param_set_collect_befor_and_after_parsing_is_closed(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "plah",					/* A default path at the first place. */
+		"-c", "-", "-",
+		"--conf", "x",
+		"-a", "a_value",
+		"--",
+		"-f", "f", "-c", "-b", "a", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[0xfff];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{a}{b}{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{b}", PST_PRSCMD_DEFAULT | PST_PRSCMD_COLLECT_LOOSE_VALUES);
+	res += PARAM_SET_setParseOptions(set, "{a}", PST_PRSCMD_DEFAULT | PST_PRSCMD_CLOSE_PARSING | PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED | PST_PRSCMD_HAS_NO_FLAG | PST_PRSCMD_NO_TYPOS);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_getValueCount(set, "{a}{b}{c}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 10);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, "-f", 0);
+	assert_value(tc, set, "a", 1, __FILE__, __LINE__, "f", 0);
+	assert_value(tc, set, "a", 2, __FILE__, __LINE__, "-c", 0);
+	assert_value(tc, set, "a", 3, __FILE__, __LINE__, "-b", 0);
+	assert_value(tc, set, "a", 4, __FILE__, __LINE__, "a", 0);
+	assert_value(tc, set, "a", 5, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, "plah", 0);
+	assert_value(tc, set, "b", 1, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "b", 2, __FILE__, __LINE__, "x", 0);
+	assert_value(tc, set, "b", 3, __FILE__, __LINE__, "a_value", 0);
+	assert_value(tc, set, "b", 4, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, NULL, 1);
+
+
+	/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+
+	buf[0] = '\0';
+	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'conf'.\n"
+																"Unknown parameter 'a'.\n") == 0);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_param_set_collectors_without_the_flag(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "plah",					/* A default path at the first place. */
+		"-c", "-", "-",
+		"--conf", "x", "--",
+		"-f", "f", "-c", "-b", "a", NULL};
+	int argc = 0;
+	int count = 0;
+	char buf[0xfff];
+
+	while(argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{a}{b}{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{b}", PST_PRSCMD_DEFAULT | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_HAS_NO_FLAG);
+	res += PARAM_SET_setParseOptions(set, "{a}", PST_PRSCMD_DEFAULT | PST_PRSCMD_CLOSE_PARSING | PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED  | PST_PRSCMD_HAS_NO_FLAG);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+	res = PARAM_SET_getValueCount(set, "{a}{b}{c}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 9);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, "-f", 0);
+	assert_value(tc, set, "a", 1, __FILE__, __LINE__, "f", 0);
+	assert_value(tc, set, "a", 2, __FILE__, __LINE__, "-c", 0);
+	assert_value(tc, set, "a", 3, __FILE__, __LINE__, "-b", 0);
+	assert_value(tc, set, "a", 4, __FILE__, __LINE__, "a", 0);
+	assert_value(tc, set, "a", 5, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, "plah", 0);
+	assert_value(tc, set, "b", 1, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "b", 2, __FILE__, __LINE__, "x", 0);
+	assert_value(tc, set, "b", 3, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, NULL, 1);
+
+
+	/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+
+	buf[0] = '\0';
+	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'conf'.\n") == 0);
+
+	PARAM_SET_free(set);
+}
 
 CuSuite* Command_LineTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
@@ -947,6 +1066,8 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_command_line_check_for_highest_priority_last_element_errors);
 	SUITE_ADD_TEST(suite, Test_expand_WC_on_CMD_WC_not_configured_no_WC_input);
 	SUITE_ADD_TEST(suite, Test_expand_WC_on_CMD_WC_configured_WC_as_input);
+	SUITE_ADD_TEST(suite, Test_param_set_collect_befor_and_after_parsing_is_closed);
+	SUITE_ADD_TEST(suite, Test_param_set_collectors_without_the_flag);
 	return suite;
 }
 
