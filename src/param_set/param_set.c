@@ -698,6 +698,55 @@ static int isComment(const char *line) {
 	return 0;
 }
 
+int param_set_getParameterByConstraints(PARAM_SET *set, const char *names, const char *source, int priority, int at, PARAM **param, int *index, int *value_c_before) {
+	int res = PST_UNKNOWN_ERROR;
+	const char *pName = NULL;
+	char buf[1024];
+	int count_sum = 0;
+	PARAM *tmp = NULL;
+
+	if (set == NULL || names == NULL || index == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	/**
+	 * Get all the.
+	 */
+	pName = names;
+	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
+		PARAM *param = NULL;
+		int count = 0;
+
+		res = param_set_getParameterByName(set, buf, &param);
+		if (res != PST_OK) goto cleanup;;
+
+		res = PARAM_getValueCount(param, source, priority, &count);
+		if (res != PST_OK) goto cleanup;
+
+		if (count_sum + count > at) {
+			tmp = param;
+			*index = at - count_sum;
+			break;
+		}
+
+		count_sum += count;
+	}
+
+	*param = tmp;
+
+	/**
+	 * Indicators if some values existed before the first value is found;
+	 */
+	if (value_c_before != NULL) *value_c_before = count_sum;
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
 int PARAM_SET_new(const char *names, PARAM_SET **set){
 	int res;
 	PARAM_SET *tmp = NULL;
@@ -956,14 +1005,24 @@ int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *sourc
 	int res;
 	PARAM *param = NULL;
 	void *extras[2] = {NULL, NULL};
+	int virtual_at = 0;
+	int values_before_target;
 
 	if (set == NULL || name == NULL || obj == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;;
 	}
 
-	res = param_set_getParameterByName(set, name, &param);
+	res = param_set_getParameterByConstraints(set, name, source, priority, at, &param, &virtual_at, &values_before_target);
 	if (res != PST_OK) goto cleanup;
+
+	if (param == NULL && values_before_target > 0) {
+		res = PST_PARAMETER_VALUE_NOT_FOUND;
+		goto cleanup;
+	} else if (param == NULL && values_before_target == 0) {
+		res = PST_PARAMETER_EMPTY;
+		goto cleanup;
+	}
 
 	extras[0] = set;
 	extras[1] = ctxt;
@@ -990,16 +1049,27 @@ int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int p
 	int res;
 	PARAM *param = NULL;
 	PARAM_VAL *val = NULL;
+	int virtual_at = 0;
+	int values_before_target;
+
 
 	if (set == NULL || name == NULL || value == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;;
 	}
 
-	res = param_set_getParameterByName(set, name, &param);
+	res = param_set_getParameterByConstraints(set, name, source, priority, at, &param, &virtual_at, &values_before_target);
 	if (res != PST_OK) goto cleanup;
 
-	res = PARAM_getValue(param, source, priority, at, &val);
+	if (param == NULL && values_before_target > 0) {
+		res = PST_PARAMETER_VALUE_NOT_FOUND;
+		goto cleanup;
+	} else if (param == NULL && values_before_target == 0) {
+		res = PST_PARAMETER_EMPTY;
+		goto cleanup;
+	}
+
+	res = PARAM_getValue(param, source, priority, virtual_at, &val);
 	if (res != PST_OK) goto cleanup;
 
 

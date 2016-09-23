@@ -253,9 +253,15 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const char *source, int priority);
 
 /**
- * Extracts string from the \c PARAM_SET (see \ref PARAM_SET_add). If object
+ * Extracts strings from the \c PARAM_SET (see \ref PARAM_SET_add). If object
  * extractor is set, a string value is is always extracted. The user MUST not free
  * the returned string.
+ *
+ * Values are filtered by constraints. If multiple names are
+ * specified (e.g. name1,name2,name3) all the parameters are examined. If all the
+ * parameters do not contain any values \c PST_PARAMETER_EMPTY is returned, if some
+ * values are found and the end of the list is reached \c PST_PARAMETER_VALUE_NOT_FOUND
+ * is returned.
  *
  * \param	set			PARAM_SET object.
  * \param	name		parameters name.
@@ -275,6 +281,12 @@ int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int p
  * returned. By default the user MUST not free the returned object. If a custom
  * object extractor function is used, object must be freed if implementation
  * requires it.
+ *
+ * Values are filtered by constraints. If multiple names are
+ * specified (e.g. name1,name2,name3) all the parameters are examined. If all the
+ * parameters do not contain any values \c PST_PARAMETER_EMPTY is returned, if some
+ * values are found and the end of the list is reached \c PST_PARAMETER_VALUE_NOT_FOUND
+ * is returned.
  *
  * \param	set			PARAM_SET object.
  * \param	name		parameters name.

@@ -41,6 +41,30 @@ static void assert_param_set_value_count(CuTest* tc,
 	}
 }
 
+static void assert_value(CuTest* tc,
+		PARAM_SET *set, const char *name, int at,
+		const char *file, int line,
+		const char *expected) {
+	int res;
+	char *V = NULL;
+	char buf[2048];
+	int count = 0;
+
+	count += snprintf(buf + count, sizeof(buf) - count, "Invalid value '%s' at line %i. ", file, line);
+
+	res = PARAM_SET_getStr(set, name, NULL, PST_PRIORITY_NONE, at, &V);
+	if (res != PST_OK) {
+		count += snprintf(buf + count, sizeof(buf) - count, " Unable to get value from '%s' at %i.", name, at);
+		CuAssert(tc, buf, 0);
+	}
+
+	if (((expected != NULL && V != NULL) && strcmp(V, expected) != 0)
+			|| ((expected == NULL && V != NULL) || (expected != NULL && V == NULL))) {
+		count += snprintf(buf + count, sizeof(buf) - count, " Value expected '%s' but is '%s'.", expected, V);
+		CuAssert(tc, buf, 0);
+	}
+}
+
 /**
  * PARAM_SET_new
  * PARAM_SET_add
@@ -505,6 +529,43 @@ static void Test_set_get_str(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_set_get_str_multiple_parameters(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	int i = 0;
+
+
+	res = PARAM_SET_new("{a}{b}{c}{d}{e}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "a", "a_value", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "a", "a_value_2", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "b", NULL, NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "d", "not null", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "b", "b_value", NULL, 0);
+	CuAssert(tc, "Unable to add a value.", res == PST_OK);
+
+	res = PARAM_SET_addControl(set, "d", isFormatOk_isNull, NULL, NULL, NULL);
+
+	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, "a_value");
+	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, "a_value_2");
+	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, "not null");
+	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, NULL);
+	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, "b_value");
+
+
+
+	PARAM_SET_free(set);
+}
+
 static void Test_key_value_pairs(CuTest* tc) {
 	int res;
 	char key[2048];
@@ -594,30 +655,6 @@ static void Test_key_value_pairs(CuTest* tc) {
 
 	res = parse_key_value_pair(" test8 \" \" ", key, value, sizeof(key));
 	CuAssert(tc, "Invalid value.", res == PST_OK && strcmp(key, "test8") == 0 && strcmp(value, " ") == 0);
-}
-
-static void assert_value(CuTest* tc,
-		PARAM_SET *set, const char *name, int at,
-		const char *file, int line,
-		const char *expected) {
-	int res;
-	char *V = NULL;
-	char buf[2048];
-	int count = 0;
-
-	count += snprintf(buf + count, sizeof(buf) - count, "Invalid value '%s' at line %i. ", file, line);
-
-	res = PARAM_SET_getStr(set, name, NULL, PST_PRIORITY_NONE, at, &V);
-	if (res != PST_OK) {
-		count += snprintf(buf + count, sizeof(buf) - count, " Unable to get value from '%s' at %i.", name, at);
-		CuAssert(tc, buf, 0);
-	}
-
-	if (((expected != NULL && V != NULL) && strcmp(V, expected) != 0)
-			|| ((expected == NULL && V != NULL) || (expected != NULL && V == NULL))) {
-		count += snprintf(buf + count, sizeof(buf) - count, " Value expected '%s' but is '%s'.", expected, V);
-		CuAssert(tc, buf, 0);
-	}
 }
 
 static void Test_set_read_from_file(CuTest* tc) {
@@ -1007,6 +1044,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_read_line_2);
 	SUITE_ADD_TEST(suite, Test_param_set_constraint_errors);
 	SUITE_ADD_TEST(suite, Test_param_set_is_set_by_name);
+	SUITE_ADD_TEST(suite, Test_set_get_str_multiple_parameters);
 	return suite;
 }
 
