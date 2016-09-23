@@ -703,12 +703,15 @@ int param_set_getParameterByConstraints(PARAM_SET *set, const char *names, const
 	const char *pName = NULL;
 	char buf[1024];
 	int count_sum = 0;
+	PARAM *has_value = NULL;
 	PARAM *tmp = NULL;
 
 	if (set == NULL || names == NULL || index == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
+
+
 
 	/**
 	 * Get all the.
@@ -724,13 +727,26 @@ int param_set_getParameterByConstraints(PARAM_SET *set, const char *names, const
 		res = PARAM_getValueCount(param, source, priority, &count);
 		if (res != PST_OK) goto cleanup;
 
-		if (count_sum + count > at) {
+		if (count != NULL) {
+			has_value = param;
+		}
+
+		if (at == PST_INDEX_FIRST && has_value != NULL) {
+			tmp = has_value;
+			*index = PST_INDEX_FIRST;
+			break;
+		} else if (at != PST_INDEX_FIRST && at != PST_INDEX_LAST && count_sum + count > at) {
 			tmp = param;
 			*index = at - count_sum;
 			break;
 		}
 
 		count_sum += count;
+	}
+
+	if (at == PST_INDEX_LAST && has_value != NULL) {
+		tmp = has_value;
+		*index = PST_INDEX_LAST;
 	}
 
 	*param = tmp;

@@ -560,6 +560,8 @@ static void Test_set_get_str_multiple_parameters(CuTest* tc) {
 	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, "not null");
 	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, NULL);
 	assert_value(tc, set, "a,c,e,d,b", i++, __FILE__, __LINE__, "b_value");
+	assert_value(tc, set, "a,c,e,d,b", PST_INDEX_FIRST, __FILE__, __LINE__, "a_value");
+	assert_value(tc, set, "a,c,e,d,b", PST_INDEX_LAST, __FILE__, __LINE__, "b_value");
 
 
 
