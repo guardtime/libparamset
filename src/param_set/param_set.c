@@ -1901,6 +1901,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 cleanup:
 
 	if (typo_helper != NULL) free(typo_helper);
+	COLLECTORS_free(collector);
 
 	return res;
 }
