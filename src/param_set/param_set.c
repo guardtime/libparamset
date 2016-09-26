@@ -727,7 +727,7 @@ int param_set_getParameterByConstraints(PARAM_SET *set, const char *names, const
 		res = PARAM_getValueCount(param, source, priority, &count);
 		if (res != PST_OK) goto cleanup;
 
-		if (count != NULL) {
+		if (count != 0) {
 			has_value = param;
 		}
 
