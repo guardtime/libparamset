@@ -337,10 +337,10 @@ static void Test_task_definition_repair_messages(CuTest* tc) {
 	char buf[1024];
 
 	char exp_1[] = "Error: You have to define flag(s) '--_b', '--_c'.\n";
-	char exp_2[] = "Error: You have to define at least one the flag(s) '--_b', '--_c'.\n";
+	char exp_2[] = "Error: You have to define at least one of the flag(s) '--_b', '--_c'.\n";
 	char exp_3[] = "Error: You must not use flag(s) '-x'.\n";
 	char exp_4[] = "You have to define flag(s) '--_b'.\nYou must not use flag(s) '-x', '-g'.\n";
-	char exp_5[] = "Error: You have to define flag(s) '--_b'.\nError: You have to define at least one the flag(s) '--_h'.\nError: You must not use flag(s) '-x'.\n";
+	char exp_5[] = "Error: You have to define flag(s) '--_b'.\nError: You have to define at least one of the flag(s) '--_h'.\nError: You must not use flag(s) '-x'.\n";
 
 	res = PARAM_SET_new("{a}{_b}{_c}{d}{x}{y}{z}{f}{g}{_h}", &set);
 	CuAssert(tc, "Unable to create new task definition.", res == PST_OK && set != NULL);
