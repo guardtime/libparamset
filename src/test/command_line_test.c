@@ -85,7 +85,7 @@ static void Test_param_set_from_cmd_flags_bacward_compatibility(CuTest* tc) {
 	int count = 0;
 	char *value = NULL;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}{d}{x}{e}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -129,7 +129,7 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 	int count = 0;
 	char buf[1024];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}{d}{e}{x|xtra}{y}{w}{v}{f}{z}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -203,7 +203,7 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 	int count = 0;
 	char buf[0xfff];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{mb}{db}{mdb}{all}{e}{f}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -294,7 +294,7 @@ static void Test_param_set_loose_parameters_end_of_commands(CuTest* tc) {
 	int count = 0;
 	char buf[0xfff];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}{d}{e}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -360,7 +360,7 @@ static void Test_param_set_loose_parameters_collect_dashes(CuTest* tc) {
 	int count = 0;
 	char buf[0xfff];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -411,7 +411,7 @@ static void Test_param_last_parameter_without_mandatory_value(CuTest* tc) {
 	int argc = 0;
 	int count = 0;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -453,7 +453,7 @@ static void Test_param_last_token_bunch_of_flags(CuTest* tc) {
 	int argc = 0;
 	int count = 0;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -500,7 +500,7 @@ static void Test_command_line_short_and_long(CuTest* tc) {
 	int argc = 0;
 	int count = 0;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -532,7 +532,7 @@ static void Test_command_line_limited_loose_collect(CuTest* tc) {
 	int count = 0;
 	char buf[1024];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -572,7 +572,7 @@ static void Test_command_line_collect_lower_priority(CuTest* tc) {
 	int argc = 0;
 	int count = 0;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -621,7 +621,7 @@ static void Test_command_line_collect_has_no_flag_no_ignore_typos(CuTest* tc) {
 	int count = 0;
 	char buf[1024];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -673,7 +673,7 @@ static void Test_command_line_check_for_highest_priority_last_element_errors(CuT
 	int argc = 0;
 	char buf[1024];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{i}{j}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -707,7 +707,7 @@ static void Test_command_line_parameter_with_value_in_the_end_2(CuTest* tc) {
 	int argc = 0;
 	int count = 0;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{i}{o}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -748,7 +748,7 @@ static void Test_command_last_value_after_flag_type_parameteter(CuTest* tc) {
 	int count = 0;
 	char buf[1024];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{v}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -786,7 +786,7 @@ static void Test_command_test_1(CuTest* tc) {
 		"<path>", "-o", "test_1", "-d", "-h", NULL};
 	int argc = 0;
 	int count = 0;
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{o}{d}{h}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -874,7 +874,7 @@ static void Test_expand_WC_on_CMD_WC_not_configured_no_WC_input(CuTest* tc) {
 	char *argv[] = {
 		"<path>", "xxx", "zzz", "abc", "dbg", NULL};
 	int argc = 0;
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{i}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -898,7 +898,7 @@ static void Test_expand_WC_on_CMD_WC_configured_WC_as_input(CuTest* tc) {
 	int argc = 0;
 	int count = 0;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{i}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -941,7 +941,7 @@ static void Test_param_set_collect_befor_and_after_parsing_is_closed(CuTest* tc)
 	int count = 0;
 	char buf[0xfff];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
@@ -1001,7 +1001,7 @@ static void Test_param_set_collectors_without_the_flag(CuTest* tc) {
 	int count = 0;
 	char buf[0xfff];
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);

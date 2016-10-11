@@ -396,7 +396,7 @@ static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	int count = 0;
 	char *value = NULL;
 
-	while(argv[argc] != NULL) argc++;
+	while (argv[argc] != NULL) argc++;
 
 	res = PARAM_SET_new("{a}{b}{c}{d}{x}{e}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);

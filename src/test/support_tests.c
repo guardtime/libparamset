@@ -110,7 +110,7 @@ static void createSuiteXMLSummary(CuSuite* testSuite, CuString* summary) {
 			CuStringAppend(summary, ">\n");
 			CuStringAppendFormat(summary, "\t\t<failure type=\"AssertionFailure\">%s</failure>\n", tmpCuStr->buffer);
 			CuStringAppend(summary, "\t</testcase>\n");
-		} else if(testCase->skip){
+		} else if (testCase->skip){
 			CuStringDelete(tmpCuStr);
 			tmpCuStr = CuStringNew();
 			escapeStr(testCase->skipMessage, tmpCuStr);

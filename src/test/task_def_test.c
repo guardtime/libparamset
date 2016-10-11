@@ -115,7 +115,7 @@ static int param_set_add(CuTest* tc, PARAM_SET *set, const char *names, const ch
 	}
 
 	name = names;
-	while((name = category_extract_name(name ,name_buf, sizeof(name_buf), NULL)) != NULL) {
+	while ((name = category_extract_name(name ,name_buf, sizeof(name_buf), NULL)) != NULL) {
 		if (strlen(name_buf) != 0) {
 			res = PARAM_SET_add(set, name_buf, NULL, NULL, 0);
 			if (res != PST_OK) {
