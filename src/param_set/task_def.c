@@ -636,8 +636,8 @@ cleanup:
 
 int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensitivity){
 	int res;
-	int i = 0;
-	int j = 0;
+	size_t i = 0;
+	size_t j = 0;
 	double cons = 0;
 	double tmp_cons_small = 0;
 	int tmp_index_for_small = 0;
@@ -742,7 +742,7 @@ int TASK_SET_getConsistentTask(TASK_SET *task_set, TASK **task) {
 	TASK_DEFINITION *consistent = NULL;
 	TASK_DEFINITION *def_tmp = NULL;
 	TASK *tmp = NULL;
-	int i;
+	size_t i;
 
 	if (task_set == NULL || task == NULL) {
 		res = PST_INVALID_ARGUMENT;
@@ -849,7 +849,7 @@ cleanup:
 }
 
 int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff, int *ID) {
-	int i;
+	size_t i;
 	TASK_DEFINITION *tmp = NULL;
 	double cons = 0;
 
@@ -873,7 +873,7 @@ int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff, int *ID) {
 }
 
 char* TASK_SET_howToRepair_toString(TASK_SET *task_set, PARAM_SET *set, int ID, const char *prefix, char *buf, size_t buf_len) {
-	int i;
+	size_t i;
 	size_t count = 0;
 	char *tmp;
 
@@ -898,7 +898,7 @@ char* TASK_SET_howToRepair_toString(TASK_SET *task_set, PARAM_SET *set, int ID, 
 }
 
 char* TASK_SET_suggestions_toString(TASK_SET *task_set, int depth, char *buf, size_t buf_len) {
-	int i;
+	size_t i;
 	int n;
 	size_t count = 0;
 	TASK_DEFINITION *tmp = NULL;

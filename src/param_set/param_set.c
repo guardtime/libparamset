@@ -512,7 +512,7 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 
 int param_set_add_typo_from_list(PARAM_SET *set, const char *typo, const char *source, TYPO *typo_list, size_t typo_list_len) {
 	int res;
-	int i = 0;
+	size_t i = 0;
 
 	if (set == NULL || typo == NULL || typo_list == NULL || typo_list_len == 0) {
 		res = PST_INVALID_ARGUMENT;
