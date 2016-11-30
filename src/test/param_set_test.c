@@ -408,13 +408,13 @@ static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
 	CuAssert(tc, "Invalid value count.", count == 5);
 
-	res = PARAM_SET_getObj(set, "e", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "e", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_OK && strcmp(value, argv[4]) == 0);
 
-	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value == NULL);
 
-	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_PARAMETER_EMPTY);
 
 	PARAM_SET_free(set);
@@ -432,7 +432,7 @@ static int wrapper_return_str_append_a_value(void *extra, const char* str, void*
 		return PST_OUT_OF_MEMORY;
 	}
 
-	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, &tmp);
+	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, (void**)&tmp);
 	if (res != PST_OK) return res;
 
 	snprintf(m, 1024, "%s:%s", str, tmp);
@@ -473,14 +473,14 @@ static void Test_set_get_object(CuTest* tc) {
 	CuAssert(tc, "Unable to object extractor to 'd'.", res == PST_OK);
 
 
-	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value != NULL);
 
 	value = NULL;
-	res = PARAM_SET_getObj(set, "b", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "b", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_UNDEFINED_BEHAVIOUR && value == NULL);
 
-	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, &d_value);
+	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, (void**)&d_value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_OK && strcmp(d_value, "d_value:a_value") == 0);
 
 	free(d_value);

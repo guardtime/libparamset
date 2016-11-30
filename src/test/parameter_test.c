@@ -145,7 +145,7 @@ static void Test_parameterGetValue(CuTest* tc) {
 	int res;
 	PARAM *multiple = NULL;
 	PARAM_VAL *val = NULL;
-	char *value = NULL;
+	const char *value = NULL;
 	int prio = 0xffff;
 
 	res = PARAM_new("test1", NULL, 0, 0, &multiple);
@@ -473,7 +473,7 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	 int res;
 	 char **accepted_strs = (char**)ctx;
 	 char *str = NULL;
-	 char *src = NULL;
+	 const char *src = NULL;
 	 int prio = 0;
 	 int i = 0;
 	 PARAM_VAL *tmp = NULL;

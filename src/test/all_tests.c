@@ -22,7 +22,7 @@
 #include<ctype.h>
 #include<stdlib.h>
 
-#include "CuTest.h"
+#include "cutest/CuTest.h"
 #include "all_tests.h"
 #include "support_tests.h"
 #include <ctype.h>

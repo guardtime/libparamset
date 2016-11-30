@@ -29,20 +29,6 @@
 
 int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority);
 
-static void assert_param_set_value_count(CuTest* tc,
-		PARAM_SET* set, const char* names, const char* source, int priority,
-		const char *file, int line, int C) {
-	int res;
-	int count = 0;
-	char buf[2048];
-
-	res = PARAM_SET_getValueCount(set, names, source, priority, &count);
-	if (res != PST_OK || count != C) {
-		snprintf(buf, sizeof(buf), "Invalid count %i, expected %i in file '%s' at line %i.", count, C, file, line);
-		CuAssert(tc, buf, 0);
-	}
-}
-
 static void assert_value(CuTest* tc,
 		PARAM_SET *set, const char *name, int at,
 		const char *file, int line,
@@ -97,13 +83,13 @@ static void Test_param_set_from_cmd_flags_bacward_compatibility(CuTest* tc) {
 	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
 	CuAssert(tc, "Invalid value count.", count == 5);
 
-	res = PARAM_SET_getObj(set, "e", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "e", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_OK && strcmp(value, argv[4]) == 0);
 
-	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "a", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_OK && value == NULL);
 
-	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, &value);
+	res = PARAM_SET_getObj(set, "d", NULL, PST_PRIORITY_NONE, 0, (void**)&value);
 	CuAssert(tc, "Invalid value extracted.", res == PST_PARAMETER_EMPTY);
 
 
@@ -827,7 +813,7 @@ static int expand_wildcard_len3str(PARAM_VAL *param_value, void *ctx, int *value
 	 int res;
 	 char **accepted_strs = (char**)ctx;
 	 char *str = NULL;
-	 char *src = NULL;
+	 const char *src = NULL;
 	 int prio = 0;
 	 int i = 0;
 	 PARAM_VAL *tmp = NULL;
