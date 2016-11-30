@@ -1,0 +1,85 @@
+#
+# Copyright 2013-2015 Guardtime, Inc.
+#
+# This file is part of the Guardtime client SDK.
+#
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES, CONDITIONS, OR OTHER LICENSES OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+# "Guardtime" and "KSI" are trademarks or registered trademarks of
+# Guardtime, Inc., and no license to trademarks is granted; Guardtime
+# reserves and retains all trademark rights.
+#
+
+%if 0%{?rhel} == 7
+  %define dist .el7
+  # CentOS 7 would force ".el7.centos", we want to avoid that.
+%endif
+
+Summary: Command-line Parameter and Task handling library.
+Name: libparamset
+Version: @VERSION@
+Release: 1%{?dist}
+License: ASL 2.0
+Group: Development/Libraries
+Source: http://download.guardtime.com/%{name}-%{version}.tar.gz
+URL: http://www.guardtime.com/
+Vendor: Guardtime AS
+Packager: Guardtime AS <info@guardtime.com>
+BuildRequires: autoconf
+BuildRequires: automake
+BuildRequires: libtool
+
+%description
+Library for handling command-line parameters and tasks. Supports long and short
+parameters, configuration file, aliases, typo and unknown parameter handling and
+suggestions for the user.
+
+%package devel
+Summary: Parameter and task handling library for C
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description devel
+Library for handling command-line parameters and tasks. Supports long and short
+parameters, configuration file, aliases, typo and unknown parameter handling and
+suggestions for the user.
+
+%prep
+%setup
+autoreconf -iv
+
+%build
+%configure
+make
+
+%install
+rm -rf %{buildroot}
+make install DESTDIR=%{buildroot}
+
+%files
+%defattr(644,root,root,755)
+%{_libdir}/libparamset.so
+%{_libdir}/libparamset.so.*
+%{_docdir}/%{name}/changelog
+%{_docdir}/%{name}/LICENSE
+
+%files devel
+%defattr(644,root,root,755)
+
+%{_includedir}/param_set/parameter.h
+%{_includedir}/param_set/param_set.h
+%{_includedir}/param_set/param_set_obj_impl.h
+%{_includedir}/param_set/param_value.h
+%{_includedir}/param_set/strn.h
+%{_includedir}/param_set/task_def.h
+%{_includedir}/param_set/version.h
+%{_libdir}/libparamset.a
+%{_libdir}/libparamset.la
+# %{_libdir}/pkgconfig/libparamset.pc

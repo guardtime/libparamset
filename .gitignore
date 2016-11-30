@@ -16,7 +16,6 @@ Makefile.in
 /missing
 /stamp-h1
 /config
->>>>>>> release_3.4
 config.status
 config.log
 
@@ -24,7 +23,6 @@ GNUMakefile
 config.h
 
 .deps
-libksi.pc
 src/ksi/stamp-h1
 
 libtool

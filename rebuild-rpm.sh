@@ -1,3 +1,5 @@
+#!/bin/sh
+
 #
 # Copyright 2013-2015 Guardtime, Inc.
 #
@@ -17,33 +19,18 @@
 # reserves and retains all trademark rights.
 #
 
+BUILD_DIR=~/rpmbuild
+version=$(tr -d [:space:] <VERSION)
 
-lib_LTLIBRARIES = libparamset.la
+autoreconf -if && \
+./configure $* && \
+make clean && \
+make dist && \
+mkdir -p $BUILD_DIR/{BUILD,RPMS,SOURCES,SPECS,SRPMS,tmp} && \
+cp packaging/redhat/libparamset.spec $BUILD_DIR/SPECS/ && \
+cp libparamset-*.tar.gz $BUILD_DIR/SOURCES/ && \
+rpmbuild -ba $BUILD_DIR/SPECS/libparamset.spec && \
+cp $BUILD_DIR/RPMS/*/libparamset-*$version*.rpm . && \
+cp $BUILD_DIR/SRPMS/libparamset-*$version*.rpm .
 
-libparamset_la_SOURCES = \
-	param_set.c \
-	param_set.h \
-	param_set_obj_impl.h \
-	param_value.c \
-	param_value.h \
-	parameter.c \
-	parameter.h \
-	strn.c \
-	strn.h \
-	task_def.c \
-	task_def.h \
-	version.h
-
-
-otherincludedir = $(includedir)/param_set
-otherinclude_HEADERS = \
-	param_set.h \
-	param_set_obj_impl.h \
-	param_value.h \
-	parameter.h \
-	strn.h \
-	task_def.h \
-	version.h
-
-libparamset_la_LDFLAGS=-version-info @LTVER@
 

@@ -23,8 +23,8 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/param_set src/test
 
 
-
-EXTRA_DIST = VERSION changelog
+dist_doc_DATA = changelog LICENSE
+EXTRA_DIST = VERSION $(dist_doc_DATA)
 
 
 test: check 
