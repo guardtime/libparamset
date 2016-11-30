@@ -1,0 +1,1 @@
+nmake RTL=MTd DLL=lib clean test & out\bin\test.exe .\src\test\resource

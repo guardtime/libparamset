@@ -1,0 +1,8 @@
+*.sh eol=lf
+configure.ac eol=lf
+GNUmakefile.am eol=lf
+libparamset.spec.in eol=lf
+libparamset.spec eol=lf
+VERSION eol=lf
+changelog eol=lf
+changelog merge=union
