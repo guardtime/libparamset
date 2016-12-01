@@ -261,8 +261,24 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
 	if (file == NULL || buf == NULL || len == 0) return 0;
 	buf[0] = '\0';
 
+	/**
+	 * Unix LF 0x0A \n.
+	 * Windows CR LF 0x0D 0x0A \r \n.
+	 * Mac LF and possibly CR.
+	 */
 	while ((c = fgetc(file)) != 0 && count < len - 1) {
-		if (c == EOF || (c == '\r' || c == '\n')) {
+		if (c == EOF || (c == 0x0D || c == 0x0A)) {
+			if (c == '\r') {
+				fpos_t position;
+				int next_char;
+
+				fgetpos(file, &position);
+				next_char = fgetc(file);
+				if (next_char != '\n') {
+					fsetpos(file, &position);
+				}
+			}
+
 			line_coun++;
 			if (c == EOF) break;
 		}
@@ -1397,7 +1413,7 @@ int PARAM_SET_readFromFile(PARAM_SET *set, const char *fname, const char* source
 		goto cleanup;
 	}
 
-	file = fopen(fname, "r");
+	file = fopen(fname, "rb");
 	if (file == NULL) {
 		res = PST_IO_ERROR;
 		goto cleanup;

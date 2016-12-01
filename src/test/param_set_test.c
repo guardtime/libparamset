@@ -913,7 +913,7 @@ static void Test_param_set_read_line(CuTest* tc) {
 
 	FILE *f = NULL;
 
-	f = fopen(getFullResourcePath("new-lines.txt"), "r");
+	f = fopen(getFullResourcePath("new-lines.txt"), "rb");
 
 	res = read_line(f, buf, sizeof(buf), &rows, &count);
 	CuAssert(tc, "Invalid row.", strcmp(buf, "2222") == 0 && res == 0 && count == 4 && rows == 2);
