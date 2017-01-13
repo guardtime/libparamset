@@ -1,3 +1,5 @@
+* IMPROVEMENT: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
+
 2016-11-30 0.2.0
 
 * IMPROVEMENT: RPM packaging implemented.

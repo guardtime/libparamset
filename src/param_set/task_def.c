@@ -699,16 +699,16 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 					smaller_index = -1;
 					bigger_index = -1;
 				} else if (Bigger == B_j) {
-					smaller_index = i;
-					bigger_index = j;
+					smaller_index = (int) i;
+					bigger_index = (int) j;
 				} else {
 					res = PST_UNDEFINED_BEHAVIOUR;
 					goto cleanup;
 				}
 
 			} else if (task_set->cons[i] < task_set->cons[j]) {
-				smaller_index = i;
-				bigger_index = j;
+				smaller_index = (int) i;
+				bigger_index = (int) j;
 			} else {
 				smaller_index = -1;
 				bigger_index = -1;
@@ -719,7 +719,7 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 				task_set->cons[i] = task_set->cons[bigger_index];
 				task_set->cons[j] = tmp_cons_small;
 
-				tmp_index_for_small = task_set->index[smaller_index];
+				tmp_index_for_small = (int) task_set->index[smaller_index];
 				task_set->index[i] = task_set->index[bigger_index];
 				task_set->index[j] = tmp_index_for_small;
 
