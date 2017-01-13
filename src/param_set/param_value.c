@@ -573,6 +573,7 @@ int ITERATOR_new(PARAM_VAL *root, ITERATOR **itr) {
 	tmp->value = tmp->root;
 	tmp->i = 0;
 	tmp->source = NULL;
+	tmp->priority = PST_PRIORITY_NONE;
 
 	*itr = tmp;
 	tmp = NULL;
