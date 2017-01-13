@@ -39,8 +39,10 @@
  * PARAM_VAL_getPriority
  */
 
-static void assert_value(CuTest* tc,
-		PARAM_VAL *value, const char *S, int P, int at,
+static void assert_value_abstact(CuTest* tc,
+		void *value_container,
+		int (*getValue)(void*, const char*, int, int, PARAM_VAL **),
+		const char *S, int P, int at,
 		const char *file, int line,
 		const char *expected) {
 	int res;
@@ -51,7 +53,7 @@ static void assert_value(CuTest* tc,
 
 	count += snprintf(buf + count, sizeof(buf) - count, "Invalid value '%s' at line %i. ", file, line);
 
-	res = PARAM_VAL_getElement(value, S, P, at, &tmp);
+	res = getValue(value_container, S, P, at, &tmp);
 	if (res != PST_OK) {
 		count += snprintf(buf + count, sizeof(buf) - count, " Unable to get next.");
 		CuAssert(tc, buf, 0);
@@ -64,8 +66,10 @@ static void assert_value(CuTest* tc,
 	}
 }
 
-static void assert_value_unable_to_extract(CuTest* tc,
-		PARAM_VAL *value, const char *S, int P, int at,
+static void assert_value_unable_to_extract_abstract(CuTest* tc,
+		void *value_container,
+		int (*getValue)(void*, const char*, int, int, PARAM_VAL **),
+		const char *S, int P, int at,
 		const char *file, int line) {
 	int res1;
 	int res2;
@@ -76,7 +80,7 @@ static void assert_value_unable_to_extract(CuTest* tc,
 
 	count += snprintf(buf + count, sizeof(buf) - count, "It should be the last value '%s' at line %i. ", file, line);
 
-	res1 = PARAM_VAL_getElement(value, S, P, at, &tmp);
+	res1 = getValue(value_container, S, P, at, &tmp);
 
 	if (res1 != PST_PARAMETER_VALUE_NOT_FOUND) {
 		res2 = PARAM_VAL_extract(tmp, &V, NULL, NULL);
@@ -85,6 +89,25 @@ static void assert_value_unable_to_extract(CuTest* tc,
 		count += snprintf(buf + count, sizeof(buf) - count, " Value extracted '%s'.", V);
 		CuAssert(tc, buf, 0);
 	}
+}
+
+static void assert_value(CuTest* tc,
+		PARAM_VAL *value, const char *S, int P, int at,
+		const char *file, int line,
+		const char *expected) {
+		assert_value_abstact(tc,
+			(void*)value,
+			(int (*)(void*, const char*, int, int, PARAM_VAL **))PARAM_VAL_getElement,
+			S, P, at, file, line, expected);
+}
+
+static void assert_value_unable_to_extract(CuTest* tc,
+		PARAM_VAL *value, const char *S, int P, int at,
+		const char *file, int line) {
+		assert_value_unable_to_extract_abstract(tc,
+			(void*)value,
+			(int (*)(void*, const char*, int, int, PARAM_VAL **))PARAM_VAL_getElement,
+			S, P, at, file, line);
 }
 
 static void assert_value_count(CuTest* tc,
@@ -629,6 +652,93 @@ static void Test_param_pop(CuTest* tc) {
 	PARAM_VAL_free(pop);
 }
 
+static void itr_assert_value(CuTest* tc,
+		ITERATOR *value, const char *S, int P, int at,
+		const char *file, int line,
+		const char *expected) {
+		assert_value_abstact(tc,
+			(void*)value,
+			(int (*)(void*, const char*, int, int, PARAM_VAL **))ITERATOR_fetch,
+			S, P, at, file, line, expected);
+}
+
+static void itr_assert_value_unable_to_extract(CuTest* tc,
+		ITERATOR *value, const char *S, int P, int at,
+		const char *file, int line) {
+		assert_value_unable_to_extract_abstract(tc,
+			(void*)value,
+			(int (*)(void*, const char*, int, int, PARAM_VAL **))ITERATOR_fetch,
+			S, P, at, file, line);
+}
+static void Test_iteratorLifecycle(CuTest* tc) {
+	int res;
+	PARAM_VAL *value = NULL;
+	ITERATOR *itr = NULL;
+
+	/**
+	 * Create linked list.
+     */
+	res = PARAM_VAL_new("a", NULL, 0, &value);
+	CuAssert(tc, "Unable to create parameter value object.", res == PST_OK);
+
+	res = PARAM_VAL_new("b", "B", 3, &value);
+	CuAssert(tc, "Unable to create parameter value object.", res == PST_OK);
+
+	res = ITERATOR_new(value, &itr);
+	CuAssert(tc, "Unable to create iterator.", res == PST_OK);
+
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 0, __FILE__, __LINE__, "a");
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 1, __FILE__, __LINE__, "b");
+	itr_assert_value_unable_to_extract(tc, itr, NULL, PST_PRIORITY_NONE, 2,  __FILE__, __LINE__);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 0, __FILE__, __LINE__, "a");
+
+	ITERATOR_free(itr);
+	PARAM_VAL_free(value);
+}
+
+static void Test_iterator(CuTest* tc) {
+	int res = 0;
+	PARAM_VAL *value = NULL;
+	ITERATOR *itr = NULL;
+
+	/**
+	 * Create linked list.
+     */
+	res = PARAM_VAL_new("a", NULL, 0, &value);
+	res += PARAM_VAL_new("b", "B", 3, &value);
+	res += PARAM_VAL_new("c", NULL, 2, &value);
+	res += PARAM_VAL_new("d", "D", 3, &value);
+	res += PARAM_VAL_new("e", NULL, 0, &value);
+	res += PARAM_VAL_new("f", NULL, 1, &value);
+
+	CuAssert(tc, "Unable to create parameter value objects.", res == PST_OK);
+
+	res = ITERATOR_new(value, &itr);
+	CuAssert(tc, "Unable to create iterator.", res == PST_OK);
+
+
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 0, __FILE__, __LINE__, "a");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 0, __FILE__, __LINE__, "a");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 1, __FILE__, __LINE__, "b");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 1);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 1, __FILE__, __LINE__, "b");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 1);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 2, __FILE__, __LINE__, "c");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 2);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 3, __FILE__, __LINE__, "d");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 3);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 4, __FILE__, __LINE__, "e");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 4);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, 5, __FILE__, __LINE__, "f");
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 5);
+	itr_assert_value_unable_to_extract(tc, itr, NULL, PST_PRIORITY_NONE, 6,  __FILE__, __LINE__);
+
+	ITERATOR_free(itr);
+	PARAM_VAL_free(value);
+}
 
 CuSuite* ParamValueTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
@@ -639,6 +749,8 @@ CuSuite* ParamValueTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_extractPriority);
 	SUITE_ADD_TEST(suite, Test_param_extractInvalid);
 	SUITE_ADD_TEST(suite, Test_param_pop);
+	SUITE_ADD_TEST(suite, Test_iteratorLifecycle);
+	SUITE_ADD_TEST(suite, Test_iterator);
 
 	return suite;
 }

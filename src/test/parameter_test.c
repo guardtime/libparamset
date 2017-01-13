@@ -590,6 +590,42 @@ static void Test_WildcarcExpander(CuTest* tc) {
 	PARAM_free(param);
 }
 
+static void Test_root_and_get_values(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	PARAM_VAL *value = NULL;
+
+	/**
+	 * Create some parameter objects.
+	 */
+	res = PARAM_new("string", NULL, 0, PST_PRSCMD_DEFAULT | PST_PRSCMD_EXPAND_WILDCARD, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res += PARAM_addValue(param, "a", NULL, 0);
+	res += PARAM_addValue(param, "b", NULL, 0);
+	res += PARAM_addValue(param, "c", NULL, 0);
+	res += PARAM_addValue(param, "d", NULL, 0);
+	res += PARAM_addValue(param, "e", NULL, 0);
+	res += PARAM_addValue(param, "f", NULL, 0);
+	CuAssert(tc, "Unable to add valid parameters.", res == PST_OK);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Unable to get value from parameter.", res == PST_OK);
+	CuAssert(tc, "Wrong value extracted.", res == PST_OK && strcmp(value->cstr_value, "a") == 0);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 1, &value);
+	CuAssert(tc, "Unable to get value from parameter.", res == PST_OK);
+	CuAssert(tc, "Wrong value extracted.", res == PST_OK && strcmp(value->cstr_value, "b") == 0);
+
+	res = PARAM_clearValue(param, NULL, PST_PRIORITY_NONE, 0);
+	CuAssert(tc, "Unable to clear first (root) value.", res == PST_OK);
+
+	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 0, &value);
+	CuAssert(tc, "Unable to get value from parameter.", res == PST_OK);
+	CuAssert(tc, "Wrong value extracted.", res == PST_OK && strcmp(value->cstr_value, "b") == 0);
+
+	PARAM_free(param);
+}
 
 CuSuite* ParameterTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
@@ -600,6 +636,7 @@ CuSuite* ParameterTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_ObjectGetter);
 	SUITE_ADD_TEST(suite, Test_ParseOptionSetter);
 	SUITE_ADD_TEST(suite, Test_WildcarcExpander);
+	SUITE_ADD_TEST(suite, Test_root_and_get_values);
 
 	return suite;
 }
