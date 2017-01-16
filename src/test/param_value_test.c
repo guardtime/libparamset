@@ -740,6 +740,49 @@ static void Test_iterator(CuTest* tc) {
 	PARAM_VAL_free(value);
 }
 
+static void Test_iteratorWithSpecialAtValues(CuTest* tc) {
+	int res = 0;
+	PARAM_VAL *value = NULL;
+	ITERATOR *itr = NULL;
+
+	/**
+	 * Create linked list.
+     */
+	res = PARAM_VAL_new("a", NULL, 0, &value);
+	res += PARAM_VAL_new("b", "B", 3, &value);
+	res += PARAM_VAL_new("c", NULL, 2, &value);
+	res += PARAM_VAL_new("d", "D", 3, &value);
+	res += PARAM_VAL_new("e", NULL, 0, &value);
+	res += PARAM_VAL_new("f", NULL, 1, &value);
+
+	CuAssert(tc, "Unable to create parameter value objects.", res == PST_OK);
+
+	res = ITERATOR_new(value, &itr);
+	CuAssert(tc, "Unable to create iterator.", res == PST_OK);
+
+
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, PST_INDEX_FIRST, __FILE__, __LINE__, "a");
+
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, "D", PST_PRIORITY_NONE, PST_INDEX_FIRST, __FILE__, __LINE__, "d");
+
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, "B", PST_PRIORITY_NONE, PST_INDEX_FIRST, __FILE__, __LINE__, "b");
+
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, NULL, 3, PST_INDEX_FIRST, __FILE__, __LINE__, "b");
+
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == 0);
+	itr_assert_value(tc, itr, NULL, 3, PST_INDEX_LAST, __FILE__, __LINE__, "d");
+
+	CuAssert(tc, "Iterator Internal index variable mismatch.", itr->i == PST_INDEX_LAST);
+	itr_assert_value(tc, itr, NULL, PST_PRIORITY_NONE, PST_INDEX_LAST, __FILE__, __LINE__, "f");
+
+	ITERATOR_free(itr);
+	PARAM_VAL_free(value);
+}
+
 CuSuite* ParamValueTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 
@@ -751,6 +794,7 @@ CuSuite* ParamValueTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_pop);
 	SUITE_ADD_TEST(suite, Test_iteratorLifecycle);
 	SUITE_ADD_TEST(suite, Test_iterator);
+	SUITE_ADD_TEST(suite, Test_iteratorWithSpecialAtValues);
 
 	return suite;
 }
