@@ -2067,7 +2067,9 @@ char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *pref
 		if (PARAM_isParsOptionSet(parameter, PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE)) {
 			res = PARAM_getValue(parameter, NULL, PST_PRIORITY_HIGHEST, PST_INDEX_LAST, &invalid);
 
-			if (res != PST_OK && res != PST_PARAMETER_EMPTY && res != PST_PARAMETER_VALUE_NOT_FOUND) return NULL;
+			if (res == PST_PARAMETER_EMPTY || res == PST_PARAMETER_VALUE_NOT_FOUND) continue;
+
+			if (res != PST_OK) return NULL;
 			count += param_value_add_errorstring_to_buf(parameter, invalid, prefix, getErrString, buf + count, buf_len - count);
 		} else {
 			while (PARAM_getInvalid(parameter, NULL, PST_PRIORITY_NONE, n++, &invalid) == PST_OK) {
