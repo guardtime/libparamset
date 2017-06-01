@@ -734,17 +734,17 @@ int param_set_getParameterByConstraints(PARAM_SET *set, const char *names, const
 	 */
 	pName = names;
 	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
-		PARAM *param = NULL;
+		PARAM *parameter = NULL;
 		int count = 0;
 
-		res = param_set_getParameterByName(set, buf, &param);
+		res = param_set_getParameterByName(set, buf, &parameter);
 		if (res != PST_OK) goto cleanup;;
 
-		res = PARAM_getValueCount(param, source, priority, &count);
+		res = PARAM_getValueCount(parameter, source, priority, &count);
 		if (res != PST_OK) goto cleanup;
 
 		if (count != 0) {
-			has_value = param;
+			has_value = parameter;
 		}
 
 		if (at == PST_INDEX_FIRST && has_value != NULL) {
@@ -752,7 +752,7 @@ int param_set_getParameterByConstraints(PARAM_SET *set, const char *names, const
 			*index = PST_INDEX_FIRST;
 			break;
 		} else if (at != PST_INDEX_FIRST && at != PST_INDEX_LAST && count_sum + count > at) {
-			tmp = param;
+			tmp = parameter;
 			*index = at - count_sum;
 			break;
 		}
