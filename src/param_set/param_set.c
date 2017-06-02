@@ -1823,6 +1823,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 					dpgprint("----------------------------------\n");
 					if (value_counter == 0) {
 						res = PARAM_SET_add(set, opend_parameter->flagName, NULL, source, priority);
+						if (res != PST_OK) goto cleanup;
 						dpgprint("P:CLOSE (%s = NULL)%s\n", opend_parameter->flagName, break_type_to_string(token_match_break + token_pot_param_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
 					} else {
 						dpgprint("P:CLOSE (%s ---)%s\n", opend_parameter->flagName, break_type_to_string(token_match_break + token_pot_param_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
@@ -1855,6 +1856,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 
 				if (last_token_brake && value_counter == 0) {
 					res = PARAM_SET_add(set, opend_parameter->flagName, NULL, source, priority);
+					if (res != PST_OK) goto cleanup;
 				}
 
 				continue;
