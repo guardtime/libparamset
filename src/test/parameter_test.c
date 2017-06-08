@@ -664,6 +664,51 @@ static void Test_constantPrintName(CuTest* tc) {
 	PARAM_free(param);
 }
 
+static void Test_getAttributes(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	PARAM_ATR attributes;
+
+	res = PARAM_new("p", NULL, 0, PST_PRSCMD_DEFAULT | PST_PRSCMD_EXPAND_WILDCARD, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res += PARAM_addValue(param, "a", "A", 0);
+	res += PARAM_addValue(param, "b", NULL, 1);
+	res += PARAM_addValue(param, "c", NULL, 0);
+	CuAssert(tc, "Unable to add valid parameters.", res == PST_OK);
+
+	res = PARAM_getAtr( param, "A", 0, PST_INDEX_LAST, &attributes);
+	CuAssert(tc, "Unable to get attributes.", res == PST_OK);
+	CuAssert(tc, "Wrong value extracted.", strcmp(attributes.source, "A") == 0 && attributes.priority == 0);
+
+	res = PARAM_getAtr(param, NULL, 1, PST_INDEX_LAST, &attributes);
+	CuAssert(tc, "Unable to get attributes.", res == PST_OK);
+	CuAssert(tc, "Wrong value extracted.", attributes.source == NULL && attributes.priority == 1);
+
+	res = PARAM_getAtr(param, NULL, 0, PST_INDEX_LAST, &attributes);
+	CuAssert(tc, "Unable to get attributes.", res == PST_OK);
+	CuAssert(tc, "Wrong value extracted.", attributes.source == NULL && attributes.priority == 0);
+
+	PARAM_free(param);
+}
+
+static void Test_getName(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	const char *name = NULL;
+	const char *alias = NULL;
+
+	res = PARAM_new("p", "P", 0, PST_PRSCMD_DEFAULT | PST_PRSCMD_EXPAND_WILDCARD, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_getName(param, &name, &alias);
+	CuAssert(tc, "Unable to get name and alias.", res == PST_OK);
+	CuAssert(tc, "Name is not correct.", strcmp(name, "p") == 0);
+	CuAssert(tc, "Alias is not correct.", strcmp(alias, "P") == 0);
+
+	PARAM_free(param);
+}
+
 CuSuite* ParameterTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 
@@ -676,6 +721,8 @@ CuSuite* ParameterTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_root_and_get_values);
 	SUITE_ADD_TEST(suite, Test_defaultPrintName);
 	SUITE_ADD_TEST(suite, Test_constantPrintName);
+	SUITE_ADD_TEST(suite, Test_getAttributes);
+	SUITE_ADD_TEST(suite, Test_getName);
 
 	return suite;
 }

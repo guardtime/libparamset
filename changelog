@@ -1,4 +1,6 @@
 * IMPROVEMENT: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
+* IMPROVEMENT: PARAM_SET_typosToString interface changed - flag parameter removed.
+* FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
 
 2016-11-30 0.2.0
 
