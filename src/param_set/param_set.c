@@ -1141,7 +1141,6 @@ cleanup:
 int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int priority, int at, PARAM_ATR *atr) {
 	int res;
 	PARAM *param = NULL;
-	PARAM_VAL *val = NULL;
 
 	if (set == NULL || name == NULL || atr == NULL) {
 		res = PST_INVALID_ARGUMENT;
