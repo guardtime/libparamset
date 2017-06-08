@@ -28,24 +28,24 @@ extern "C" {
 
 /**
  * Parameter value data structure that contains the data and information about its
- * status, priority and source. Data is hold as a linked list of values. 
- */	
-	
+ * status, priority and source. Data is hold as a linked list of values.
+ */
+
 struct PARAM_VAL_st{
 	char *cstr_value;			/* c-string value for raw argument. */
 	char *source;				/* Optional c-string source description, e.g. file, environment. */
 	int priority;				/* Priority level constraint. */
 	int formatStatus;			/* Format status. */
 	int contentStatus;			/* Content status. */
-	
+
 	PARAM_VAL *previous;		/* Link to the previous value. */
 	PARAM_VAL *next;			/* Link to the next value. */
-};	
+};
 
 
 /**
  * Parameter data structure that describes a parameter and its properties including
- * linked list of values.  
+ * linked list of values.
  */
 
 struct PARAM_st{
@@ -59,7 +59,7 @@ struct PARAM_st{
 	PARAM_VAL *last_element;	/* The last value in list. */
 	PARAM_VAL *arg;		/* Linked list of parameter values. */
 	ITERATOR *itr;
-	
+
 	/**
 	 * A function to extract object from the parameter.
 	 * int extractObject(void *extra, const char *str, void **obj)
@@ -69,7 +69,7 @@ struct PARAM_st{
 	 * Returns PST_OK if successful, error code otherwise.
 	 */
 	int (*extractObject)(void *extra, const char *str, void **obj);
-	
+
 	/**
 	 * Function convert takes input as raw parameter, followed by a buffer and its size.
 	 * str - c-string value that belongs to PARAM_VAL object.
@@ -78,7 +78,7 @@ struct PARAM_st{
 	 * Returns 1 if conversion successful, 0 otherwise.
 	 */
 	int (*convert)(const char *str, char *buf, unsigned buf_len);
-	
+
 	/**
 	 * Function \c controlFormat takes input as raw parameter and performs format
 	 * check.
@@ -86,7 +86,7 @@ struct PARAM_st{
 	 * Returns 0 if format ok, error code otherwise.
 	 */
 	int (*controlFormat)(const char *str);
-	
+
 	/**
 	 * Function \c controlContent takes input as raw parameter and performs content
 	 * check.
@@ -94,7 +94,19 @@ struct PARAM_st{
 	 * Returns 0 if content ok, error code otherwise.
 	 */
 	int (*controlContent)(const char *str);
-	
+
+	/**
+	 * This buffer and its size is feed to the abstract function getPrintName.
+	 * It is not ment to be used directly.
+	 */
+	char print_name_buf[256];
+
+	/**
+	 * Function \c getPrintName is used to return string representation of the
+	 * parameter.
+	 */
+	const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len);
+
 	/**
 	 * A function to expand tokens that contain wildcard character (WC) to array of
 	 * new values. Characters '?' and '*' are WC. The first argument is the param_value
@@ -112,7 +124,7 @@ struct PARAM_st{
 	 * PARAM_SET_parseCMD.
 	 */
 	int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift);
-	
+
 	/**
 	 * Additional context for expand_wildcard.
 	 */
@@ -128,7 +140,7 @@ struct PARAM_st{
 struct PARAM_SET_st {
 	/* Parameter count. */
 	int count;
-	
+
 	/* List of parameters. */
 	PARAM **parameter;
 	PARAM *typos;

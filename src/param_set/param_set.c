@@ -30,8 +30,7 @@
 
 #define TYPO_SENSITIVITY 10
 #define TYPO_MAX_COUNT 5
-
-//typedef struct INT_st {int value;} INT;
+#define VARIABLE_IS_NOT_USED(v) ((void)(v));
 
 static int isValidNameChar(int c) {
 	if ((ispunct(c) || isspace(c)) && c != '_' && c != '-') return 0;
@@ -933,6 +932,27 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 	return PST_OK;
 }
 
+int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
+							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)){
+	int res;
+	PARAM *tmp = NULL;
+	const char *pName = NULL;
+	char buf[1024];
+
+	if (set == NULL || names == NULL || (constv == NULL && getPrintName == NULL) || (constv != NULL && getPrintName != NULL)) return PST_INVALID_ARGUMENT;
+
+	pName = names;
+	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
+		res = param_set_getParameterByName(set, buf, &tmp);
+		if (res != PST_OK) return res;
+
+		res = PARAM_setPrintName(tmp, constv, getPrintName);
+		if (res != PST_OK) return res;
+	}
+
+	return PST_OK;
+}
+
 int PARAM_SET_wildcardExpander(PARAM_SET *set, const char *names,
 		void *ctx,
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)){
@@ -1131,18 +1151,33 @@ int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int p
 	res = param_set_getParameterByName(set, name, &param);
 	if (res != PST_OK) goto cleanup;
 
-	res = PARAM_getValue(param, source, priority, at, &val);
+	res = PARAM_getAtr(param, source, priority, at, atr);
 	if (res != PST_OK) goto cleanup;
 
+	res = PST_OK;
 
-	atr->cstr_value = val->cstr_value;
-	atr->formatStatus = val->formatStatus;
-	atr->contentStatus = val->contentStatus;
-	atr->priority = val->priority;
-	atr->source = val->source;
-	atr->name = param->flagName;
-	atr->alias = param->flagAlias;
+cleanup:
 
+	return res;
+}
+
+int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_name) {
+	int res;
+	PARAM *param = NULL;
+	const char *tmp = NULL;
+
+	if (set == NULL || name == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	res = param_set_getParameterByName(set, name, &param);
+	if (res != PST_OK) goto cleanup;
+
+	tmp = PARAM_getPrintName(param);
+	if (tmp == NULL) goto cleanup;
+
+	*print_name = tmp;
 	res = PST_OK;
 
 cleanup:
@@ -2029,9 +2064,8 @@ static size_t param_value_add_errorstring_to_buf(PARAM *parameter, PARAM_VAL *in
 	/**
 	 * Add the parameter and its value.
 	 */
-	count += PST_snprintf(buf + count, buf_len - count, "%s%s '%s'.",
-							strlen(parameter->flagName) > 1 ? "--" : "-",
-							parameter->flagName,
+	count += PST_snprintf(buf + count, buf_len - count, "%s '%s'.",
+							PARAM_getPrintName(parameter),
 							value != NULL ? value : ""
 							);
 
@@ -2160,7 +2194,7 @@ char* PARAM_SET_syntaxErrorsToString(const PARAM_SET *set, const char *prefix, c
 	return buf;
 }
 
-char* PARAM_SET_typosToString(PARAM_SET *set, int flags, const char *prefix, char *buf, size_t buf_len) {
+char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
 	int res;
 	const char *use_prefix = NULL;
 	PARAM_VAL *typo = NULL;
@@ -2171,16 +2205,6 @@ char* PARAM_SET_typosToString(PARAM_SET *set, int flags, const char *prefix, cha
 	int n = 0;
 	const char *similar = NULL;
 	size_t count = 0;
-	char *hyphen = "";
-	char *d_hyphen = "";
-
-	if (flags & PST_TOSTR_HYPHEN) {
-		hyphen = "-";
-		d_hyphen = "-";
-	} else if (flags & PST_TOSTR_DOUBLE_HYPHEN) {
-		hyphen = "-";
-		d_hyphen = "--";
-	}
 
 	if (set == NULL || buf == NULL || buf_len == 0) {
 		return NULL;
@@ -2201,13 +2225,17 @@ char* PARAM_SET_typosToString(PARAM_SET *set, int flags, const char *prefix, cha
 		if (res != PST_OK) return NULL;
 
 		for (n = 0; n < similar_count; n++) {
+			PARAM *param = NULL;
+
 			res = PARAM_getObject(set->typos, name, 0, n, NULL, (void**)&similar);
 			if (res != PST_OK || similar == NULL) return NULL;
 
-			count += PST_snprintf(buf + count, buf_len - count, "%sDid You mean '%s%s' instead of '%s'.\n",
+			res = param_set_getParameterByName(set, similar, &param);
+			if (res != PST_OK || param == NULL) return NULL;
+
+			count += PST_snprintf(buf + count, buf_len - count, "%sDid You mean '%s' instead of '%s'.\n",
 						use_prefix,
-						strlen(similar) > 1 ? d_hyphen : hyphen,
-						similar,
+						PARAM_getPrintName(param),
 						name);
 			if (count >= buf_len - 1) return buf;
 		}

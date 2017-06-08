@@ -70,31 +70,31 @@ enum param_set_err {
 
 enum enum_priority {
 	PST_PRIORITY_NOTDEFINED = -4,
-	
+
 	/* Priority for the most significant priority level. */
 	PST_PRIORITY_HIGHEST = -3,
-	
+
 	/* Priority for the least significant priority level. */
 	PST_PRIORITY_LOWEST = -2,
-	
+
 	/* Priority level is not used when filtering elements. */
 	PST_PRIORITY_NONE = -1,
-	
+
 	/* Count of possible priority values beginning from PST_PRIORITY_VALID_BASE. */
 	PST_PRIORITY_COUNT = 0xffff,
-	
+
 	/* The valid base for priority level. */
 	PST_PRIORITY_VALID_BASE = 0,
-		
+
 	/* The valid highest priority level.*/
 	PST_PRIORITY_VALID_ROOF = PST_PRIORITY_VALID_BASE + PST_PRIORITY_COUNT - 1 ,
-	
+
 	/* To extract values higher than A, use priority A + PST_PRIORITY_HIGHER_THAN*/
 	PST_PRIORITY_HIGHER_THAN = PST_PRIORITY_VALID_ROOF + 1,
-	
+
 	/* To extract values lower than A, use priority A + PST_PRIORITY_LOWER_THAN*/
 	PST_PRIORITY_LOWER_THAN = PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_COUNT,
-	
+
 	 /* Priorities greater than that are all invalid. */
 	PST_PRIORITY_FIELD_OUT_OF_RANGE = PST_PRIORITY_LOWER_THAN + PST_PRIORITY_COUNT
 };
@@ -107,12 +107,6 @@ enum enum_status {
 enum enum_value_index {
 	PST_INDEX_LAST = -1,
 	PST_INDEX_FIRST = 0,
-};
-
-enum enum_to_str_artifacts {
-	PST_TOSTR_NONE = 0x0,
-	PST_TOSTR_HYPHEN = 0x02,
-	PST_TOSTR_DOUBLE_HYPHEN = 0x04 ,
 };
 
 struct PARAM_ATR_st {
@@ -231,6 +225,29 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 		int (*extractObject)(void *, const char *, void**));
 
 /**
+ * This function is used to alter the way the parameter is represented in (error)
+ * messages or returned by \see PARAM_getPrintName.
+ *
+ * If constv is not NULL, a user specified constant value is used. If constv is
+ * NULL an abstract function getPrintName must be specified that formats the string.
+ * Default print format for long and short parameters are '--long-option' and '-a'.
+ *
+ * const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)
+ * param   - this PARAM object.
+ * buf     - Internal buffer with constant size. May be left unused.
+ * buf_len - The size of the internal buffer.
+ * Returns string that is the string representation of parameter.
+ *
+ * \param	set				PARAM_SET object.
+ * \param	names			List of names to add the functions.
+ * \param	constv			Constant string representation of the parameter. Can be NULL.
+ * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is NULL. Can be NULL.
+ * \return \c PST_OK when successful, error code otherwise.
+ */
+int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
+							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
+
+/**
  * Appends parameter to the set. Invalid value format or content is not handled
  * as error if it is possible to append it. If parameter can have only one value,
  * it is still possible to add more. Internal format, content or count errors can
@@ -317,7 +334,10 @@ int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int p
 int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *source, int priority, int at, void *ctxt, void **obj);
 
 /**
- * Extract a values attributes with the given constraints.
+ * Extract a values attributes with the given constraints. Note that \c name is
+ * the real string representation of the parameters name and is NOT altered by
+ * function PARAM_SET_setPrintName. See \ref PARAM_SET_getPrintName to extract
+ * parameters print name.
  * \param	set			PARAM_SET object.
  * \param	name		parameters name.
  * \param	source		Constraint for the source, can be NULL.
@@ -326,9 +346,20 @@ int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *sourc
  * \param	atr
  * \return \c PST_OK when successful, error code otherwise. Some more common error
  * codes: 	\c PST_INVALID_ARGUMENT,  \c PST_PARAMETER_NOT_FOUND \c PST_PARAMETER_EMPTY
- * \c PST_PARAMETER_VALUE_NOT_FOUND
+ * \c PST_PARAMETER_VALUE_NOT_FOUND.
  */
 int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int priority, int at, PARAM_ATR *atr);
+
+/**
+ * This function extracts parameters print name. See \ref PARAM_SET_setPrintName
+ * to alter the result.
+ * \param	set			PARAM_SET object.
+ * \param	name		Parameters name.
+ * \param	print_name	Pointer to receiving pointer.
+ * \return \c PST_OK when successful, error code otherwise. Some more common error
+ * codes: 	\c PST_INVALID_ARGUMENT,  \c PST_PARAMETER_NOT_FOUND;
+ */
+int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_name);
 
 /**
  * Removes all values from the specified parameter list. Parameter list is defined
@@ -478,13 +509,12 @@ char* PARAM_SET_toString(PARAM_SET *set, char *buf, size_t buf_len);
 /**
  * Generates typo failure string
  * \param	set		PARAM_SET object.
- * \param	flags	Optional flags to modify output. Use PST_TOSTR_x values.
  * \param	prefix	prefix to each typo failure string. Can be NULL.
  * \param	buf		receiving buffer.
  * \param	buf_len	receiving buffer size.
  * \return buf if successful, NULL otherwise.
  */
-char* PARAM_SET_typosToString(PARAM_SET *set, int flags, const char *prefix, char *buf, size_t buf_len);
+char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, size_t buf_len);
 
 /**
  * Generates unknown parameter error string.

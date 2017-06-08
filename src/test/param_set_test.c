@@ -19,6 +19,7 @@
 
 #include "cutest/CuTest.h"
 #include "all_tests.h"
+#include "../param_set/strn.h"
 #include "../param_set/param_value.h"
 #include "../param_set/parameter.h"
 #include "../param_set/param_set.h"
@@ -350,7 +351,7 @@ static void Test_param_set_typos(CuTest* tc) {
 	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
 
 
-	PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, "Typo: ", buf, sizeof(buf));
+	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
 	CuAssert(tc, "Invalid string generated.", strcmp(buf, expected) == 0);
 
 
@@ -873,7 +874,7 @@ static void Test_param_set_typos_sub_str_middle(CuTest* tc) {
 	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
 
 
-	PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, "Typo: ", buf, sizeof(buf));
+	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
 	CuAssert(tc, "Invalid string generated.", strcmp(buf, expected) == 0);
 //	printf("%s\n", buf);
 
@@ -894,11 +895,8 @@ static void Test_param_set_typos_substring_at_beginning(CuTest* tc) {
 	CuAssert(tc, "There should be typos.", PARAM_SET_isTypoFailure(set));
 
 
-	PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, "Typo: ", buf, sizeof(buf));
+	PARAM_SET_typosToString(set, "Typo: ", buf, sizeof(buf));
 	CuAssert(tc, "Invalid string generated.", strcmp(buf, "Typo: Did You mean '--aggr-user' instead of 'ag'.\n") == 0);
-
-	PARAM_SET_typosToString(set, PST_TOSTR_NONE, "Typo: ", buf, sizeof(buf));
-	CuAssert(tc, "Invalid string generated.", strcmp(buf, "Typo: Did You mean 'aggr-user' instead of 'ag'.\n") == 0);
 
 //	printf("A '%s' B", buf);
 	PARAM_SET_free(set);
@@ -1023,6 +1021,72 @@ static void Test_param_set_is_set_by_name(CuTest* tc) {
 
 	PARAM_SET_free(set);
 }
+
+static const char* getPrintName(PARAM *param, char *buf, unsigned buf_len) {
+	int count = 0;
+	const char *name = NULL;
+
+	PARAM_getName(param, &name, NULL);
+	PARAM_getValueCount(param, NULL, PST_PRIORITY_NONE, &count);
+
+	PST_snprintf(buf, buf_len, "%s[%i]", name, count);
+	return buf;
+}
+
+static void Test_param_set_set_print_name(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *printName = NULL;
+	/**
+	 * Create set and add control functions.
+	 */
+	res = PARAM_SET_new("{1}{2}{3}{4}{5}{6}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+
+	res = PARAM_SET_setPrintName(set, "1", "<const 1>", NULL);
+	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
+
+	res = PARAM_SET_setPrintName(set, "2,3", "<const 23>", NULL);
+	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
+
+	res = PARAM_SET_setPrintName(set, "4", NULL, getPrintName);
+	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
+
+	res = PARAM_SET_setPrintName(set, "5,6", NULL, getPrintName);
+	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "4", NULL, NULL, 0);
+	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "5", NULL, NULL, 0);
+	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
+
+	res = PARAM_SET_add(set, "5", NULL, NULL, 0);
+	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
+
+
+	res = PARAM_SET_getPrintName(set, "1", &printName);
+	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "<const 1>") == 0);
+
+	res = PARAM_SET_getPrintName(set, "2", &printName);
+	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "<const 23>") == 0);
+
+	res = PARAM_SET_getPrintName(set, "3", &printName);
+	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "<const 23>") == 0);
+
+	res = PARAM_SET_getPrintName(set, "4", &printName);
+	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "4[1]") == 0);
+
+	res = PARAM_SET_getPrintName(set, "5", &printName);
+	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "5[2]") == 0);
+
+	res = PARAM_SET_getPrintName(set, "6", &printName);
+	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "6[0]") == 0);
+
+	PARAM_SET_free(set);
+}
+
 CuSuite* ParamSetTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_param_add_count_clear);
@@ -1047,6 +1111,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_constraint_errors);
 	SUITE_ADD_TEST(suite, Test_param_set_is_set_by_name);
 	SUITE_ADD_TEST(suite, Test_set_get_str_multiple_parameters);
+	SUITE_ADD_TEST(suite, Test_param_set_set_print_name);
 	return suite;
 }
 

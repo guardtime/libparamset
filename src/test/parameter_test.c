@@ -627,6 +627,43 @@ static void Test_root_and_get_values(CuTest* tc) {
 	PARAM_free(param);
 }
 
+static void Test_defaultPrintName(CuTest* tc) {
+	int res;
+	PARAM *param_1 = NULL;
+	PARAM *param_2 = NULL;
+	const char *expected_print_name_1 = "--string";
+	const char *expected_print_name_2 = "-s";
+
+	/* Create a single parameter without any special steps to alter its print name. */
+	res = PARAM_new("string", NULL, 0, 0, &param_1);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("s", NULL, 0, 0, &param_2);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_1), expected_print_name_1) == 0);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_2), expected_print_name_2) == 0);
+
+	PARAM_free(param_1);
+	PARAM_free(param_2);
+}
+
+static void Test_constantPrintName(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	char *expected_print_name = "constant";
+
+	/* Create a single parameter without any special steps to alter its print name. */
+	res = PARAM_new("string", NULL, 0, 0, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_setPrintName(param, expected_print_name, NULL);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param), expected_print_name) == 0);
+
+	PARAM_free(param);
+}
+
 CuSuite* ParameterTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 
@@ -637,6 +674,8 @@ CuSuite* ParameterTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_ParseOptionSetter);
 	SUITE_ADD_TEST(suite, Test_WildcarcExpander);
 	SUITE_ADD_TEST(suite, Test_root_and_get_values);
+	SUITE_ADD_TEST(suite, Test_defaultPrintName);
+	SUITE_ADD_TEST(suite, Test_constantPrintName);
 
 	return suite;
 }

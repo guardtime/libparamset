@@ -250,8 +250,8 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 	 * Check for unknown and typos.
 	 */
 	buf[0] = '\0';
-	PARAM_SET_typosToString(set, 0, NULL, buf, sizeof(buf));
-	CuAssert(tc, "One typo should be detected.", strcmp(buf, "Did You mean 'db' instead of 'dbm'.\n") == 0);
+	PARAM_SET_typosToString(set, NULL, buf, sizeof(buf));
+	CuAssert(tc, "One typo should be detected.", strcmp(buf, "Did You mean '--db' instead of 'dbm'.\n") == 0);
 
 	buf[0] = '\0';
 	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
@@ -470,10 +470,6 @@ static void Test_param_last_token_bunch_of_flags(CuTest* tc) {
 	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
 	CuAssert(tc, "There should be no typos.", !PARAM_SET_isUnknown(set));
 
-
-//	printf("\n%s\n", PARAM_SET_toString(set, buf, sizeof(buf)));
-//	printf("\n%s\n", PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf)));
-//	printf("\n%s\n", PARAM_SET_typosToString(set, PST_TOSTR_DOUBLE_HYPHEN, NULL, buf, sizeof(buf)));
 
 	PARAM_SET_free(set);
 }

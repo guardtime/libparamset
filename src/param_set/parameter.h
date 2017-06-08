@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-	
+
 enum PARAM_CONSTRAINTS_enum {
 	/** Only a single value is allowed. */
 	PARAM_SINGLE_VALUE = 0x0002,
@@ -107,7 +107,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * how to define one argument with multiple values.
 	 */
 	PST_PRSCMD_DEFAULT = 0x0001 | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER,
-	
+
 	/**
 	 * Collect all elements that are not bind with another flag and that do not
 	 * look like potential parameters. It must be noted that - and -- are still
@@ -115,37 +115,37 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * parameter use it together with PST_PRSCMD_COLLECT_LOOSE_FLAGS;
 	 */
 	PST_PRSCMD_COLLECT_LOOSE_VALUES = 0x0040,
-	
+
 	/**
 	 * Collect all loose (No typos or unknowns are detected) flags.
 	 */
 	PST_PRSCMD_COLLECT_LOOSE_FLAGS = 0x0080,
-	
+
 	/**
 	 * Collect everything after the parsing is closed. See \c PST_PRSCMD_CLOSE_PARSING
-	 * to see how to enable the closing of command line parsing. 
+	 * to see how to enable the closing of command line parsing.
 	 */
 	PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED = 0x0100,
-	
-	
+
+
 	/**
 	 * Enable loose element collector to stop command line parsing and redirect
 	 * all tokens to parameter pointed with loose element flag. Parameter -- is used
 	 * to mark the end of commands. It must be used with PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED.
 	 */
 	PST_PRSCMD_CLOSE_PARSING = 0x0200,
-	
+
 	/**
 	 * Collect has lower priority.
 	 */
 	PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY = 0x0400,
-	
+
 	/**
 	 * New flag to ignore a parameter from command line to be parsed.
 	 * Parameter can be added from code.
 	 */
 	PST_PRSCMD_HAS_NO_FLAG = 0x0800,
-	
+
 	/**
 	 * With this parameter no typos are generated for a parameter.
 	 */
@@ -168,7 +168,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * If not implemented parsing fails.
 	 */
 	PST_PRSCMD_EXPAND_WILDCARD = 0x4000,
-	
+
 	PST_PRSCMD_COLLECT_LIMITER_ON       = 0x00008000,
 	PST_PRSCMD_COLLECT_LIMITER_1X       = 0x00010000,
 	PST_PRSCMD_COLLECT_LIMITER_MAX_MASK = 0xffff0000
@@ -176,14 +176,14 @@ enum PARAM_PARS_OPTIONS_enum {
 
 /**
  * Create a new empty parameter with constraints <flags> (see \c PARAM_FLAGS).
- *  
+ *
  * \param	flagName	The parameters name.
  * \param	flagAlias	The alias for the name. Can be NULL.
  * \param	constraint	Constraints for the parameter and its values (see \c PARAM_FLAGS).
  * \param	pars_opt	Parsing Options.
  * \param	newObj		Pointer to receiving pointer to new object.
  * \return \c PST_OK when successful, error code otherwise.
- * 
+ *
  * \note It must be noted that it is possible to add multiple parameters to the
  * list using function \ref PARAM_addArgument no matter what the constraints are.
  * When parameter constraints are broken its validity check fails - see
@@ -202,16 +202,16 @@ void PARAM_free(PARAM *obj);
  * it is still possible to extract PARAM_VAL objects (see \ref PARAM_getValue and
  * \ref PARAM_getInvalid). Value that has invalid status can not be extracted as
  * object (see \ref PARAM_getObject).
- * 
+ *
  * Function \c controlFormat takes input as raw parameter and returns 0 if
  * successful, status indicating the failure otherwise.
- * 
+ *
  * Function controlContent takes input as raw parameter and returns 0 if
  * successful, status indicating the failure otherwise.
- * 
+ *
  * Function convert takes input as raw parameter, followed by a buffer and its size.
  * Returns 1 if conversion successful, 0 otherwise.
- * 
+ *
  * \param	obj				Parameter object.
  * \param	controlFormat	Function pointer to control the format. Can be NULL.
  * \param	controlContent	Function pointer to control the content. Can be NULL.
@@ -264,7 +264,7 @@ int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void *, const char
 /**
  * Add new argument to the linked list. See \ref PARAM_addControl, \ref PARAM_getValue
  * \ref PARAM_getInvalid, \ref PARAM_getValueCount and \ref PARAM_getInvalidCount.
- * 
+ *
  * \param	param		Parameter object.
  * \param	argument	Parameters value as c-string. Can be NULL.
  * \param	source		Source description as c-string. Can be NULL.
@@ -276,20 +276,20 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 /**
  * Extracts element from PARAM internal linked list. Element is extracted from given
  * priority level at the given index. If <at> is \c PST_INDEX_LAST the last element is
- * extracted. If priority is \c PST_PRIORITY_NONE every element is counted and returned 
+ * extracted. If priority is \c PST_PRIORITY_NONE every element is counted and returned
  * at given priority level. If priority is \c PST_PRIORITY_VALID_BASE (0) or higher, only elements
- * at the given priority are counted and extracted. For example if list contains 
+ * at the given priority are counted and extracted. For example if list contains
  * 2 lower priority values followed by higher priority value at position 3 and <at>
  * is 0, function returns the last value (but the  first value matching the priority).
  * Priority \c PST_PRIORITY_LOWEST and \c PST_PRIORITY_HIGHEST are used to extract only
  * the lowest and the highest priority values.
- * 
+ *
  * \param	param		Parameter object.
  * \param	source		Constraint for the source, can be NULL.
  * \param	priority	Constraint for the priority, can be \c PST_PRIORITY_NONE, \c PST_PRIORITY_LOWEST, \c PST_PRIORITY_HIGHEST or greater than 0.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \param	value		Pointer to receiving pointer to \c PARAM_VAL object.
- * 
+ *
  * \return \c PST_OK when successful, error code otherwise. When value is not found
  * \c PST_PARAMETER_VALUE_NOT_FOUND is returned. If parameter is empty \c PST_PARAMETER_EMPTY
  * is returned.
@@ -297,15 +297,39 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value);
 
 /**
+ * Extract a values attributes with the given constraints. Note that \c name is
+ * the real string representation of the parameters name and is NOT altered by
+ * function PARAM_setPrintName. See \ref PARAM_getPrintName to extract
+ * parameters print name.
+ * \param	param		Parameter object.
+ * \param	source		Constraint for the source, can be NULL.
+ * \param	priority	Priority that can be \c PST_PRIORITY_VALID_BASE (0) or higher.
+ * \param	at			Parameter index in the matching set composed with the constraints.
+ * \param	atr			Pointer to PARAM_ATR object for the result.
+ * \return \c PST_OK when successful, error code otherwise. Some more common error
+ * codes: 	\c PST_INVALID_ARGUMENT, \c PST_PARAMETER_EMPTY \c PST_PARAMETER_VALUE_NOT_FOUND.
+ */
+int PARAM_getAtr(PARAM *param, const char *source, int priority, int at, PARAM_ATR *atr);
+
+/**
+ * This function extracts parameters real name or / and its alias.
+ * \param	param		Parameter object.
+ * \param	name		Pointer to receiving pointer to name.
+ * \param	alias		Pointer to receiving pointer to alias.
+ * \return \c PST_OK when successful, error code otherwise.
+ */
+int PARAM_getName(PARAM *param, const char **name, const char **alias);
+
+/**
  * Same as get value, but values that have been controlled and failed by the
  * format and control functions (see \ref PARAM_addControl) will be returned.
- * 
+ *
  * \param	param		Parameter object.
  * \param	source		Constraint for the source, can be NULL.
  * \param	priority	Constraint for the priority, can be \c PST_PRIORITY_NONE, \c PST_PRIORITY_LOWEST, \c PST_PRIORITY_HIGHEST or greater than 0.
  * \param	at			Parameter index in the matching set composed with the constraints.
- * \param	value		Pointer to receiving pointer to \c PARAM_VAL object. 
- * 
+ * \param	value		Pointer to receiving pointer to \c PARAM_VAL object.
+ *
  * \return \c PST_OK when successful, error code otherwise. When value is not found
  * \c PST_PARAMETER_VALUE_NOT_FOUND is returned. If parameter is empty \c PST_PARAMETER_EMPTY
  * is returned.
@@ -318,14 +342,14 @@ int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL
  * it is not possible to extract the object. The functionality must be implemented
  * by setting object extractor function.  <value> is given to the extractor function
  * directly! See \ref PARAM_setObjectExtractor for more details.
- * 
+ *
  * \param	param		Parameter object.
  * \param	source		Constraint for the source, can be NULL.
  * \param	priority	Constraint for the priority, can be \c PST_PRIORITY_NONE, \c PST_PRIORITY_LOWEST, \c PST_PRIORITY_HIGHEST or greater than 0.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \param	extra		Pointer to optional extra data.
  * \param	value		Pointer to the receiving pointer to the value.
- * 
+ *
  * \return \c PST_OK when successful, error code otherwise.
  * \note Returned value must be freed by the user if the implementation needs it.
  */
@@ -334,33 +358,65 @@ int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void *ex
 int PARAM_getInvalid(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value);
 
 /**
- * Return parameters value count according to the constraints set. 
+ * Return parameters value count according to the constraints set.
  * \param	param		Parameter object.
  * \param	source		Constraint for the source, can be NULL.
  * \param	priority	Constraint for the priority, can be \c PST_PRIORITY_NONE, \c PST_PRIORITY_LOWEST, \c PST_PRIORITY_HIGHEST or greater than 0.
  * \param	at			Parameter index in the matching set composed with the constraints.
- * \param	count		Pointer to receiving pointer to \c PARAM_VAL object. 
+ * \param	count		Pointer to receiving pointer to \c PARAM_VAL object.
  * \return \c PST_OK when successful, error code otherwise.
  */
 int PARAM_getValueCount(PARAM *param, const char *source, int prio, int *count);
 
 /**
- * Return the invalid parameters value count according to the constraints set. 
- * See \ref PARAM_addControl. 
+ * Return the invalid parameters value count according to the constraints set.
+ * See \ref PARAM_addControl.
  * \param	param		Parameter object.
  * \param	source		Constraint for the source, can be NULL.
  * \param	priority	Constraint for the priority, can be \c PST_PRIORITY_NONE, \c PST_PRIORITY_LOWEST, \c PST_PRIORITY_HIGHEST or greater than 0.
  * \param	at			Parameter index in the matching set composed with the constraints.
- * \param	count		Pointer to receiving pointer to \c PARAM_VAL object. 
+ * \param	count		Pointer to receiving pointer to \c PARAM_VAL object.
  * \return \c PST_OK when successful, error code otherwise.
  */
 int PARAM_getInvalidCount(PARAM *param, const char *source, int prio, int *count);
 
 /**
+ * This function is used to alter the way the parameter is represented in (error)
+ * messages or returned by \see PARAM_getPrintName.
+ *
+ * If constv is not NULL, a user specified constant value is used. If constv is
+ * NULL an abstract function getPrintName must be specified that formats the string.
+ * Default print format for long and short parameters are '--long-option' and '-a'.
+ *
+ * const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)
+ * param   - this PARAM object.
+ * buf     - Internal buffer with constant size. May be left unused.
+ * buf_len - The size of the internal buffer.
+ * Returns string that is the string representation of parameter.
+ *
+ *
+ * \param obj			Parameter object.
+ * \param constv		Constant string representation of the parameter. Can be NULL.
+ * \param getPrintName	Abstract function's implementation. Has effect only when \c constv is NULL. Can be NULL.
+ * \return \c PST_OK when successful, error code otherwise.
+ */
+int PARAM_setPrintName(PARAM *obj, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
+
+/**
+ * Returns the string representation of the parameter. See PARAM_setPrintName to
+ * alter behaviour of this function. Default print format for long and short
+ * parameters are '--long-option' and '-a'.
+ *
+ * \param obj			Parameter object.
+ * @return string that is the string representation of parameter.
+ */
+const char* PARAM_getPrintName(PARAM *obj);
+
+/**
  * This function checks parameter and if all the constraints set (see \ref PARAM_new
  * and \c PARAM_CONSTRAINTS) are satisfied. Constraint values can be concatenated
  * using |. Returned value contains all failed constraints concatenated (|).
- * 
+ *
  * \param	param			Parameter object.
  * \param	constraints		Concatenated constraints to be checked.
  * \return 0 if all constraints are satisfied, concatenated constraints otherwise.
@@ -372,9 +428,7 @@ int PARAM_clearAll(PARAM *param);
 
 int PARAM_clearValue(PARAM *param, const char *source, int priority, int at);
 
-int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, int priority, int at);
-
-char* PARAM_constraintErrorToString(const PARAM *param, const char *prefix, char *buf, size_t buf_len);
+char* PARAM_constraintErrorToString(PARAM *param, const char *prefix, char *buf, size_t buf_len);
 
 /**
  * A function to expand tokens that contain wildcard character (WC) to array of

@@ -28,6 +28,7 @@
 
 
 #define FORMAT_OK 0
+#define VARIABLE_IS_NOT_USED(v) ((void)(v));
 
 static char *new_string(const char *str) {
 	char *tmp = NULL;
@@ -109,6 +110,13 @@ static int wrapper_returnStr(void *extra, const char* str, void** obj){
 	return PST_OK;
 }
 
+static const char* wrapper_returnConstantPrintName(PARAM *param, char *buf, unsigned buf_len){
+	VARIABLE_IS_NOT_USED(buf);
+	VARIABLE_IS_NOT_USED(buf_len);
+	if (param == NULL) return NULL;
+	return param->print_name_buf;
+}
+
 int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int pars_opt, PARAM **newObj){
 	int res;
 	PARAM *tmp = NULL;
@@ -141,6 +149,8 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 	tmp->extractObject = wrapper_returnStr;
 	tmp->expand_wildcard = NULL;
 	tmp->expand_wildcard_ctx = NULL;
+	tmp->getPrintName = wrapper_returnConstantPrintName;
+	PST_snprintf(tmp->print_name_buf, sizeof(tmp->print_name_buf), "%s%s", (strlen(flagName) == 1 ? "-" : "--"), flagName);
 
 
 	tmpFlagName = new_string(flagName);
@@ -148,6 +158,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
 	}
+
 
 	if (flagAlias) {
 		tmpAlias = new_string(flagAlias);
@@ -232,6 +243,25 @@ int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void *, const char
 	return PST_OK;
 }
 
+int PARAM_setPrintName(PARAM *obj, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)) {
+	if (obj == NULL || (getPrintName == NULL && constv == NULL)) return PST_INVALID_ARGUMENT;
+
+
+	if (constv != NULL) {
+		obj->getPrintName = wrapper_returnConstantPrintName;
+		PST_strncpy(obj->print_name_buf, constv, sizeof(obj->print_name_buf));
+	} else {
+		obj->getPrintName = getPrintName;
+	}
+
+	return PST_OK;
+}
+
+const char* PARAM_getPrintName(PARAM *obj) {
+	if (obj == NULL) return NULL;
+	return obj->getPrintName(obj, obj->print_name_buf, sizeof(obj->print_name_buf));
+}
+
 int PARAM_addValue(PARAM *param, const char *argument, const char* source, int priority){
 	int res;
 	PARAM_VAL *newValue = NULL;
@@ -305,6 +335,58 @@ cleanup:
 
 int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value) {
 	return param_get_value(param, source, prio, at, NULL, value);
+}
+
+int PARAM_getAtr(PARAM *param, const char *source, int priority, int at, PARAM_ATR *atr) {
+	int res;
+	PARAM_VAL *val = NULL;
+
+	if (param == NULL || atr == NULL) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+
+	res = PARAM_getValue(param, source, priority, at, &val);
+	if (res != PST_OK) goto cleanup;
+
+
+	atr->cstr_value = val->cstr_value;
+	atr->formatStatus = val->formatStatus;
+	atr->contentStatus = val->contentStatus;
+	atr->priority = val->priority;
+	atr->source = val->source;
+	atr->name = param->flagName;
+	atr->alias = param->flagAlias;
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
+}
+
+int PARAM_getName(PARAM *param, const char **name, const char **alias) {
+	int res;
+
+	if (param == NULL || (name == NULL && alias == NULL)) {
+		res = PST_INVALID_ARGUMENT;
+		goto cleanup;
+	}
+
+	if (name != NULL) {
+		*name = param->flagName;
+	}
+
+	if (alias != NULL) {
+		*alias = param->flagAlias;
+	}
+
+	res = PST_OK;
+
+cleanup:
+
+	return res;
 }
 
 int PARAM_clearAll(PARAM *param) {
@@ -447,31 +529,16 @@ int PARAM_checkConstraints(const PARAM *param, int constraints) {
 	return ret;
 }
 
-static size_t param_add_constraint_error_to_buf(const PARAM *param, const char *message, const char *prefix, char *buf, size_t buf_len) {
+static size_t param_add_constraint_error_to_buf(PARAM *param, const char *message, const char *prefix, char *buf, size_t buf_len) {
 	const char *use_prefix = NULL;
-	size_t count = 0;
 
 	if (param == NULL || message == NULL || buf == NULL || buf_len == 0) return 0;
 
 	use_prefix = prefix == NULL ? "" : prefix;
-
-	count += PST_snprintf(buf + count, buf_len - count, "%s", use_prefix);
-
-	count += PST_snprintf(buf + count, buf_len - count, "%s", message);
-
-	/**
-	 * Add the parameter and its value.
-	 */
-	count += PST_snprintf(buf + count, buf_len - count, "%s%s",
-							strlen(param->flagName) > 1 ? "--" : "-",
-							param->flagName
-							);
-
-	count += PST_snprintf(buf + count, buf_len - count, ".\n");
-	return count;
+	return PST_snprintf(buf, buf_len, "%s%s%s.\n", use_prefix, message, PARAM_getPrintName(param));
 }
 
-char* PARAM_constraintErrorToString(const PARAM *param, const char *prefix, char *buf, size_t buf_len) {
+char* PARAM_constraintErrorToString(PARAM *param, const char *prefix, char *buf, size_t buf_len) {
 	int constraints = 0;
 	size_t count = 0;
 
