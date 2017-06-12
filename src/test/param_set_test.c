@@ -421,11 +421,12 @@ static void Test_param_set_from_cmd_flags(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
-static int wrapper_return_str_append_a_value(void *extra, const char* str, void** obj){
+static int wrapper_return_str_append_a_value(void **extra, const char* str, void** obj){
 	int res;
 	void **extra_array = extra;
 	PARAM_SET *set = (PARAM_SET*)(extra_array[0]);
 	char *m = NULL;
+
 	char *tmp = NULL;
 
 	m = (char*)malloc(sizeof(char) * 1024);
@@ -442,7 +443,7 @@ static int wrapper_return_str_append_a_value(void *extra, const char* str, void*
 	return PST_OK;
 }
 
-static int wrapper_return_error(void *extra, const char* str, void** obj){
+static int wrapper_return_error(void **extra, const char* str, void** obj){
 	if (extra || str || obj);
 	return PST_UNDEFINED_BEHAVIOUR;
 }
@@ -852,8 +853,8 @@ static void Test_set_param_atr(CuTest* tc) {
 	CuAssert(tc, "Invalid atr.", strcmp(atr.alias, "aaa") == 0);
 	CuAssert(tc, "Invalid atr.", strcmp(atr.cstr_value, "a_value") == 0);
 	CuAssert(tc, "Invalid atr.", strcmp(atr.source, "A") == 0);
-	CuAssert(tc, "Invalid atr.", atr.contentStatus == PST_CONTENT_STATUS_OK);
-	CuAssert(tc, "Invalid atr.", atr.contentStatus == PST_FORMAT_STATUS_OK);
+	CuAssert(tc, "Invalid atr.", atr.contentStatus == 0);
+	CuAssert(tc, "Invalid atr.", atr.contentStatus == 0);
 
 	PARAM_SET_free(set);
 }

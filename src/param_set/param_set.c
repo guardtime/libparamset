@@ -909,7 +909,7 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 		int (*controlFormat)(const char *),
 		int (*controlContent)(const char *),
 		int (*convert)(const char*, char*, unsigned),
-		int (*extractObject)(void *, const char *, void**)){
+		int (*extractObject)(void **, const char *, void**)){
 	int res;
 	PARAM *tmp = NULL;
 	const char *pName = NULL;
@@ -953,7 +953,7 @@ int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
 	return PST_OK;
 }
 
-int PARAM_SET_wildcardExpander(PARAM_SET *set, const char *names,
+int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 		void *ctx,
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)){
 	int res;
@@ -1053,7 +1053,7 @@ cleanup:
 	return res;
 }
 
-int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *source, int priority, int at, void *ctxt, void **obj) {
+int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *source, int priority, int at, void *ctx, void **obj) {
 	int res;
 	PARAM *param = NULL;
 	void *extras[2] = {NULL, NULL};
@@ -1077,7 +1077,7 @@ int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *sourc
 	}
 
 	extras[0] = set;
-	extras[1] = ctxt;
+	extras[1] = ctx;
 
 	/**
 	 * Obj must be feed directly to the getter function, asi it enables to manipulate

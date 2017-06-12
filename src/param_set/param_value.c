@@ -26,6 +26,9 @@
 #include "param_set.h"
 #include "strn.h"
 
+#define PST_FORMAT_STATUS_OK 0
+#define PST_CONTENT_STATUS_OK 0
+
 static char *new_string(const char *str) {
 	char *tmp = NULL;
 	if (str == NULL) return NULL;

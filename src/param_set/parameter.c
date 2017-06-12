@@ -236,7 +236,7 @@ int PARAM_setParseOption(PARAM *obj, int option) {
 	return PST_OK;
 }
 
-int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void *, const char *, void**)) {
+int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void **, const char *, void**)) {
 	if (obj == NULL) return PST_INVALID_ARGUMENT;
 
 	obj->extractObject = extractObject == NULL ? wrapper_returnStr : extractObject;
@@ -557,7 +557,7 @@ char* PARAM_constraintErrorToString(PARAM *param, const char *prefix, char *buf,
 	return buf;
 }
 
-int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void *extra, void **obj) {
+int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void **extra, void **obj) {
 	int res;
 	PARAM_VAL *value = NULL;
 

@@ -888,7 +888,7 @@ static void Test_expand_WC_on_CMD_WC_configured_WC_as_input(CuTest* tc) {
 	res = PARAM_SET_setParseOptions(set, "{i}", PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_EXPAND_WILDCARD);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
-	res = PARAM_SET_wildcardExpander(set, "i", data, expand_wildcard_len3str);
+	res = PARAM_SET_setWildcardExpander(set, "i", data, expand_wildcard_len3str);
 	CuAssert(tc, "Unable to configure wildcard expander.", res == PST_OK);
 
 	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);

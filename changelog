@@ -1,6 +1,9 @@
+* IMPROVEMENT: Abstract function extractObject extra parameter type changed from void* to void**.
+* IMPROVEMENT: Macros PST_FORMAT_STATUS_OK, PST_CONTENT_STATUS_OK and TASK_DEFINITION_MAX_COUNT are used internally only.
 * IMPROVEMENT: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
 * IMPROVEMENT: PARAM_SET_typosToString interface changed - flag parameter removed.
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
+* BUGFIX: PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
 
 2016-11-30 0.2.0
 

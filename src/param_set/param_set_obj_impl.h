@@ -26,6 +26,9 @@
 extern "C" {
 #endif
 
+/** Maximum task count. */
+#define TASK_DEFINITION_MAX_COUNT 64
+
 /**
  * Parameter value data structure that contains the data and information about its
  * status, priority and source. Data is hold as a linked list of values.
@@ -62,13 +65,13 @@ struct PARAM_st{
 
 	/**
 	 * A function to extract object from the parameter.
-	 * int extractObject(void *extra, const char *str, void **obj)
-	 * extra - optional pointer to data structure.
+	 * int extractObject(void **extra, const char *str, void **obj)
+	 * extra - optional pointer to array of pointer size 2.
 	 * str - c-string value that belongs to PARAM_VAL object.
 	 * obj - pointer to receiving pointer to desired object.
 	 * Returns PST_OK if successful, error code otherwise.
 	 */
-	int (*extractObject)(void *extra, const char *str, void **obj);
+	int (*extractObject)(void **extra, const char *str, void **obj);
 
 	/**
 	 * Function convert takes input as raw parameter, followed by a buffer and its size.

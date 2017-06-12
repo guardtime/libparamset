@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+typedef enum PARAM_PARS_OPTIONS_enum PARAM_PARS_OPTIONS;
 
 enum PARAM_CONSTRAINTS_enum {
 	/** Only a single value is allowed. */
@@ -249,8 +250,8 @@ int PARAM_setParseOption(PARAM *obj, int option);
  * pointer is given directly to the extractor it is possible to initialize existing
  * objects or create a new ones. It all depends how the extractor method is implemented.
  *
- * int extractObject(void *extra, const char *str, void **obj)
- * extra - optional pointer to data structure.
+ * int extractObject(void **extra, const char *str, void **obj)
+ * extra - optional pointer to additional array of \c void* pointers.
  * str - c-string value that belongs to PARAM_VAL object.
  * obj - pointer to receiving pointer to desired object.
  * Returns PST_OK if successful, error code otherwise.
@@ -259,7 +260,7 @@ int PARAM_setParseOption(PARAM *obj, int option);
  * \param	extractObject	Object extractor.
  * \return \c PST_OK when successful, error code otherwise.
  */
-int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void *, const char *, void**));
+int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void **, const char *, void**));
 
 /**
  * Add new argument to the linked list. See \ref PARAM_addControl, \ref PARAM_getValue
@@ -347,13 +348,13 @@ int PARAM_getName(PARAM *param, const char **name, const char **alias);
  * \param	source		Constraint for the source, can be NULL.
  * \param	priority	Constraint for the priority, can be \c PST_PRIORITY_NONE, \c PST_PRIORITY_LOWEST, \c PST_PRIORITY_HIGHEST or greater than 0.
  * \param	at			Parameter index in the matching set composed with the constraints.
- * \param	extra		Pointer to optional extra data.
+ * \param	extra		Pointer to optional extra data array.
  * \param	value		Pointer to the receiving pointer to the value.
  *
  * \return \c PST_OK when successful, error code otherwise.
  * \note Returned value must be freed by the user if the implementation needs it.
  */
-int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void *extra, void **value);
+int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void **extra, void **value);
 
 int PARAM_getInvalid(PARAM *param, const char *source, int prio, int at, PARAM_VAL **value);
 
