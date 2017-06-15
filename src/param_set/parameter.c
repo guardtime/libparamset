@@ -186,24 +186,24 @@ cleanup:
 	return res;
 }
 
-void PARAM_free(PARAM *obj) {
-	if (obj == NULL) return;
-	free(obj->flagName);
-	free(obj->flagAlias);
-	if (obj->itr) ITERATOR_free(obj->itr);
-	if (obj->arg) PARAM_VAL_free(obj->arg);
-	free(obj);
+void PARAM_free(PARAM *param) {
+	if (param == NULL) return;
+	free(param->flagName);
+	free(param->flagAlias);
+	if (param->itr) ITERATOR_free(param->itr);
+	if (param->arg) PARAM_VAL_free(param->arg);
+	free(param);
 }
 
-int PARAM_addControl(PARAM *obj,
+int PARAM_addControl(PARAM *param,
 		int (*controlFormat)(const char *),
 		int (*controlContent)(const char *),
 		int (*convert)(const char*, char*, unsigned)) {
-	if (obj == NULL) return PST_INVALID_ARGUMENT;
+	if (param == NULL) return PST_INVALID_ARGUMENT;
 
-	obj->controlFormat = controlFormat;
-	obj->controlContent = controlContent;
-	obj->convert = convert;
+	param->controlFormat = controlFormat;
+	param->controlContent = controlContent;
+	param->convert = convert;
 	return PST_OK;
 }
 
@@ -218,40 +218,40 @@ int PARAM_isParsOptionSet(PARAM *param, int state) {
 	return is_flag_set(param->parsing_options, state);
 }
 
-int PARAM_setParseOption(PARAM *obj, int option) {
-	if (obj == NULL) return PST_INVALID_ARGUMENT;
+int PARAM_setParseOption(PARAM *param, int option) {
+	if (param == NULL) return PST_INVALID_ARGUMENT;
 
 	/**
 	 * Give an error on some invalid configurations.
 	 */
 	if ((is_flag_set(option, PST_PRSCMD_HAS_NO_VALUE) || is_flag_set(option, PST_PRSCMD_DEFAULT))
-		&& (is_flag_set(option, PST_PRSCMD_HAS_MULTIPLE_INSTANCES) || is_flag_set(option, PST_PRSCMD_HAS_VALUE) ||
+		&& (is_flag_set(option, PST_PRSCMD_HAS_VALUE_SEQUENCE) || is_flag_set(option, PST_PRSCMD_HAS_VALUE) ||
 			(is_flag_set(option, PST_PRSCMD_HAS_NO_VALUE) && is_flag_set(option, PST_PRSCMD_DEFAULT))))
 		{
 		return PST_PRSCMD_INVALID_COMBINATION;
 	}
 
 
-	obj->parsing_options = option;
+	param->parsing_options = option;
 	return PST_OK;
 }
 
-int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void **, const char *, void**)) {
-	if (obj == NULL) return PST_INVALID_ARGUMENT;
+int PARAM_setObjectExtractor(PARAM *param, int (*extractObject)(void **, const char *, void**)) {
+	if (param == NULL) return PST_INVALID_ARGUMENT;
 
-	obj->extractObject = extractObject == NULL ? wrapper_returnStr : extractObject;
+	param->extractObject = extractObject == NULL ? wrapper_returnStr : extractObject;
 	return PST_OK;
 }
 
-int PARAM_setPrintName(PARAM *obj, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)) {
-	if (obj == NULL || (getPrintName == NULL && constv == NULL)) return PST_INVALID_ARGUMENT;
+int PARAM_setPrintName(PARAM *param, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)) {
+	if (param == NULL || (getPrintName == NULL && constv == NULL)) return PST_INVALID_ARGUMENT;
 
 
 	if (constv != NULL) {
-		obj->getPrintName = wrapper_returnConstantPrintName;
-		PST_strncpy(obj->print_name_buf, constv, sizeof(obj->print_name_buf));
+		param->getPrintName = wrapper_returnConstantPrintName;
+		PST_strncpy(param->print_name_buf, constv, sizeof(param->print_name_buf));
 	} else {
-		obj->getPrintName = getPrintName;
+		param->getPrintName = getPrintName;
 	}
 
 	return PST_OK;
@@ -262,7 +262,7 @@ const char* PARAM_getPrintName(PARAM *obj) {
 	return obj->getPrintName(obj, obj->print_name_buf, sizeof(obj->print_name_buf));
 }
 
-int PARAM_addValue(PARAM *param, const char *argument, const char* source, int priority){
+int PARAM_addValue(PARAM *param, const char *argument, const char* source, int prio) {
 	int res;
 	PARAM_VAL *newValue = NULL;
 	PARAM_VAL *pLastValue = NULL;
@@ -282,7 +282,7 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 		arg = argument;
 
 	/*Create new object and control the format*/
-	res = PARAM_VAL_new(arg, source, priority, &newValue);
+	res = PARAM_VAL_new(arg, source, prio, &newValue);
 	if (res != PST_OK) goto cleanup;
 
 	if (param->controlFormat)
@@ -319,8 +319,8 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 	param->last_element = newValue;
 	param->argCount++;
 
-	if (param->highestPriority < priority)
-		param->highestPriority = priority;
+	if (param->highestPriority < prio)
+		param->highestPriority = prio;
 
 	newValue = NULL;
 	res = PST_OK;
@@ -337,7 +337,7 @@ int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL
 	return param_get_value(param, source, prio, at, NULL, value);
 }
 
-int PARAM_getAtr(PARAM *param, const char *source, int priority, int at, PARAM_ATR *atr) {
+int PARAM_getAtr(PARAM *param, const char *source, int prio, int at, PARAM_ATR *atr) {
 	int res;
 	PARAM_VAL *val = NULL;
 
@@ -347,7 +347,7 @@ int PARAM_getAtr(PARAM *param, const char *source, int priority, int at, PARAM_A
 	}
 
 
-	res = PARAM_getValue(param, source, priority, at, &val);
+	res = PARAM_getValue(param, source, prio, at, &val);
 	if (res != PST_OK) goto cleanup;
 
 
@@ -432,7 +432,7 @@ static int param_reser_iterator_if_needed_after_pop(PARAM *param, int popIndex) 
 	return PST_OK;
 }
 
-int PARAM_clearValue(PARAM *param, const char *source, int priority, int at) {
+int PARAM_clearValue(PARAM *param, const char *source, int prio, int at) {
 	int res;
 	PARAM_VAL *pop = NULL;
 
@@ -446,7 +446,7 @@ int PARAM_clearValue(PARAM *param, const char *source, int priority, int at) {
 		goto cleanup;
 	}
 
-	res = PARAM_VAL_popElement(&(param->arg), source, priority, at, &pop);
+	res = PARAM_VAL_popElement(&(param->arg), source, prio, at, &pop);
 	if (res != PST_OK) goto cleanup;
 
 	res = param_reser_iterator_if_needed_after_pop(param, at);
@@ -589,10 +589,10 @@ cleanup:
 	return res;
 }
 
-int PARAM_setWildcardExpander(PARAM *obj, void *ctx, int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
-	if (obj == NULL || expand_wildcard == NULL) return PST_INVALID_ARGUMENT;
-	obj->expand_wildcard = expand_wildcard;
-	obj->expand_wildcard_ctx = ctx;
+int PARAM_setWildcardExpander(PARAM *param, void *ctx, int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
+	if (param == NULL || expand_wildcard == NULL) return PST_INVALID_ARGUMENT;
+	param->expand_wildcard = expand_wildcard;
+	param->expand_wildcard_ctx = ctx;
 	return PST_OK;
 }
 

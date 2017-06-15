@@ -1618,9 +1618,9 @@ static char* pars_flags_to_string(int type, char *buf, size_t len) {
 			((type & PST_PRSCMD_DEFAULT) == PST_PRSCMD_DEFAULT) ? "D:" : "",
 			(type & PST_PRSCMD_HAS_NO_VALUE) ? "NV:" : "",
 			(type & PST_PRSCMD_HAS_VALUE) ? "V:" : "",
-			(type & PST_PRSCMD_HAS_MULTIPLE_INSTANCES) ? "M:" : "",
+			(type & PST_PRSCMD_HAS_VALUE_SEQUENCE) ? "M:" : "",
 			(type & PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER) ? "PPBR:" : "",
-			(type & PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH) ? "MBR:" : "");
+			(type & PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH) ? "MBR:" : "");
 	return buf;
 }
 
@@ -1706,7 +1706,7 @@ static int COLLECTORS_new(PARAM_SET *set, COLLECTORS **new) {
 			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED)) tmp->rec[tmp->count].collect_when_parsing_is_closed = 1;
 			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY)) tmp->rec[tmp->count].reduced_priority = 1;
 
-			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_LIMITER_ON)) {
+			if (PARAM_isParsOptionSet(p, PST_PRSCMD_COLLECT_LIMITER_BREAK_ON)) {
 				tmp->rec[tmp->count].collect_limiter = 1;
 				tmp->rec[tmp->count].max_collect_count = (p->parsing_options & PST_PRSCMD_COLLECT_LIMITER_MAX_MASK) / PST_PRSCMD_COLLECT_LIMITER_1X;
 			}
@@ -1838,9 +1838,11 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 
 
 			if (is_parameter_opend) {
-				token_match_break = (TOKEN_IS_MATCH(token_type) && PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH)) ? 1 : 0;
+				token_match_break = ((TOKEN_IS_MATCH(token_type)
+						|| (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type)) && collector->close_parsing_permited)
+						&& PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH)) ? 1 : 0;
 				token_pot_param_break = ((TOKE_IS_VALID_POT_PARAM_BREAKER(token_type)
-						|| (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type) && COLLECTORS_doCollectorsExist(collector)))
+						|| (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type) && collector->close_parsing_permited))
 						&& PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER)) ? 2 : 0;
 				token_no_param_break = PARAM_isParsOptionSet(opend_parameter, PST_PRSCMD_HAS_NO_VALUE) ? 4 : 0;
 
