@@ -206,7 +206,7 @@ typedef struct PARAM_SET_st PARAM_SET;
 
 typedef enum PARAM_CONSTRAINTS_enum PARAM_CONSTRAINTS;
 typedef struct PARAM_ATR_st PARAM_ATR;
-typedef struct ITERATOR_st ITERATOR;
+
 
 /**
  * A set on task definitions that can be analyzed against #PARAM_SET object to

@@ -177,41 +177,7 @@ int PARAM_VAL_getInvalid(PARAM_VAL *rootValue, const char* source, int priority,
  */
 char* PARAM_VAL_toString(const PARAM_VAL *value, char *buf, size_t buf_len);
 
-/**
- * Helper data structure to optimize sequential access to the #PARAM_VAL links.
- * \param root	The first #PARAM_VAL link in the linked list.
- * \param itr	Pointer to receiving pointer to #ITERATOR object.
- * \return #PST_OK if successful, error code otherwise.
- */
-int ITERATOR_new(PARAM_VAL *root, ITERATOR **itr);
 
-/**
- * Free #ITERATOR object.
- * \param itr	#ITERATOR object to be freed.
- */
-void ITERATOR_free(ITERATOR *itr);
-
-/**
- * Set iterator to specified state.
- * \param itr		- #ITERATOR object.
- * \param root		- Set new root value (e.g. the old one is not used) or NULL to let the base value remain the same.
- * \param source	- The source constraint.
- * \param priority	- The priority constraint.
- * \param at		- Index constraint.
- * \return #PST_OK if successful error code otherwise.
- */
-int ITERATOR_set(ITERATOR *itr, PARAM_VAL *new_root, const char* source, int priority, int at);
-
-/**
- * Fetch a parameter value from the configured #ITERATOR (see #ITERATOR_set).
- * \param	itr			#ITERATOR object.
- * \param	source		Constraint for the source.
- * \param	priority	Constraint for the priority.
- * \param	at			Parameter index in the matching set composed with the constraints.
- * \param	item		Pointer to receiving pointer.
- * \return #PST_OK if successful error code otherwise.
- */
-int ITERATOR_fetch(ITERATOR *itr, const char* source, int priority, int at, PARAM_VAL **item);
 
 #ifdef	__cplusplus
 }

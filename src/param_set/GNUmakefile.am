@@ -43,6 +43,7 @@ otherinclude_HEADERS = \
 	parameter.h \
 	strn.h \
 	task_def.h \
+	internal.h \
 	version.h
 
 libparamset_la_LDFLAGS=-version-info @LTVER@
