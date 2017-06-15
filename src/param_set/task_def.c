@@ -149,12 +149,6 @@ PARAM_SET *TASK_getSet(TASK *task) {
 	else return task->set;
 }
 
-TASK_DEFINITION *TASK_getDef(TASK *task) {
-	if (task == NULL) return NULL;
-	else return task->def;
-}
-
-
 int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore, TASK_DEFINITION **new) {
 	int res;
 	TASK_DEFINITION *tmp = NULL;

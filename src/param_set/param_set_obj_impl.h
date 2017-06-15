@@ -21,6 +21,7 @@
 #define	PARAM_SET_OBJ_IMPL_H
 
 #include "param_set.h"
+#include "internal.h"
 
 #ifdef	__cplusplus
 extern "C" {

@@ -209,12 +209,6 @@ typedef struct PARAM_ATR_st PARAM_ATR;
 typedef struct ITERATOR_st ITERATOR;
 
 /**
- * A structure that holds the names of the parameters that are allowed or restricted
- * by the task.
- */
-typedef struct TASK_DEFINITION_st TASK_DEFINITION;
-
-/**
  * A set on task definitions that can be analyzed against #PARAM_SET object to
  * extract a single consistent task.
  */
