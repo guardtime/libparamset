@@ -254,7 +254,7 @@ void PARAM_SET_free(PARAM_SET *set);
 
 /**
  * Adds several optional functions to a set of parameters. Each function takes
- * the first parameters as c-string value (must not fail if is \c NULL). All the
+ * one parameters as c-string value (must not fail if is \c NULL). All the
  * functions except \c extractObject are applied when adding the value to the
  * #PARAM_SET object. Function \c extractObject is applied when calling #PARAM_SET_getObj
  * or #PARAM_SET_getObjExtended.
@@ -332,9 +332,8 @@ int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
 							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
 
 /**
- * Appends parameter to the set. Invalid value format or content is not handled
- * as error if it is possible to append it. If parameter can have only one value,
- * it is still possible to add more. Internal format, content or count errors can
+ * Appends value to the set. Invalid value format or content is not handled
+ * as error, but the state is saved. Internal format, content or count errors can
  * be detected - see #PARAM_SET_isFormatOK. If parameters name dose not exist,
  * function will fail. When parameter is not found it is examined as a typo or
  * unknown (see #PARAM_SET_isTypoFailure and #PARAM_SET_isUnknown).
