@@ -57,7 +57,7 @@ enum PARAM_CONSTRAINTS_enum {
  * - \c known or \c unknown - A known and unknown parameter accordingly.
  * - \c param - Both \c known and \c unknown parameter.
  * - \c bindv - A value that belongs to \c curr and is bound with it.
- * - <TT>loose value</tt> or \c flag - A value that is not bound with \c param or \c unknown parameter accordingly.
+ * - <TT>loose value</tt> or \c parameter - A value that is not bound with \c param or \c unknown parameter accordingly.
  * - \c token - Can be interpreted as anything.
  *
  * Usage examples:
@@ -172,8 +172,8 @@ enum PARAM_PARS_OPTIONS_enum {
 
 	/**
 	 * If set the parameter must not have a value and next token from the
-	 * command-line is interpreted as next possible argument. The value is set to
-	 * \c NULL, that indicates the occurrence of the parameter.
+	 * command-line is interpreted as next possible parameter (or unknown token).
+	 * The value is set to \c NULL, that indicates the occurrence of the parameter.
 	 * \code{.txt}
 	 * curr token token ...
 	 * \endcode
@@ -197,7 +197,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * curr known token ...
 	 * \endcode
 	 *
-	 * \note Using additional flags #PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER
+	 * \note Using additional options #PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER
 	 * or #PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH it is possible to
 	 * interpret the next token as parameter.
 	 */
@@ -221,7 +221,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	 * // With known parameter break.
 	 * curr bindv bindv ... known token ...
 	 * \endcode
-	 * \note Using additional flags #PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER
+	 * \note Using additional options #PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER
 	 * or #PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH it is possible to break
 	 * the parsing of the current parameter and interpret the next token as parameter.
 	 */
@@ -262,7 +262,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	PST_PRSCMD_DEFAULT = 0x0001 | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER,
 
 	/**
-	 * Collect all tokens that are not bound with some flag and that do not
+	 * Collect all tokens that are not bound with some parameter and that do not
 	 * look like potential parameters. If used together with
 	 * #PST_PRSCMD_COLLECT_LIMITER_BREAK_ON collect maximum count is limited.
 	 * \note Note that by default, if not bound with some parameter, "-" and "--"
@@ -273,11 +273,11 @@ enum PARAM_PARS_OPTIONS_enum {
 	PST_PRSCMD_COLLECT_LOOSE_VALUES = 0x0040,
 
 	/**
-	 * Collect all loose (unknown or misspelled) flags (e.q. "-x", "-xy", "--zzz",
+	 * Collect all loose (unknown or misspelled) parameters (e.q. "-x", "-xy", "--zzz",
 	 * "---"). If used together with #PST_PRSCMD_COLLECT_LIMITER_BREAK_ON collect
 	 * maximum count is limited.
 	 * \attention No typos or unknowns are detected as all unknown or misspelled
-	 * parameters are redirected to parameters with the flag set.
+	 * parameters are redirected to parameters with the this options set.
 	 */
 	PST_PRSCMD_COLLECT_LOOSE_FLAGS = 0x0080,
 
@@ -305,8 +305,8 @@ enum PARAM_PARS_OPTIONS_enum {
 	PST_PRSCMD_COLLECT_HAS_LOWER_PRIORITY = 0x0400,
 
 	/**
-	 * This flag can be used to hide existing parameter from command-line parser.
-	 * Parameter with this flag can only be added from the code. Use together with
+	 * This option can be used to hide existing parameter from command-line parser.
+	 * Parameter with this option can only be added from the code. Use together with
 	 * #PST_PRSCMD_NO_TYPOS to completely hide the parameter from the user.
 	 */
 	PST_PRSCMD_HAS_NO_FLAG = 0x0800,
@@ -319,7 +319,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	/**
 	 * With this parameter only the highest priority last parameters format is
 	 * checked in functions #PARAM_SET_isFormatOK and #PARAM_SET_invalidParametersToString.
-	 * The error status is set in spite of the given flag.
+	 * The error status is set in spite of the given option.
 	 */
 	PST_PRSCMD_FORMAT_CONTROL_ONLY_FOR_LAST_HIGHST_PRIORITY_VALUE = 0x2000,
 
@@ -337,7 +337,7 @@ enum PARAM_PARS_OPTIONS_enum {
 	PST_PRSCMD_EXPAND_WILDCARD = 0x4000,
 
 	/**
-	 * If set, this flag will affect the maximum possible count of a collected
+	 * If set, this option will affect the maximum possible count of a collected
 	 * values during entire command-line parsing. It is possible to create multiple
 	 * parameters with different count limits that are computed separately. If
 	 * the limit for all counters are exceeded, the value is redirected to typo
@@ -417,7 +417,7 @@ void PARAM_free(PARAM *param);
  * \param	param			#PARAM object.
  * \param	controlFormat	Function for format control.
  * \param	controlContent	Function for content control.
- * \param	convert			Function for argument conversion.
+ * \param	convert			Function for parameter value conversion.
  * \return #PST_OK if successful, error code otherwise.
  */
 int PARAM_addControl(PARAM *param, int (*controlFormat)(const char *), int (*controlContent)(const char *), int (*convert)(const char*, char*, unsigned));
@@ -442,7 +442,7 @@ int PARAM_isParsOptionSet(PARAM *param, int state);
  * \param param		#PARAM object.
  * \param options	Parsing options.
  * \return #PST_OK if successful, error code otherwise. #PST_PRSCMD_INVALID_COMBINATION
- * is returned if conflicting parsing flag combination is feed to the function.
+ * is returned if conflicting parsing option combination is feed to the function.
  */
 int PARAM_setParseOption(PARAM *param, int option);
 
@@ -473,13 +473,13 @@ int PARAM_setObjectExtractor(PARAM *param, int (*extractObject)(void **, const c
  * detected - see #PARAM_getInvalid.
  *
  * \param	param		#PARAM object.
- * \param	argument	Parameters value as c-string. Can be \c NULL.
+ * \param	value		Parameters value as c-string. Can be \c NULL.
  * \param	source		Source description as c-string. Can be \c NULL.
  * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_getValueCount, #PARAM_getInvalidCount, #PARAM_getValue and #PARAM_getInvalid.
  */
-int PARAM_addValue(PARAM *param, const char *argument, const char* source, int prio);
+int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio);
 
 /**
  *

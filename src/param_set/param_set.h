@@ -168,7 +168,7 @@ struct PARAM_ATR_st {
 	/** Alias. */
 	char *alias;
 
-	/** c-string value for raw argument. */
+	/** c-string value. */
 	char *cstr_value;
 
 	/** Optional c-string source description, e.g. file, environment. */
@@ -287,7 +287,7 @@ void PARAM_SET_free(PARAM_SET *set);
  * \param	names			List of names to add the functions.
  * \param	controlFormat	Function for format control.
  * \param	controlContent	Function for content control.
- * \param	convert			Function for argument conversion.
+ * \param	convert			Function for value conversion.
  * \param	extractObject	Function for object extraction.
  * \return #PST_OK if successful, error code otherwise.
  * \see PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and PARAM_SET_setWildcardExpander.
@@ -335,7 +335,7 @@ int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
  *
  * \param	set			#PARAM_SET object.
  * \param	name		Parameters name.
- * \param	argument	Parameters value as c-string. Can be \c NULL.
+ * \param	value		Parameters value as c-string. Can be \c NULL.
  * \param	source		Source description as c-string. Can be \c NULL.
  * \param	priority	Priority that can be #PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \return #PST_OK if successful, error code otherwise. When parameters is not
@@ -548,9 +548,9 @@ int PARAM_SET_isUnknown(const PARAM_SET *set);
  * Format of parameters:
  * \code{.txt}
  * # comment    - a line with comment.
- * --long       - Long parameter without argument.
- * --long <arg> - Long parameter with argument.
- * -i <arg>     - Short parameter with argument.
+ * --long       - Long parameter without value.
+ * --long <arg> - Long parameter with value.
+ * -i <arg>     - Short parameter with value.
  * -vxn         - Bunch of flags.
  * \endcode
  *
@@ -576,9 +576,9 @@ int PARAM_SET_readFromFile(PARAM_SET *set, const char *fname, const char* source
  *
  * Command-line format:
  * \code{.txt}
- * --long       - Long parameter without argument.
- * --long <arg> - Long parameter with argument.
- * -i <arg>     - Short parameter with argument.
+ * --long       - Long parameter without value.
+ * --long <arg> - Long parameter with value.
+ * -i <arg>     - Short parameter with value.
  * -vxn         - Bunch of flags.
  * \endcode
  * \param	set			#PARAM_SET object.
@@ -595,16 +595,16 @@ int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *sou
 /**
  * This function is used to parse command-line parameters. It is similar to
  * #PARAM_SET_readFromCMD but extends its functionality. For example it is possible
- * to have a parameter that always interprets the next token as its argument, even
- * if it is identical to some command-line options. To redirect all tokens after
+ * to have a parameter that always interprets the next token as its value, even
+ * if it is identical to some command-line parameter. To redirect all tokens after
  * "--" to specified parameter or process some parameters with configured wildcard
  * expander see #PARAM_SET_setParseOptions;
  *
  * to specify parse option for each command line parameter.
  * \code{.txt}
- * --long       - Long parameter without argument.
- * --long <arg> - Long parameter with argument.
- * -i <arg>     - Short parameter with argument.
+ * --long       - Long parameter without value.
+ * --long <arg> - Long parameter with value.
+ * -i <arg>     - Short parameter with value.
  * -vxn         - Bunch of flags.
  * \endcode
  * \param	set			#PARAM_SET object.

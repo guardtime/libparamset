@@ -262,7 +262,7 @@ const char* PARAM_getPrintName(PARAM *obj) {
 	return obj->getPrintName(obj, obj->print_name_buf, sizeof(obj->print_name_buf));
 }
 
-int PARAM_addValue(PARAM *param, const char *argument, const char* source, int prio) {
+int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio) {
 	int res;
 	PARAM_VAL *newValue = NULL;
 	PARAM_VAL *pLastValue = NULL;
@@ -277,9 +277,9 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 
 	/*If conversion function exists convert the argument*/
 	if (param->convert)
-		arg = param->convert(argument, buf, sizeof(buf)) ? buf : argument;
+		arg = param->convert(value, buf, sizeof(buf)) ? buf : value;
 	else
-		arg = argument;
+		arg = value;
 
 	/*Create new object and control the format*/
 	res = PARAM_VAL_new(arg, source, prio, &newValue);
