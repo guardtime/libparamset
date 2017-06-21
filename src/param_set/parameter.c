@@ -104,8 +104,8 @@ cleanup:
 	return res;
 }
 
-static int wrapper_returnStr(void *extra, const char* str, void** obj){
-	if (extra);
+static int wrapper_returnStr(void **extra, const char* str, void** obj){
+	VARIABLE_IS_NOT_USED(extra);
 	*obj = (void*)str;
 	return PST_OK;
 }

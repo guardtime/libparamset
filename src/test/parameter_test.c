@@ -309,20 +309,20 @@ static void Test_SetValuesAndControl(CuTest* tc) {
 	PARAM_free(p4);
 }
 
-static int wrapper_returnStr(void *extra, const char* str, void** obj){
+static int wrapper_returnStr(void **extra, const char* str, void** obj){
 	if (extra);
 	*obj = (void*)str;
 	return PST_OK;
 }
 
-static int wrapper_returnInt(void *extra, const char* str,  void** obj){
+static int wrapper_returnInt(void **extra, const char* str,  void** obj){
 	int *pI = (int*)obj;
 	if (extra);
 	*pI = atoi(str);
 	return PST_OK;
 }
 
-static int wrapper_returnDouble(void *extra, const char* str,  void** obj){
+static int wrapper_returnDouble(void **extra, const char* str,  void** obj){
 	double *pd = (double*)obj;
 	if (extra);
 	*pd = atof(str);
