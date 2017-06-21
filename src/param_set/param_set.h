@@ -504,7 +504,7 @@ int PARAM_SET_isOneOfSetByName(const PARAM_SET *set, const char *names);
  * Controls if the format and content of the parameters is OK.
  * \param	set		#PARAM_SET object.
  * \return \c 0 if format is invalid, \c 1 otherwise.
- * \see #PARAM_SET_addControl.
+ * \see #PARAM_SET_addControl and #PARAM_SET_invalidParametersToString.
  */
 int PARAM_SET_isFormatOK(const PARAM_SET *set);
 
@@ -520,7 +520,7 @@ int PARAM_SET_isConstraintViolation(const PARAM_SET *set);
  * file, similar to the defined ones - possible typos.
  * \param	set		#PARAM_SET object.
  * \return \c 0 if set contains possible typos, \c 1 otherwise.
- * \see #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
+ * \see #PARAM_SET_typosToString, #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
  */
 int PARAM_SET_isTypoFailure(const PARAM_SET *set);
 
@@ -536,7 +536,7 @@ int PARAM_SET_isSyntaxError(const PARAM_SET *set);
  * Controls if there are some undefined parameters red from command-line or file.
  * \param	set		#PARAM_SET object.
  * \return \c 0 if set contains unknown parameters, \c 1 otherwise.
- * \see #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
+ * \see #PARAM_SET_unknownsToString, #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
  */
 int PARAM_SET_isUnknown(const PARAM_SET *set);
 
@@ -660,6 +660,7 @@ char* PARAM_SET_toString(PARAM_SET *set, char *buf, size_t buf_len);
  * \param	buf		Receiving buffer.
  * \param	buf_len	Receiving buffer size.
  * \return \c buf if successful, \c NULL otherwise.
+ * \see #PARAM_SET_isTypoFailure.
  */
 char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, size_t buf_len);
 
@@ -670,6 +671,7 @@ char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, siz
  * \param buf		Receiving buffer.
  * \param buf_len	Receiving buffer size.
  * \return \c buf if successful, \c NULL otherwise.
+ * \see #PARAM_SET_isUnknown.
  */
 char* PARAM_SET_unknownsToString(const PARAM_SET *set, const char *prefix, char *buf, size_t buf_len);
 
@@ -685,6 +687,7 @@ char* PARAM_SET_unknownsToString(const PARAM_SET *set, const char *prefix, char 
  * \param	buf				Receiving buffer.
  * \param	buf_len			Receiving buffer size.
  * \return \c buf if successful, \c NULL otherwise.
+ * \see #PARAM_SET_isFormatOK.
  */
 char* PARAM_SET_invalidParametersToString(const PARAM_SET *set, const char *prefix, const char* (*getErrString)(int), char *buf, size_t buf_len);
 
