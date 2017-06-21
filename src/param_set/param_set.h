@@ -24,8 +24,9 @@
 extern "C" {
 #endif
 
-#include <stddef.h>
 #include <stdio.h>
+#include "param_value.h"
+#include "parameter.h"
 
 #ifndef PARAM_SET_ERROR_BASE
 #	define PARAM_SET_ERROR_BASE 0x30001
@@ -34,7 +35,7 @@ extern "C" {
 /**
  * List of error codes returned by the functions.
  */
-enum param_set_err {
+enum PARAM_SET_ERR_enum {
 	/** Everything is OK! */
 	PST_OK = 0,
 
@@ -112,115 +113,10 @@ enum param_set_err {
 };
 
 /**
- * List of priority constraints used for filtering the parameter values.
- */
-enum enum_priority {
-	/** Priority equal or less than this value is undefined.*/
-	PST_PRIORITY_NOTDEFINED = -4,
-
-	/** Priority for the most significant priority level. */
-	PST_PRIORITY_HIGHEST = -3,
-
-	/** Priority for the least significant priority level. */
-	PST_PRIORITY_LOWEST = -2,
-
-	/** Priority level is not used when filtering elements. */
-	PST_PRIORITY_NONE = -1,
-
-	/** Count of possible priority values beginning from #PST_PRIORITY_VALID_BASE. */
-	PST_PRIORITY_COUNT = 0xffff,
-
-	/** The valid base for priority level. */
-	PST_PRIORITY_VALID_BASE = 0,
-
-	/** The valid highest priority level.*/
-	PST_PRIORITY_VALID_ROOF = PST_PRIORITY_VALID_BASE + PST_PRIORITY_COUNT - 1 ,
-
-	/** To extract values higher than A, use priority A + #PST_PRIORITY_HIGHER_THAN*/
-	PST_PRIORITY_HIGHER_THAN = PST_PRIORITY_VALID_ROOF + 1,
-
-	/** To extract values lower than A, use priority A + #PST_PRIORITY_LOWER_THAN*/
-	PST_PRIORITY_LOWER_THAN = PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_COUNT,
-
-	 /** Priorities greater than that are all invalid. */
-	PST_PRIORITY_FIELD_OUT_OF_RANGE = PST_PRIORITY_LOWER_THAN + PST_PRIORITY_COUNT
-};
-
-/**
- * List of special index macros used for filtering the parameter values.
- */
-enum enum_value_index {
-	/** Return the last value found with specified constraints. */
-	PST_INDEX_LAST = -1,
-
-	/** Return the first value found with specified constraints. */
-	PST_INDEX_FIRST = 0,
-};
-
-/**
- * Object that is meant to be used with function #PARAM_SET_getAtr to get details
- * about Parameters value.
- */
-struct PARAM_ATR_st {
-	/** Name. */
-	char *name;
-
-	/** Alias. */
-	char *alias;
-
-	/** c-string value. */
-	char *cstr_value;
-
-	/** Optional c-string source description, e.g. file, environment. */
-	char *source;
-
-	/** Priority level constraint. */
-	int priority;
-
-	/** Format status. */
-	int formatStatus;
-
-	/** Content status. */
-	int contentStatus;
-};
-
-/**
- * Parameter value object. It holds values in list in order of insertion. Values
- * can be filtered with constraints - source, priority and index. Values are held
- * in linked list.
- */
-typedef struct PARAM_VAL_st PARAM_VAL;
-
-/**
- * Parameter object that has a name and list of values. Accessing values in
- * sequence (index is increased) is optimized. Contains optional functionality
- * for format and content control.
- */
-typedef struct PARAM_st PARAM;
-
-/**
  * Parameter set object. Holds multiple parameters, performs parsing and access
  * to the parameter values.
  */
 typedef struct PARAM_SET_st PARAM_SET;
-
-
-typedef struct PARAM_ATR_st PARAM_ATR;
-
-
-/**
- * A set on task definitions that can be analyzed against #PARAM_SET object to
- * extract a single consistent task.
- */
-typedef struct TASK_SET_st TASK_SET;
-
-/**
- * Consistent task object that is extracted from the #TASK_SET.
- */
-typedef struct TASK_st TASK;
-
-
-
 
 
 /**

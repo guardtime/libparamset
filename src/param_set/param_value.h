@@ -20,11 +20,64 @@
 #ifndef SET_PARAM_VALUE_H
 #define	SET_PARAM_VALUE_H
 
-#include "param_set.h"
+#include <stddef.h>
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
+
+/**
+ * Parameter value object. It holds values in list in order of insertion. Values
+ * can be filtered with constraints - source, priority and index. Values are held
+ * in linked list.
+ */
+typedef struct PARAM_VAL_st PARAM_VAL;
+
+/**
+ * List of priority constraints used for filtering the parameter values.
+ */
+enum PST_PRIORITY_enum {
+	/** Priority equal or less than this value is undefined.*/
+	PST_PRIORITY_NOTDEFINED = -4,
+
+	/** Priority for the most significant priority level. */
+	PST_PRIORITY_HIGHEST = -3,
+
+	/** Priority for the least significant priority level. */
+	PST_PRIORITY_LOWEST = -2,
+
+	/** Priority level is not used when filtering elements. */
+	PST_PRIORITY_NONE = -1,
+
+	/** Count of possible priority values beginning from #PST_PRIORITY_VALID_BASE. */
+	PST_PRIORITY_COUNT = 0xffff,
+
+	/** The valid base for priority level. */
+	PST_PRIORITY_VALID_BASE = 0,
+
+	/** The valid highest priority level.*/
+	PST_PRIORITY_VALID_ROOF = PST_PRIORITY_VALID_BASE + PST_PRIORITY_COUNT - 1 ,
+
+	/** To extract values higher than A, use priority A + #PST_PRIORITY_HIGHER_THAN*/
+	PST_PRIORITY_HIGHER_THAN = PST_PRIORITY_VALID_ROOF + 1,
+
+	/** To extract values lower than A, use priority A + #PST_PRIORITY_LOWER_THAN*/
+	PST_PRIORITY_LOWER_THAN = PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_COUNT,
+
+	 /** Priorities greater than that are all invalid. */
+	PST_PRIORITY_FIELD_OUT_OF_RANGE = PST_PRIORITY_LOWER_THAN + PST_PRIORITY_COUNT
+};
+
+/**
+ * List of special index macros used for filtering the parameter values.
+ */
+enum PST_INDEX_enum {
+	/** Return the last value found with specified constraints. */
+	PST_INDEX_LAST = -1,
+
+	/** Return the first value found with specified constraints. */
+	PST_INDEX_FIRST = 0,
+};
 
 /**
  * Creates a new #PARAM_VAL object. If \c new is pointer to \c NULL, a new

@@ -75,7 +75,6 @@ make install DESTDIR=%{buildroot}
 
 %{_includedir}/param_set/parameter.h
 %{_includedir}/param_set/param_set.h
-%{_includedir}/param_set/param_set_obj_impl.h
 %{_includedir}/param_set/param_value.h
 %{_includedir}/param_set/strn.h
 %{_includedir}/param_set/task_def.h

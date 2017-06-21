@@ -20,14 +20,26 @@
 #ifndef SET_PARAMETER_H
 #define	SET_PARAMETER_H
 
-#include "param_set.h"
+#include "param_value.h"
+
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
+/**
+ * Parameter object that has a name and list of values. Accessing values in
+ * sequence (index is increased) is optimized. Contains optional functionality
+ * for format and content control.
+ */
+typedef struct PARAM_st PARAM;
+
 typedef enum PARAM_PARS_OPTIONS_enum PARAM_PARS_OPTIONS;
+
 typedef enum PARAM_CONSTRAINTS_enum PARAM_CONSTRAINTS;
+
+typedef struct PARAM_ATR_st PARAM_ATR;
+
 
 enum PARAM_CONSTRAINTS_enum {
 	/** Only a single value is allowed. */
@@ -40,6 +52,32 @@ enum PARAM_CONSTRAINTS_enum {
 	PARAM_INVALID_CONSTRAINT = 0x8000,
 };
 
+/**
+ * Object that is meant to be used with function #PARAM_SET_getAtr to get details
+ * about Parameters value.
+ */
+struct PARAM_ATR_st {
+	/** Name. */
+	char *name;
+
+	/** Alias. */
+	char *alias;
+
+	/** c-string value. */
+	char *cstr_value;
+
+	/** Optional c-string source description, e.g. file, environment. */
+	char *source;
+
+	/** Priority level constraint. */
+	int priority;
+
+	/** Format status. */
+	int formatStatus;
+
+	/** Content status. */
+	int contentStatus;
+};
 
 /**
  * This is the list of #PARAM parsing options that will affect how the parameters
@@ -490,7 +528,7 @@ int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio
  *
  * Use #PST_INDEX_LAST as \c at to extract the last value matching the constraints.
  * If there are values with different priority levels use #PST_PRIORITY_HIGHEST
- * (see #enum_priority) to get the values with the highest priority. To extract
+ * (see #PST_PRIORITY_enum) to get the values with the highest priority. To extract
  * values that have source specified, set \c source as desired value or if there
  * is need to ignore the source set \c source as \c NULL.
  *

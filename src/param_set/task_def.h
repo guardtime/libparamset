@@ -29,6 +29,17 @@ extern "C" {
 #endif
 
 /**
+ * A set on task definitions that can be analyzed against #PARAM_SET object to
+ * extract a single consistent task.
+ */
+typedef struct TASK_SET_st TASK_SET;
+
+/**
+ * Consistent task object that is extracted from the #TASK_SET.
+ */
+typedef struct TASK_st TASK;
+
+/**
  * Create a empty #TASK_SET object.
  * \param new	Pointer to receiving pointer to #TASK_SET object.
  * \return #PST_OK if successful, error code otherwise.

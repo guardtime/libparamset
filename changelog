@@ -1,3 +1,8 @@
+* IMPROVEMENT: Enumeration "enum_priority" renamed to "PST_PRIORITY_enum" and moved from param_set.h to param_value.h.
+* IMPROVEMENT: Enumeration "enum_value_index" renamed to "PST_INDEX_enum" and moved from param_set.h to param_value.h.
+* IMPROVEMENT: Object PARAM_ATR  moved from param_set.h to parameter.h.
+* IMPROVEMENT: PARAM_VAL and PARAM objects type definitions moved from param_set.h to param_value.h and parameter.h accordingly.
+* IMPROVEMENT: TASK_SET and TASK objects type definitions moved from param_set.h to task_def.h.
 * IMPROVEMENT: Abstract function extractObject extra parameter type changed from void* to void**.
 * IMPROVEMENT: Macros PST_FORMAT_STATUS_OK, PST_CONTENT_STATUS_OK and TASK_DEFINITION_MAX_COUNT are used internally only.
 * IMPROVEMENT: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
@@ -7,12 +12,10 @@
 * IMPROVEMENT: Parsing option PST_PRSCMD_HAS_MULTIPLE_INSTANCES changed to PST_PRSCMD_HAS_VALUE_SEQUENCE.
 * IMPROVEMENT: Object TASK_DEFINITION is used internally only.
 * IMPROVEMENT: Object ITERATOR is used internally only.
-
-
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
 * BUGFIX: PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
 
-2016-11-30 0.2.0
+2016-11-30 0.2.0 - First code in repository that is never packaged. Code was copied and included as source files.
 
 * IMPROVEMENT: RPM packaging implemented.
 * IMPROVEMENT: Unit tests implemented.
