@@ -45,7 +45,7 @@ enum PARAM_SET_ERR_enum {
 	/** Input content or syntax in wrong (e.g. parsing command-line or configuration file). */
 	PST_INVALID_FORMAT,
 
-	/** Currently used only if #TASK_DEFINITION_MAX_COUNT exceeded. */
+	/** Indicates index out of boundaries. */
 	PST_INDEX_OVF,
 
 	/** Parameter with the given name does not exist in the given set. */
@@ -259,7 +259,7 @@ int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const cha
  * \param	source		Constraint for the source, can be \c NULL.
  * \param	priority	Priority that can be #PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	at			Parameter index in the matching set composed with the constraints.
- * \param	obj			Pointer to receiving pointer to string returned.
+ * \param	value		Pointer to receiving pointer to string returned.
  * \return #PST_OK when successful, error code otherwise. Some more common error
  * codes: #PST_INVALID_ARGUMENT, #PST_PARAMETER_NOT_FOUND, #PST_PARAMETER_EMPTY,
  * #PST_PARAMETER_INVALID_FORMAT and #PST_PARAMETER_VALUE_NOT_FOUND.
@@ -518,8 +518,8 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 /**
  * This function is used to specify parsing options (#PARAM_PARS_OPTIONS) used
  * by #PARAM_SET_parseCMD.
- * .
- * \param	set			#PARAM_SET object.
+ *
+ * \param set			#PARAM_SET object.
  * \param names			Parameter name list.
  * \param options		Parsing options.
  * \return #PST_OK if successful, error code otherwise.
@@ -599,7 +599,7 @@ char* PARAM_SET_constraintErrorToString(const PARAM_SET *set, const char *prefix
 
 /**
  * Converts PST_* Error codes to string.
- * \param err	Error code from #param_set_err.
+ * \param err	Error code from #PARAM_SET_ERR_enum.
  * \return Error string mapped from specified error code.
  */
 const char* PARAM_SET_errorToString(int err);
@@ -634,7 +634,7 @@ const char* extract_next_name(const char* name_string, int (*isValidNameChar)(in
 /**
  * Extract a key value pair from the line. Value part can be wrapped inside
  * double quote marks (<em>"</em>) to include whitespace characters. Use back slash
- * (<em>\</em>) as escape character for it self and for double quotes. Some examples:
+ * (<em>\\</em>) as escape character for it self and for double quotes. Some examples:
  *
  * \code{.txt}
  * key = value

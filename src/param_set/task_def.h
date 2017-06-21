@@ -76,7 +76,7 @@ void TASK_SET_free(TASK_SET *obj);
  * \param ignore		Ignored parameters. Can be \c NULL.
  * \return #PST_OK if successful, error code otherwise.
  */
-int TASK_SET_add(TASK_SET *obj, int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore);
+int TASK_SET_add(TASK_SET *task_set, int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore);
 
 /**
  * Performs analyze on the #TASK_SET with parameters from #PARAM_SET. After analyze

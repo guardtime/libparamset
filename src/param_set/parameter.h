@@ -476,9 +476,9 @@ int PARAM_isParsOptionSet(PARAM *param, int state);
 /**
  * This function is used to specify parsing options (#PARAM_PARS_OPTIONS) used
  * by #PARAM_SET_parseCMD.
- * .
+ *
  * \param param		#PARAM object.
- * \param options	Parsing options.
+ * \param option	Parsing options.
  * \return #PST_OK if successful, error code otherwise. #PST_PRSCMD_INVALID_COMBINATION
  * is returned if conflicting parsing option combination is feed to the function.
  */
@@ -488,14 +488,13 @@ int PARAM_setParseOption(PARAM *param, int option);
  * Set object extractor to the parameter that implements #PARAM_getObject.
  *
  * Function \c extractObject is used to extract an object from the parameters value.
- * Function \c extractObject affects #PARAM_getObj and  #PARAM_getObjExtended
- * behaviour. If not specified, the default function is used that extracts the
- * c-string value. Parameter \c extra is <tt>void**</tt> pointer to array with
- * 2 elements, \c str is parameters value and \c obj is pointer to receiving pointer.
- * Calling #PARAM_getObj both array elements in \c extra are pointing to #PARAM_SET
- * itself (<tt>void **extra = {set, set}</tt>), when calling #PARAM_SET_getObjExtended,
- * the second value is determined by the function call and extra parameter given
- * (<tt>void **extra = {set, extra}</tt>).
+ * Function \c extractObject affects #PARAM_getObject behaviour. If not specified,
+ * the default function is used that extracts the c-string value. Parameter \c extra
+ * is <tt>void**</tt> pointer to array with 2 elements, \c str is parameters value
+ * and \c obj is pointer to receiving pointer. Calling #PARAM_getObject both array
+ * elements in \c extra are pointing to #PARAM_SET itself (<tt>void **extra = {set, set}</tt>),
+ * when calling #PARAM_SET_getObjExtended, the second value is determined by
+ * the function call and extra parameter given (<tt>void **extra = {set, extra}</tt>).
  *
  * <tt>int (*extractObject)(void **extra, const char *str, void **obj)</tt>
  *
@@ -513,7 +512,7 @@ int PARAM_setObjectExtractor(PARAM *param, int (*extractObject)(void **, const c
  * \param	param		#PARAM object.
  * \param	value		Parameters value as c-string. Can be \c NULL.
  * \param	source		Source description as c-string. Can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_getValueCount, #PARAM_getInvalidCount, #PARAM_getValue and #PARAM_getInvalid.
  */
@@ -534,7 +533,7 @@ int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio
  *
  * \param	param		#PARAM object.
  * \param	source		Constraint for the source, can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \param	value		Pointer to receiving pointer to \c PARAM_VAL object.
  *
@@ -549,7 +548,7 @@ int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL
  * #PARAM_setPrintName. See #PARAM_getPrintName to extract parameters print name.
  * \param	param		#PARAM object.
  * \param	source		Constraint for the source, can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \param	atr			Pointer to #PARAM_ATR object to store the result.
  * \return #PST_OK when successful, error code otherwise. More common errors
@@ -573,7 +572,7 @@ int PARAM_getName(PARAM *param, const char **name, const char **alias);
  *
  * \param	param		#PARAM object.
  * \param	source		Constraint for the source, can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \param	extra		Pointer to optional extra data array.
  * \param	value		Pointer to the receiving pointer to the value.
@@ -592,7 +591,7 @@ int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void **e
  * error status set. See #PARAM_addControl how to apply value control.
  * \param	param		#PARAM object.
  * \param	source		Constraint for the source, can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \param	value		Pointer to receiving pointer to \c PARAM_VAL object.
  * \return #PST_OK when successful, error code otherwise.
@@ -603,7 +602,7 @@ int PARAM_getInvalid(PARAM *param, const char *source, int prio, int at, PARAM_V
  * Return parameters value count matching the constraints.
  * \param	param		#PARAM object.
  * \param	source		Constraint for the source, can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	count		Pointer to to store tha count value.
  * \return #PST_OK when successful, error code otherwise.
  */
@@ -614,7 +613,7 @@ int PARAM_getValueCount(PARAM *param, const char *source, int prio, int *count);
  * #PARAM_addControl how to apply value control.
  * \param	param		#PARAM object.
  * \param	source		Constraint for the source, can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	count		Pointer to to store tha count value.
  * \return #PST_OK when successful, error code otherwise.
  */
@@ -625,7 +624,7 @@ int PARAM_getInvalidCount(PARAM *param, const char *source, int prio, int *count
  * messages or returned by #PARAM_getPrintName. It does not change the parameters
  * real name that is used to get it from #PARAM_SET object.
  *
- * If \c constv  <b>is not<\b> \c NULL, a user specified constant value is used.
+ * If \c constv  <b>is not</b> \c NULL, a user specified constant value is used.
  * If \c constv is \c NULL an abstract function \c getPrintName must be specified
  * that formats the string.
  * Default print format for long and short parameter is "--long-option" and "-a".
@@ -677,7 +676,7 @@ int PARAM_clearAll(PARAM *param);
  * Removes specified value.
  * \param	param		#PARAM object.
  * \param	source		Constraint for the source, can be \c NULL.
- * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<//>0</tt>) or higher.
+ * \param	prio		Priority that can be \c PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \return #PST_OK when successful, error code otherwise.
  */
