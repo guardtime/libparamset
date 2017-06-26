@@ -411,9 +411,32 @@ int PARAM_SET_isFormatOK(const PARAM_SET *set);
  * \see #PARAM_SET_new.
  */
 int PARAM_SET_isConstraintViolation(const PARAM_SET *set);
+
 /**
  * Controls if there are some undefined parameters red from command-line or
- * file, similar to the defined ones - possible typos.
+ * file, similar to the defined ones - possible typos. Typos are detected using
+ * the \c difference value calculated as specified below:
+ *
+ * \code{.txt}
+ *                    levenshtein_distance(token, param_name)
+ * difference = 100 * --------------------------------------- - (is_sub_str * 15 + is_sub_str_at_beginning * 15)  , where
+ *                                param_name_len
+ *
+ *   levenshtein_distance - function that calculates edit distance for two strings.
+ *   token - unknown token thats similarity is compared with existing parameters.
+ *   param_nane - parameters name.
+ *   param_name_len - parameters name length in characters.
+ *   is_sub_str - 1 if token is a substring, 0 otherwise.
+ *   is_sub_str_at_beginning - 1 if token matches with the beginning of param_name, 0 otherwise.
+ * \endcode
+ *
+ * The \c difference value with the unknown \c token is calculated for every known
+ * parameter in the \c set and the smallest value is saved as \c smdiff. A unknown
+ * token is interpreted as typo if there exists at least one parameter thats:
+ * \code{.txt}
+ * difference < 90 && difference < (smdiff + 10)
+ * \endcode
+ *
  * \param	set		#PARAM_SET object.
  * \return \c 0 if set contains possible typos, \c 1 otherwise.
  * \see #PARAM_SET_typosToString, #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
