@@ -33,7 +33,7 @@ AC_CANONICAL_TARGET
 #   3. If any interfaces have been added since the last public release, then
 #      increment age ('c:r:a' becomes 'c:r:a+1').
 #   4. If any interfaces have been removed or changed since the last public
-#      release, then set age to 0 ('c:r:a' becomes 'c:r:0'). 
+#      release, then set age to 0 ('c:r:a' becomes 'c:r:0').
 LTVER="1:0:0"
 AC_SUBST(LTVER)
 

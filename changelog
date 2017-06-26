@@ -12,6 +12,7 @@
 * IMPROVEMENT: Parsing option PST_PRSCMD_HAS_MULTIPLE_INSTANCES changed to PST_PRSCMD_HAS_VALUE_SEQUENCE.
 * IMPROVEMENT: Object TASK_DEFINITION is used internally only.
 * IMPROVEMENT: Object ITERATOR is used internally only.
+* IMPROVEMENT: Test folder moved from "src/test" to "test".
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
 * BUGFIX: PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
 

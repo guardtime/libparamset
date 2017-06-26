@@ -19,10 +19,10 @@
 
 #include "cutest/CuTest.h"
 #include "all_tests.h"
-#include "../param_set/param_value.h"
-#include "../param_set/parameter.h"
-#include "../param_set/param_set.h"
-#include "../param_set/param_set_obj_impl.h"
+#include "../src/param_set/param_value.h"
+#include "../src/param_set/parameter.h"
+#include "../src/param_set/param_set.h"
+#include "../src/param_set/param_set_obj_impl.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>

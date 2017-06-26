@@ -20,13 +20,14 @@
 .PHONY: test
 
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src/param_set src/test
 
+SUBDIRS = src/param_set test
 
 dist_doc_DATA = changelog LICENSE
 EXTRA_DIST = VERSION $(dist_doc_DATA)
 
+EXTRA_DIST = VERSION $(dist_doc_DATA)
 
-test: check 
-	./src/test/test src/test/resource
+test: check
+	./test/test test/resource
 

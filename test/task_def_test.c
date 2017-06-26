@@ -24,9 +24,9 @@
 
 #include "cutest/CuTest.h"
 #include "all_tests.h"
-#include "../param_set/param_set_obj_impl.h"
-#include "../param_set/param_set.h"
-#include "../param_set/task_def.h"
+#include "../src/param_set/param_set_obj_impl.h"
+#include "../src/param_set/param_set.h"
+#include "../src/param_set/task_def.h"
 
 #define LIFO_SIZE 32
 
