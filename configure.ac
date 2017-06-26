@@ -78,5 +78,5 @@ AC_SUBST(VER_MINOR)
 AC_SUBST(VER_BUILD)
 AC_CONFIG_FILES([src/param_set/version.h])
 
-AC_CONFIG_FILES([GNUmakefile src/param_set/GNUmakefile src/test/GNUmakefile packaging/redhat/libparamset.spec])
+AC_CONFIG_FILES([GNUmakefile src/param_set/GNUmakefile test/GNUmakefile packaging/redhat/libparamset.spec doc/GNUmakefile])
 AC_OUTPUT

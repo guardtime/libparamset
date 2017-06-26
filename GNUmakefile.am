@@ -17,17 +17,25 @@
 # reserves and retains all trademark rights.
 #
 
-.PHONY: test
+.PHONY: doc test
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src/param_set test
+SUBDIRS = src/param_set test doc
+
+ZIPDOC_DIR = ${PACKAGE}-${VERSION}-htmldoc
 
 dist_doc_DATA = changelog LICENSE
-EXTRA_DIST = VERSION $(dist_doc_DATA)
 
-EXTRA_DIST = VERSION $(dist_doc_DATA)
+EXTRA_DIST = VERSION $(dist_doc_DATA) doc/doxyfile doc/mainpage.md
+
 
 test: check
 	./test/test test/resource
 
+doc: doc/doxyfile
+	$(MAKE) -C doc htmldoc
+
+doc-zip: doc
+	cp -r doc/html ${ZIPDOC_DIR}
+	zip -r ${ZIPDOC_DIR}.zip ${ZIPDOC_DIR}
