@@ -108,6 +108,9 @@ enum PARAM_SET_ERR_enum {
 	/** Unable to set the combination of command-line parser options. */
 	PST_PRSCMD_INVALID_COMBINATION,
 
+	/** Parameter conversion is not performed. Original input must be used. (See #PARAM_addControl and #PARAM_SET_addControl). */
+	PST_PARAM_CONVERT_NOT_PERFORMED,
+
 	/** Unknown error. */
 	PST_UNKNOWN_ERROR,
 };
@@ -161,9 +164,9 @@ void PARAM_SET_free(PARAM_SET *set);
  *
  * Function \c convert is used to repair / convert the c-string value before any
  * content or format check is performed. Takes two extra parameters for buffer and its
- * size. Return 1 if conversion successful, 0 otherwise. If 0 is returned, original
- * \c value is used. Note that when conversion is not performed and 1 is returned,
- * \c buf must still contain the copy of \c value.
+ * size. Return #PST_OK if conversion successful, error code otherwise. To skip
+ * conversion #PST_PARAM_CONVERT_NOT_PERFORMED must be returned or \c value must be
+ * copied to \c buf.
  *
  * <tt>int (*convert)(const char *value, char *buf, unsigned *buf_len)</tt>
  *
@@ -186,9 +189,12 @@ void PARAM_SET_free(PARAM_SET *set);
  * \param	convert			Function for value conversion.
  * \param	extractObject	Function for object extraction.
  * \return #PST_OK if successful, error code otherwise.
+ * \note Note that \c controlFormat and \c controlContent may return any error code
+ * but \c convert function should be used so that user error codes are not mixed with
+ * \c PST_* error codes.
  * \see PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and PARAM_SET_setWildcardExpander.
  * To get error reports related with functions \c controlFormat and \c controlContent,
- * see #PARAM_SET_isFormatOK, #PARAM_SET_invalidParametersToString.
+ * see #PARAM_SET_isFormatOK and #PARAM_SET_invalidParametersToString.
  */
 int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 		int (*controlFormat)(const char *),

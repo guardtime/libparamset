@@ -281,11 +281,15 @@ int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio
 		goto cleanup;
 	}
 
-	/*If conversion function exists convert the argument*/
-	if (param->convert)
-		arg = param->convert(value, buf, sizeof(buf)) ? buf : value;
-	else
+	/* If conversion function exists convert the argument. */
+	if (param->convert) {
+		res = param->convert(value, buf, sizeof(buf));
+		if (res != PST_OK && res != PST_PARAM_CONVERT_NOT_PERFORMED) goto cleanup;
+
+		arg = (res == PST_OK) ? buf : value;
+	} else {
 		arg = value;
+	}
 
 	/*Create new object and control the format*/
 	res = PARAM_VAL_new(arg, source, prio, &newValue);

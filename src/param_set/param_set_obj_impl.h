@@ -80,7 +80,9 @@ struct PARAM_st{
 	 * str - c-string value that belongs to PARAM_VAL object.
 	 * buf - a buffer that will contain value after conversion.
 	 * buf_len - the size of the buffer.
-	 * Returns 1 if conversion successful, 0 otherwise.
+	 * Returns #PST_OK (0) if conversion successful, error code otherwise. If
+	 * conversion is not performed #PST_PARAM_CONVERT_NOT_PERFORMED must be used
+	 * or \c str must be copied to \ buf.
 	 */
 	int (*convert)(const char *str, char *buf, unsigned buf_len);
 

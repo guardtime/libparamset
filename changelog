@@ -13,10 +13,11 @@
 * IMPROVEMENT: Object TASK_DEFINITION is used internally only.
 * IMPROVEMENT: Object ITERATOR is used internally only.
 * IMPROVEMENT: Test folder moved from "src/test" to "test".
-* IMPROVEMENT: Doxygen documentation added.
+* IMPROVEMENT: Function convert interface, specified by PARAM_addControl and PARAM_SET_addControl, changed to return PST_OK when successful, error code otherwise.
 * IMPROVEMENT: PARAM_setWildcardExpander interface changed - new parameter ctx_free added.
 * IMPROVEMENT: PARAM_SET_setWildcardExpander interface changed - new parameter ctx_free added.
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
+* FEATURE: Doxygen documentation added.
 * BUGFIX: PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
 * BUGFIX: Small mathematical correction, that has fractional effect in typo detection, applied.
 

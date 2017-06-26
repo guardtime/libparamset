@@ -193,7 +193,7 @@ static int convert_replaceNonAlpha(const char *value, char *buf, unsigned buf_le
 		i++;
 	}
 	buf[j] = '\0';
-	return 1;
+	return PST_OK;
 }
 
 static void Test_SetValuesAndControl(CuTest* tc) {

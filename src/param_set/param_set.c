@@ -2366,6 +2366,8 @@ const char* PARAM_SET_errorToString(int err) {
 		return "Wildcard expander function not specified.";
 	case PST_UNDEFINED_BEHAVIOUR:
 		return "PARAM_SET undefined behaviour.";
+	case PST_PARAM_CONVERT_NOT_PERFORMED:
+		return "PARAM object value conversion is skipped.";
 	case PST_UNKNOWN_ERROR:
 		return "PARAM_SET unknown error.";
 	}

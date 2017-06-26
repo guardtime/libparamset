@@ -445,9 +445,9 @@ void PARAM_free(PARAM *param);
  *
  * Function \c convert is used to repair / convert the c-string value before any
  * content or format check is performed. Takes two extra parameters for buffer and its
- * size. Return 1 if conversion successful, 0 otherwise. If 0 is returned, original
- * \c value is used. Note that when conversion is not performed and 1 is returned,
- * \c buf must still contain the copy of \c value.
+ * size. Return #PST_OK if conversion successful, error code otherwise. To skip
+ * conversion #PST_PARAM_CONVERT_NOT_PERFORMED must be returned or \c value must be
+ * copied to \c buf.
  *
  * <tt>int (*convert)(const char *value, char *buf, unsigned *buf_len)</tt>
  *
