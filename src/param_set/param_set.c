@@ -432,6 +432,7 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 	int numOfElements = 0;
 	PARAM **array = NULL;
 	int smallest_difference = 100;
+	int theFirstDiff = 1;
 	int typo_count = 0;
 	int i = 0;
 
@@ -480,7 +481,7 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 			alias_difference = (alias_edit_distance * 100) / alias_len;
 		}
 
-		if (name_difference <= alias_difference) {
+		if (array[i]->flagAlias == NULL || name_difference <= alias_difference) {
 			isSubstring = string_is_substring(str, array[i]->flagName);
 			isSubstringAtTheBeginning = string_is_substring_at_the_beginning(str, array[i]->flagName);
 			typo_index[i].difference = name_difference;
@@ -505,8 +506,9 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 		/**
 		 * Register the smallest difference value.
 		 */
-		if (typo_index[i].difference < smallest_difference) {
+		if (typo_index[i].difference < smallest_difference || theFirstDiff) {
 			smallest_difference = typo_index[i].difference;
+			theFirstDiff = 0;
 		}
 
 	}

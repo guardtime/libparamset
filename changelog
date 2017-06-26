@@ -16,6 +16,7 @@
 * IMPROVEMENT: Doxygen documentation added.
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
 * BUGFIX: PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
+* BUGFIX: Small mathematical correction, that has fractional effect in typo detection, applied.
 
 2016-11-30 0.2.0 - First code in repository that is never packaged. Code was copied and included as source files.
 
