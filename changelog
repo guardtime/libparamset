@@ -14,6 +14,8 @@
 * IMPROVEMENT: Object ITERATOR is used internally only.
 * IMPROVEMENT: Test folder moved from "src/test" to "test".
 * IMPROVEMENT: Doxygen documentation added.
+* IMPROVEMENT: PARAM_setWildcardExpander interface changed - new parameter ctx_free added.
+* IMPROVEMENT: PARAM_SET_setWildcardExpander interface changed - new parameter ctx_free added.
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
 * BUGFIX: PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
 * BUGFIX: Small mathematical correction, that has fractional effect in typo detection, applied.

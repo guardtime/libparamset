@@ -957,6 +957,7 @@ int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
 
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 		void *ctx,
+		void (*ctx_free)(void*),
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)){
 	int res;
 	PARAM *tmp = NULL;
@@ -970,7 +971,7 @@ int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 		res = param_set_getParameterByName(set, buf, &tmp);
 		if (res != PST_OK) return res;
 
-		res = PARAM_setWildcardExpander(tmp, ctx, expand_wildcard);
+		res = PARAM_setWildcardExpander(tmp, ctx, ctx_free, expand_wildcard);
 		if (res != PST_OK) return res;
 	}
 

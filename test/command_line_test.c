@@ -898,7 +898,7 @@ static void Test_command_test_1(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
-static int expand_wildcard_len3str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
+static int expand_wildcard_len2str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
 	 const char *input = NULL;
 	 int res;
 	 char **accepted_strs = (char**)ctx;
@@ -982,7 +982,7 @@ static void Test_expand_WC_on_CMD_WC_configured_WC_as_input(CuTest* tc) {
 	res = PARAM_SET_setParseOptions(set, "{i}", PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_EXPAND_WILDCARD);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
-	res = PARAM_SET_setWildcardExpander(set, "i", data, expand_wildcard_len3str);
+	res = PARAM_SET_setWildcardExpander(set, "i", data, NULL, expand_wildcard_len2str);
 	CuAssert(tc, "Unable to configure wildcard expander.", res == PST_OK);
 
 	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);

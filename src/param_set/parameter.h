@@ -695,13 +695,14 @@ int PARAM_clearValue(PARAM *param, const char *source, int prio, int at);
  *
  *
  * \param	param				#PARAM_SET object.
- * \param	ctx					Data structure used by Wildcard expander.
+ * \param	ctx					Data structure used by Wildcard expander. Can be \c NULL.
+ * \param	ctx_free			Data structure release function. Can be \c NULL.
  * \param	expand_wildcard		Function pointer to Wildcard Expander function.
  * \return #PST_OK if successful, error code otherwise.
  * \note #PARAM_SET_parseCMD must be used and parsing option #PST_PRSCMD_EXPAND_WILDCARD
  * must be set using #PARAM_SET_setParseOptions.
  */
-int PARAM_setWildcardExpander(PARAM *param, void *ctx, int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));
+int PARAM_setWildcardExpander(PARAM *param, void *ctx, void (*ctx_free)(void*), int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));
 
 /**
  * Expand the values containing wildcard characters (<tt>WC</tt>). Before using

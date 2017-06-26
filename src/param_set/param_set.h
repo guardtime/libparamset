@@ -710,7 +710,8 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
  *
  * \param	set				#PARAM_SET object.
  * \param	names			List of names to add the functionality.
- * \param	ctx				Data structure used by Wildcard expander.
+ * \param	ctx				Data structure used by Wildcard expander. Can be \c NULL.
+ * \param	ctx_free		Data structure release function. Can be \c NULL.
  * \param	expand_wildcard	Function pointer to Wildcard Expander function.
  * \return #PST_OK if successful, error code otherwise.
  * \note #PARAM_SET_parseCMD must be used and parsing option #PST_PRSCMD_EXPAND_WILDCARD
@@ -719,6 +720,7 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
  */
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 		void *ctx,
+		void (*ctx_free)(void*),
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));
 
 #ifdef	__cplusplus

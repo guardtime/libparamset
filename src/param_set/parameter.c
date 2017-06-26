@@ -149,6 +149,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 	tmp->extractObject = wrapper_returnStr;
 	tmp->expand_wildcard = NULL;
 	tmp->expand_wildcard_ctx = NULL;
+	tmp->expand_wildcard_free = NULL;
 	tmp->getPrintName = wrapper_returnConstantPrintName;
 	PST_snprintf(tmp->print_name_buf, sizeof(tmp->print_name_buf), "%s%s", (strlen(flagName) == 1 ? "-" : "--"), flagName);
 
@@ -192,6 +193,11 @@ void PARAM_free(PARAM *param) {
 	free(param->flagAlias);
 	if (param->itr) ITERATOR_free(param->itr);
 	if (param->arg) PARAM_VAL_free(param->arg);
+
+	if (param->expand_wildcard_ctx != NULL && param->expand_wildcard_free != NULL) {
+		param->expand_wildcard_free(param->expand_wildcard_ctx);
+	}
+
 	free(param);
 }
 
@@ -589,10 +595,11 @@ cleanup:
 	return res;
 }
 
-int PARAM_setWildcardExpander(PARAM *param, void *ctx, int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
+int PARAM_setWildcardExpander(PARAM *param, void *ctx, void (*ctx_free)(void*), int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
 	if (param == NULL || expand_wildcard == NULL) return PST_INVALID_ARGUMENT;
 	param->expand_wildcard = expand_wildcard;
 	param->expand_wildcard_ctx = ctx;
+	param->expand_wildcard_free = ctx_free;
 	return PST_OK;
 }
 

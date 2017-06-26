@@ -134,6 +134,11 @@ struct PARAM_st{
 	 * Additional context for expand_wildcard.
 	 */
 	void *expand_wildcard_ctx;
+
+	/**
+	 * An optional expaned wildcard ctx object.
+	 */
+	void (*expand_wildcard_free)(void *);
 };
 
 

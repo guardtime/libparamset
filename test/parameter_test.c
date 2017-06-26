@@ -468,7 +468,7 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	PARAM_free(p1);
 }
 
- static int expand_wildcard_len3str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
+ static int expand_wildcard_len2str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
 	 const char *input = NULL;
 	 int res;
 	 char **accepted_strs = (char**)ctx;
@@ -541,7 +541,7 @@ static void Test_WildcarcExpander(CuTest* tc) {
 	CuAssert(tc, "Unable to get value count.", res == PST_OK);
 	CuAssert(tc, "Invalid value count.", value_count == 6);
 
-	res = PARAM_setWildcardExpander(param, argv, expand_wildcard_len3str);
+	res = PARAM_setWildcardExpander(param, argv, NULL, expand_wildcard_len2str);
 	CuAssert(tc, "Unable to set wildcard expander.", res == PST_OK);
 
 	res = PARAM_expandWildcard(param, &expand_count);
