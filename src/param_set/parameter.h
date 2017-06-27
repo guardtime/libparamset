@@ -412,7 +412,7 @@ enum PARAM_PARS_OPTIONS_enum {
  * \param	flagName	The parameters name.
  * \param	flagAlias	The alias for the name. Can be NULL.
  * \param	constraint	Constraints for the parameter and its values (see #PARAM_CONSTRAINTS).
- * \param	pars_opt	Parsing Options (see #PARAM_PARS_OPTIONS).
+ * \param	pars_opt	Parsing Options (see [PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)).
  * \param	newObj		Pointer to receiving pointer to new object.
  * \return #PST_OK when successful, error code otherwise.
  *
@@ -467,14 +467,14 @@ int PARAM_addControl(PARAM *param, int (*controlFormat)(const char *), int (*con
  * \param param		#PARAM object.
  * \param state		A state to be controlled.
  * \return #PST_OK if successful, error code otherwise.
- * \see #PARAM_PARS_OPTIONS_enum, #PARAM_setParseOption and #PARAM_SET_parseCMD
+ * \see [PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum), #PARAM_setParseOption and #PARAM_SET_parseCMD
  * for more information.
  */
 int PARAM_isParsOptionSet(PARAM *param, int state);
 
 
 /**
- * This function is used to specify parsing options (#PARAM_PARS_OPTIONS) used
+ * This function is used to specify parsing options ([PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)) used
  * by #PARAM_SET_parseCMD.
  *
  * \param param		#PARAM object.

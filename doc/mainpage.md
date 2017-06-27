@@ -1,12 +1,16 @@
-# libparamset #
-The libparamset is a software development kit for handling COmmand-Line (COL.) parameters and program tasks resolved from the predefined COL. paramer set.
+PARAM SET Overview {#mainpage}
+============
+The libparamset is a software development kit for handling cmmand-line parameters and program tasks. Parameters can be read from command-line and a task can be extrated that matches with the given input. Process is covered with error detection and functions that generates helpful feedback messages to the user.
+
+libparamset
+-----------
 
 The libparamset provides the following functionality:
 * Parameters can be parsed from command-line, read from configuration file or inserted from the code.
 * Long and short parameters (-a and --long).
 * Concatenating of flags with length 1 (-ab instead of -a -b).
 * One alias for the parameters names (e.g. --load and -l).
-* Individual parsing options for parameters:.
+* Individual parsing options for parameters ([PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)).
   * Parameter with multiple coexisting values (-a v1 -a v2 ... -a vn, where -a = {"v1", "v2", ..., "vn"}).
   * Parameter that never takes a value (-a v1 -a -a, where -a = {NULL, NULL, NULL} and "v1" is unknown token).
   * Parameter that always takes a value (-a -a, where -a = {"-a"}).
@@ -33,23 +37,25 @@ The libparamset provides the following functionality:
 * Auto-generated suggestions between multiple tasks for the user when it is not impossible to resolve which task the user wants to perform.
 * Auto-generated suggestions how to fix the task user tries to perform.
 
+Main objects
+------------
+[PARAM_SET](@ref param_set.h) contains user defined parameters that can be parsed from command-line, read from configuration file or added from the code.
 
-## Installation ##
+[TASK_SET](@ref task_def.h) contains multiple task definitions (parameters that are mandatory, ignored or restricted for defined task) that can be analyzed against specified [PARAM_SET](@ref param_set.h) to extract a signle consistent task that matches the input.
 
-To build the libparamset, you need to have gcc and autotools. For building under Windows you need the Windows SDK.
+[TASK](@ref task_def.h) is object returned by successful [TASK_SET](@ref task_def.h) analyze that contains the matching task \c ID and \c PARAM_SET object.
 
-To use libparamset in your C/C++ project, link it against the libparamset binary.
+Memory Management
+-----------------
 
-If you do not want to build your own binaries, you can get the latest stable release from the Gaurdtime repository.
-To set up the repository, save this repo file in your repositories directory (e.g. /etc/yum.repos.d/):
-[http://download.guardtime.com/ksi/configuration/guardtime.el6.repo](http://download.guardtime.com/ksi/configuration/guardtime.el6.repo)
+The memory management obeys the following rules:
+* Every object you create, belongs to you.
+* Every object you own, must be freed by you.
+* Using free function on \c NULL does nothing and won't crash.
+* Input strings are copied and freed by parent object.
 
-
-## Usage ##
-
-
-### Workflow ##
-
+Workflow
+-----------------
 - Include param_set.h and task_def.h.
 - Configure parameters.
   + Create new \c PARAM_SET object with set of parameters [PARAM_SET_new](@ref PARAM_SET_new).
@@ -77,9 +83,8 @@ To set up the repository, save this repo file in your repositories directory (e.
   + To get parameter value count, use function [PARAM_SET_getValueCount](@ref PARAM_SET_getValueCount).
 - Release object with [TASK_SET_free](@ref TASK_SET_free) and [PARAM_SET_free](@ref PARAM_SET_free).
 
-
-### Code example ##
-A simple example of a command-line tool that uses libparamset to specife parameter set and task set, read the command-line, handle errors and gives user some feedback to help get things working.
+Code example
+-----------------
 ```C
 #include <stdio.h>
 #include <string.h>
@@ -231,19 +236,8 @@ int convertRepair_path(const char* arg, char* buf, unsigned len){
 }
 
 ```
-## License ##
+Third party components
+------------
 
-See LICENSE file.
-
-
-## Dependencies ##
-| Dependency        | Version                           | License type | Source                         | Notes |
-| :---              | :---                              | :---         | :---                           |:---   |
-| CuTest            | 1.5                               | Zlib         |                                | Required only for testing. |
-
-
-## Compatibility ##
-| OS / Platform                              | Compatibility                                |
-| :---                                       | :---                                         |
-| CentOS / RHEL 6 and 7, x86_64 architecture | Fully compatible and tested.                  |
-| Windows 7, 8, 10                           | Compatible but not tested on a regular basis. Build combination of DLL=dll and RTL=MT(d) not supported. |
+The SDK is using the following third party components:
+* CuTest [cutest.sourceforge.net](http://cutest.sourceforge.net/)

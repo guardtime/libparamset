@@ -538,14 +538,14 @@ int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *sou
  * \param	source		Source description as c-string. Can be \c NULL.
  * \param	priority	Priority that can be #PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \return #PST_OK if successful, error code otherwise.
- * \see #PARAM_PARS_OPTIONS, #PARAM_SET_addControl, #PARAM_SET_isSetByName, #PARAM_SET_getStr,
+ * \see [PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum), #PARAM_SET_addControl, #PARAM_SET_isSetByName, #PARAM_SET_getStr,
  * #PARAM_SET_getObj, #PARAM_SET_isTypoFailure, #PARAM_SET_isUnknown, #PARAM_SET_unknownsToString and
  * #PARAM_SET_typosToString.
  */
 int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority);
 
 /**
- * This function is used to specify parsing options (#PARAM_PARS_OPTIONS) used
+ * This function is used to specify parsing options ([PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)) used
  * by #PARAM_SET_parseCMD.
  *
  * \param set			#PARAM_SET object.
