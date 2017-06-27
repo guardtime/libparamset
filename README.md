@@ -52,30 +52,30 @@ To set up the repository, save this repo file in your repositories directory (e.
 
 - Include param_set.h and task_def.h.
 - Configure parameters.
-  + Create new \c PARAM_SET object with set of parameters [PARAM_SET_new](@ref PARAM_SET_new).
-  + Add implementations for format, control (and convert) functions with [PARAM_SET_addControl](@ref PARAM_SET_addControl).
-  + Add implementation for wildcard expander (e.g. to implement wildcards when getting file input on Windows "-i *.txt") [PARAM_SET_setWildcardExpander](@ref PARAM_SET_setWildcardExpander).
-  + Add parsing options for parameters with [PARAM_SET_setParseOptions](@ref PARAM_SET_setParseOptions).
+  + Create new PARAM_SET object with set of parameters PARAM_SET_new.
+  + Add implementations for format, control (and convert) functions with PARAM_SET_addControl.
+  + Add implementation for wildcard expander (e.g. to implement wildcards when getting file input on Windows "-i *.txt") PARAM_SET_setWildcardExpander.
+  + Add parsing options for parameters with PARAM_SET_setParseOptions.
 - Configure tasks.
-  + Create new \c TASK_SET object with [TASK_SET_new](@ref TASK_SET_new).
-  + Add task definitions to the \c TASK_SET with [TASK_SET_add](@ref TASK_SET_add).
+  + Create new TASK_SET object with TASK_SET_new.
+  + Add task definitions to the TASK_SET with TASK_SET_add.
 - Get parameters.
-  + Parse command-line with [PARAM_SET_parseCMD](@ref PARAM_SET_parseCMD).
-  + Read parameters from configuration file with [PARAM_SET_readFromFile](@ref PARAM_SET_readFromFile).
-  + Check and report user if configuration file contained some syntax errors with [PARAM_SET_isSyntaxError](@ref PARAM_SET_isSyntaxError) and [PARAM_SET_syntaxErrorsToString](@ref PARAM_SET_syntaxErrorsToString).
-  + Merge different \c PARAM_SET objects with [PARAM_SET_IncludeSet](@ref PARAM_SET_IncludeSet).
-  + Check for unknown parameters and typos with [PARAM_SET_isUnknown](@ref PARAM_SET_isUnknown) and [PARAM_SET_isTypoFailure](@ref PARAM_SET_isTypoFailure).
-  + Check for invalid parameters that failed format or content checks with [PARAM_SET_isFormatOK](@ref PARAM_SET_isFormatOK).
-  + If there are some errors help user with error messages by using following functions [PARAM_SET_unknownsToString](@ref PARAM_SET_unknownsToString), [PARAM_SET_typosToString](@ref PARAM_SET_typosToString) and [PARAM_SET_invalidParametersToString](@ref PARAM_SET_invalidParametersToString).
+  + Parse command-line with PARAM_SET_parseCMD.
+  + Read parameters from configuration file with PARAM_SET_readFromFile.
+  + Check and report user if configuration file contained some syntax errors with PARAM_SET_isSyntaxError and PARAM_SET_syntaxErrorsToString.
+  + Merge different PARAM_SET objects with PARAM_SET_IncludeSet.
+  + Check for unknown parameters and typos with PARAM_SET_isUnknown and PARAM_SET_isTypoFailure.
+  + Check for invalid parameters that failed format or content checks with PARAM_SET_isFormatOK.
+  + If there are some errors help user with error messages by using following functions PARAM_SET_unknownsToString, PARAM_SET_typosToString and PARAM_SET_invalidParametersToString.
 - Analyze task set against given input.
-  + Analyze the \c TASK_SET against \c PARAM_SET [TASK_SET_analyzeConsistency](@ref TASK_SET_analyzeConsistency).
-  + Extract consistent task from \c TASK_SET with [TASK_SET_getConsistentTask](@ref TASK_SET_getConsistentTask).
-  + In case of failure check if there is a invalid task that stands out from the others and give user some hints how to fix it with functions [TASK_SET_isOneFromSetTheTarget](@ref TASK_SET_isOneFromSetTheTarget) and [TASK_SET_howToRepair_toString](@ref TASK_SET_howToRepair_toString). When it's hard to distinguish which task user is trying to accomplish give some suggestions that do have the most similar pattern to the given input with [TASK_SET_suggestions_toString](@ref TASK_SET_suggestions_toString).
-- Use functions [TASK_getID](@ref TASK_getID) and [TASK_getSet](@ref TASK_getSet) and perform the selected task.
-  * To check if a parameter is set, use function [PARAM_SET_isSetByName](@ref PARAM_SET_isSetByName).
-  + To get parameters value from the set, use functions [PARAM_SET_getStr](@ref PARAM_SET_getStr) and [ PARAM_SET_getObj](@ref PARAM_SET_getObj).
-  + To get parameter value count, use function [PARAM_SET_getValueCount](@ref PARAM_SET_getValueCount).
-- Release object with [TASK_SET_free](@ref TASK_SET_free) and [PARAM_SET_free](@ref PARAM_SET_free).
+  + Analyze the TASK_SET against PARAM_SET TASK_SET_analyzeConsistency.
+  + Extract consistent task from TASK_SET with TASK_SET_getConsistentTask.
+  + In case of failure check if there is a invalid task that stands out from the others and give user some hints how to fix it with functions TASK_SET_isOneFromSetTheTarget and TASK_SET_howToRepair_toString. When it's hard to distinguish which task user is trying to accomplish give some suggestions that do have the most similar pattern to the given input with TASK_SET_suggestions_toString.
+- Use functions TASK_getID and TASK_getSet and perform the selected task.
+  * To check if a parameter is set, use function PARAM_SET_isSetByName.
+  + To get parameters value from the set, use functions PARAM_SET_getStr and PARAM_SET_getObj.
+  + To get parameter value count, use function PARAM_SET_getValueCount.
+- Release object with TASK_SET_free and PARAM_SET_free.
 
 
 ### Code example ##
