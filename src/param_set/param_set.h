@@ -121,6 +121,12 @@ enum PARAM_SET_ERR_enum {
  */
 typedef struct PARAM_SET_st PARAM_SET;
 
+/**
+ * This function returns a pointer to a constant string describing the
+ * version number of the package.
+ * \return A constant pointer to a string.
+ */
+const char *PST_getVersion(void);
 
 /**
  * Creates new #PARAM_SET object using parameters names.

@@ -32,6 +32,24 @@
 #define TYPO_MAX_COUNT 5
 #define VARIABLE_IS_NOT_USED(v) ((void)(v));
 
+#ifndef _WIN32
+#  include <stdbool.h>
+#  ifdef HAVE_CONFIG_H
+#    include "config.h"
+#  endif
+#endif
+
+#ifdef COMMIT_ID
+#  define PST_VERSION_STRING "libksi " VERSION "-" COMMIT_ID
+#else
+#  define PST_VERSION_STRING "libparamset " VERSION
+#endif
+
+const char *PST_getVersion(void) {
+	static const char versionString[] = PST_VERSION_STRING;
+	return versionString;
+}
+
 static int isValidNameChar(int c) {
 	if ((ispunct(c) || isspace(c)) && c != '_' && c != '-') return 0;
 	else return 1;

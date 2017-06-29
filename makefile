@@ -28,8 +28,10 @@
 SRC_DIR = src
 PARAM_SET_DIR = $(SRC_DIR)\param_set
 TEST_DIR = test
+VERSION_FILE = VERSION
 
-
+VER = \
+!INCLUDE <$(VERSION_FILE)>
 
 #Making
 test: param_set
@@ -39,7 +41,7 @@ test: param_set
 
 param_set:
 	cd $(PARAM_SET_DIR)/
-	nmake RTL=$(RTL) DLL=$(DLL)
+	nmake RTL=$(RTL) DLL=$(DLL) VERSION=$(VER)
 	cd ..\..\
 
 
