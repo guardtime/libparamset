@@ -1,5 +1,5 @@
 # libparamset #
-The libparamset is a software development kit for handling COmmand-Line (COL.) parameters and program tasks resolved from the predefined COL. paramer set.
+The libparamset is a software development kit for handling command-line parameters and program tasks resolved from the predefined command-line parameter set.
 
 The libparamset provides the following functionality:
 * Parameters can be parsed from command-line, read from configuration file or inserted from the code.
@@ -36,17 +36,29 @@ The libparamset provides the following functionality:
 
 ## Installation ##
 
-To build the libparamset, you need to have gcc and autotools. For building under Windows you need the Windows SDK.
-
 To use libparamset in your C/C++ project, link it against the libparamset binary.
 
-If you do not want to build your own binaries, you can get the latest stable release from the Gaurdtime repository.
-To set up the repository, save this repo file in your repositories directory (e.g. /etc/yum.repos.d/):
-[http://download.guardtime.com/ksi/configuration/guardtime.el6.repo](http://download.guardtime.com/ksi/configuration/guardtime.el6.repo)
+### Latest Release from Guardtime Repository
 
+In order to install the `libparamset` CentOS/RHEL packages directly from the Guardtime public repository, download and save the repository configuration to the `/etc/yum.repos.d/` folder:
+
+```
+cd /etc/yum.repos.d
+
+# In case of RHEL / CentOS 6
+sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el6.repo
+
+# In case of RHEL / CentOS 7
+sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el7.repo
+
+yum install ksi-tools
+```
+
+### From Source Code
+
+If the latest version is needed or the package is not available for the platform you are using, check out source code from Github and build it using `gcc` or VS. To build the libparamset, you need to have gcc and autotools. For building under Windows you need the Windows SDK.
 
 ## Usage ##
-
 
 ### Workflow ##
 
@@ -235,6 +247,9 @@ int convertRepair_path(const char* arg, char* buf, unsigned len){
 
 See LICENSE file.
 
+## Contributing
+
+See `CONTRIBUTING.md` file.
 
 ## Dependencies ##
 | Dependency        | Version                           | License type | Source                         | Notes |

@@ -1,6 +1,6 @@
 PARAM SET Overview {#mainpage}
 ============
-The libparamset is a software development kit for handling cmmand-line parameters and program tasks. Parameters can be read from command-line and a task can be extrated that matches with the given input. Process is covered with error detection and functions that generates helpful feedback messages to the user.
+The libparamset is a software development kit for handling command-line parameters and program tasks. Parameters can be read from command-line and a task can be extrated that matches with the given input. Process is covered with error detection and functions that generates helpful feedback messages to the user.
 
 libparamset
 -----------
