@@ -56,7 +56,7 @@ yum install ksi-tools
 
 ### From Source Code
 
-If the latest version is needed or the package is not available for the platform you are using, check out source code from Github and build it using `gcc` or VS. To build the libparamset, you need to have gcc and autotools. For building under Windows you need the Windows SDK.
+If the latest version is needed or the package is not available for the platform you are using, check out source code from Github and build it using `gcc` or `VS`. To build the libparamset, you need to have gcc and autotools. For building under Windows you need the Windows SDK.
 
 ## Usage ##
 
@@ -245,7 +245,7 @@ int convertRepair_path(const char* arg, char* buf, unsigned len){
 ```
 ## License ##
 
-See LICENSE file.
+See `LICENSE` file.
 
 ## Contributing
 
