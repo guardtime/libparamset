@@ -107,12 +107,14 @@ struct PARAM_st{
 	 * It is not ment to be used directly.
 	 */
 	char print_name_buf[256];
+	char print_name_alias_buf[256];
 
 	/**
 	 * Function \c getPrintName is used to return string representation of the
 	 * parameter.
 	 */
 	const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len);
+	const char* (*getPrintNameAlias)(PARAM *param, char *buf, unsigned buf_len);
 
 	/**
 	 * A function to expand tokens that contain wildcard character (WC) to array of

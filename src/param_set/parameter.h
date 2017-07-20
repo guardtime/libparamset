@@ -637,11 +637,20 @@ int PARAM_getInvalidCount(PARAM *param, const char *source, int prio, int *count
  *
  *
  * \param param			#PARAM object.
- * \param constv		Constant string representation of the parameter. Can be \c NULL.
+ * \param constv		Constant string representation of the parameter. Value is copied. Can be \c NULL.
  * \param getPrintName	Abstract function's implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
  */
 int PARAM_setPrintName(PARAM *param, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
+
+/**
+ * Same as #PARAM_setPrintName but works with the alias.
+ * \param param			#PARAM object.
+ * \param constv		Constant string representation of the parameter alias. Value is copied. Can be \c NULL.
+ * \param getPrintNameAlias	Abstract function's implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
+ * \return #PST_OK when successful, error code otherwise. Return #PST_ALIAS_NOT_SPECIFIED if parameter do not have alias.
+ */
+int PARAM_setPrintNameAlias(PARAM *param, const char *constv, const char* (*getPrintNameAlias)(PARAM *param, char *buf, unsigned buf_len));
 
 /**
  * Returns the string representation of the parameter. See #PARAM_setPrintName to
@@ -649,9 +658,17 @@ int PARAM_setPrintName(PARAM *param, const char *constv, const char* (*getPrintN
  * parameter is "--long-option" and "-a".
  *
  * \param obj			#PARAM object.
- * @return string that is the string representation of parameter.
+ * \return String that is the string representation of the parameter. Can return \c NULL.
  */
 const char* PARAM_getPrintName(PARAM *obj);
+
+/**
+ * Same as #PARAM_getPrintName but works with alias.
+ * \param obj			#PARAM object.
+ * \return String that is the string representation of the parameter alias. If alias do not exists \c NULL is returned.
+ */
+const char* PARAM_getPrintNameAlias(PARAM *obj);
+
 
 /**
  * This function checks if parameter constraints are satisfied (see #PARAM_new

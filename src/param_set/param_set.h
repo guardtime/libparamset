@@ -111,6 +111,9 @@ enum PARAM_SET_ERR_enum {
 	/** Parameter conversion is not performed. Original input must be used. (See #PARAM_addControl and #PARAM_SET_addControl). */
 	PST_PARAM_CONVERT_NOT_PERFORMED,
 
+	/** Parameter alias is not specified and it is not possible to work with it. */
+	PST_ALIAS_NOT_SPECIFIED,
+
 	/** Unknown error. */
 	PST_UNKNOWN_ERROR,
 };
@@ -198,7 +201,7 @@ void PARAM_SET_free(PARAM_SET *set);
  * \note Note that \c controlFormat and \c controlContent may return any error code
  * but \c convert function should be used so that user error codes are not mixed with
  * \c PST_* error codes.
- * \see PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and #PARAM_SET_setWildcardExpander.
  * To get error reports related with functions \c controlFormat and \c controlContent,
  * see #PARAM_SET_isFormatOK and #PARAM_SET_invalidParametersToString.
  */
@@ -228,9 +231,21 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
  * \param	constv			Constant string representation of the parameter. Can be \c NULL.
  * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
- * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions, and PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions and #PARAM_SET_setWildcardExpander.
  */
 int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
+							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
+
+/**
+ * Same as #PARAM_SET_setPrintName but works with alias.
+ * \param	set				#PARAM_SET object.
+ * \param	names			List of names to add the functions.
+ * \param	constv			Constant string representation of the parameter alias. Can be \c NULL.
+ * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
+ * \return #PST_OK when successful, error code otherwise.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions, #PARAM_SET_setHelpText and #PARAM_SET_setWildcardExpander.
+ */
+int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
 							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
 
 /**
@@ -338,16 +353,26 @@ int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int p
 
 /**
  * This function extracts parameters print name that is also displayed in (error)
- * messages.
- * to alter the result.
+ *
  * \param	set			#PARAM_SET object.
  * \param	name		Parameters name.
  * \param	print_name	Pointer to receiving pointer.
  * \return #PST_OK when successful, error code otherwise. Some more common error
  * codes: #PST_INVALID_ARGUMENT,  #PST_PARAMETER_NOT_FOUND;
- * \see #PARAM_SET_setPrintName to change the print name value.
+ * \see To change the print name value see #PARAM_SET_setPrintName.
  */
 int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_name);
+
+/**
+ * Same as #PARAM_SET_getPrintName but works with alias.
+ * \param	set			#PARAM_SET object.
+ * \param	name		Parameters alias name.
+ * \param	print_name	Pointer to receiving pointer.
+ * \return #PST_OK when successful, error code otherwise. Some more common error
+ * codes: #PST_INVALID_ARGUMENT,  #PST_PARAMETER_NOT_FOUND or #PST_ALIAS_NOT_SPECIFIED;
+ * \see #PARAM_SET_setPrintNameAlias to change the print name value.
+ */
+int PARAM_SET_getPrintNameAlias(PARAM_SET *set, const char *name, const char **print_name);
 
 /**
  * Removes all values from the specified parameter list. Parameter list is defined
@@ -558,7 +583,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
  * \param names			Parameter name list.
  * \param options		Parsing options.
  * \return #PST_OK if successful, error code otherwise.
- * \see #PARAM_SET_addControl, #PARAM_SET_setPrintName, and PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setPrintName, and #PARAM_SET_setWildcardExpander.
  */
 int PARAM_SET_setParseOptions(PARAM_SET *set, const char *names, int options);
 

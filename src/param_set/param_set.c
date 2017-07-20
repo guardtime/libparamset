@@ -952,7 +952,10 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 	return PST_OK;
 }
 
-int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
+
+
+static int param_set_set_print_name(PARAM_SET *set, const char *names,
+							int (*param_setPrintName)(PARAM *param, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)),
 							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)){
 	int res;
 	PARAM *tmp = NULL;
@@ -966,11 +969,21 @@ int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
 		res = param_set_getParameterByName(set, buf, &tmp);
 		if (res != PST_OK) return res;
 
-		res = PARAM_setPrintName(tmp, constv, getPrintName);
+		res = param_setPrintName(tmp, constv, getPrintName);
 		if (res != PST_OK) return res;
 	}
 
 	return PST_OK;
+}
+
+int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
+							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)) {
+	return param_set_set_print_name(set, names, PARAM_setPrintName, constv, getPrintName);
+}
+
+int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
+							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)) {
+	return param_set_set_print_name(set, names, PARAM_setPrintNameAlias, constv, getPrintName);
 }
 
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
@@ -1181,8 +1194,10 @@ cleanup:
 	return res;
 }
 
-int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_name) {
-	int res;
+
+
+static int param_set_get_print_name(PARAM_SET *set, const char *name, const char* (*param_get_print_name)(PARAM *obj), const char **print_name) {
+	int res = PST_UNKNOWN_ERROR;
 	PARAM *param = NULL;
 	const char *tmp = NULL;
 
@@ -1194,7 +1209,7 @@ int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_
 	res = param_set_getParameterByName(set, name, &param);
 	if (res != PST_OK) goto cleanup;
 
-	tmp = PARAM_getPrintName(param);
+	tmp = param_get_print_name(param);
 	if (tmp == NULL) goto cleanup;
 
 	*print_name = tmp;
@@ -1203,6 +1218,15 @@ int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_
 cleanup:
 
 	return res;
+}
+
+int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_name) {
+	return param_set_get_print_name(set, name, PARAM_getPrintName, print_name);
+}
+
+int PARAM_SET_getPrintNameAlias(PARAM_SET *set, const char *name, const char **print_name) {
+	int res = param_set_get_print_name(set, name, PARAM_getPrintNameAlias, print_name);
+	return (res == PST_UNKNOWN_ERROR) ? PST_ALIAS_NOT_SPECIFIED : res;
 }
 
 int PARAM_SET_clearParameter(PARAM_SET *set, const char *names){
@@ -2386,6 +2410,8 @@ const char* PARAM_SET_errorToString(int err) {
 		return "PARAM_SET undefined behaviour.";
 	case PST_PARAM_CONVERT_NOT_PERFORMED:
 		return "PARAM object value conversion is skipped.";
+	case PST_ALIAS_NOT_SPECIFIED:
+		return "PARAM object alias do not exist.";
 	case PST_UNKNOWN_ERROR:
 		return "PARAM_SET unknown error.";
 	}
