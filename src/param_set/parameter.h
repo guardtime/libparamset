@@ -665,7 +665,7 @@ const char* PARAM_getPrintName(PARAM *obj);
 /**
  * Same as #PARAM_getPrintName but works with alias.
  * \param obj			#PARAM object.
- * \return String that is the string representation of the parameter alias. If alias do not exists \c NULL is returned.
+ * \return String that is the string representation of the parameter alias. If alias does not exists \c NULL is returned.
  */
 const char* PARAM_getPrintNameAlias(PARAM *obj);
 /**

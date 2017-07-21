@@ -30,20 +30,20 @@ extern "C" {
 /**
  * Platform independent version of snprintf.
  * \param[in]		buf		Pointer to buffer.
- * \param[in]		n		Maximum number of bytes to be written into buffer. Includes terminating \c NUL character.
+ * \param[in]		n		Maximum number of bytes to be written into buffer. Includes terminating \c null character.
  * \param[in]		format	Format string.
  * \param[in]		...		Extra parameters for formatting.
- * \return The number of characters written, not including terminating \c NUL character. On error \c  0 is returned.
+ * \return The number of characters written, not including terminating \c null character. On error \c  0 is returned.
  */
 size_t PST_snprintf(char *buf, size_t n, const char *format, ... );
 
 /**
- * Platform independent version of strncpy that guarantees \c NUL terminated
+ * Platform independent version of strncpy that guarantees \c null terminated
  * destination. To copy \c N characters from source to destination \c n and size of
  * destination must be <tt>N + 1</tt>.
  * \param[in]		destination Pointer to destination.
  * \param[in]		source		Pointer to source.
- * \param[in]		n			Maximum number of characters to be copied including terminating \c NUL.
+ * \param[in]		n			Maximum number of characters to be copied including terminating \c null.
  * \return The pointer to destination is returned. On error \c NULL is returned.
  */
 char *PST_strncpy (char *destination, const char *source, size_t n);
@@ -65,7 +65,7 @@ char *PST_strncpy (char *destination, const char *source, size_t n);
  * Regular text with indention:
  * [     indent      ][    text  line 1  ]
  * [     indent      ][    text  line N  ]
- * Example 1. (indent = 2, headerLen = 0, delimiter = NUL, nxtLnIndnt = 0, paramName = NULL, rowLen = 10):
+ * Example 1. (indent = 2, headerLen = 0, delimiter = '\0', nxtLnIndnt = 0, paramName = NULL, rowLen = 10):
  *     "1234567890"
  *     "  this is "
  *     "  sample"
@@ -74,7 +74,7 @@ char *PST_strncpy (char *destination, const char *source, size_t n);
  * [indent][         text line 1         ]
  * [indent][eint][   text line 2         ]
  * [indent][eint][   text line N         ]
- * Example 2. (indent = 2, headerLen = 0, delimiter = NUL, nxtLnIndnt = 2, paramName = NULL, rowLen = 10):
+ * Example 2. (indent = 2, headerLen = 0, delimiter = '\0', nxtLnIndnt = 2, paramName = NULL, rowLen = 10):
  *     "1234567890"
  *     "  this is "
  *     "    sample"
@@ -109,7 +109,7 @@ char *PST_strncpy (char *destination, const char *source, size_t n);
  * \param delimiter		Delimiter character used for delimiter that separates parameters name from description.
  * \param desc		Format string, parameter description.
  * \param ...			Extra parameters for formatting.
- * \return The number of characters written, not including terminating \c NUL character. On error \c  0 is returned.
+ * \return The number of characters written, not including terminating \c null character. On error \c  0 is returned.
  */
 size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int headerLen, int rowLen, const char *paramName, const char delimiter, const char *desc, ...);
 /*

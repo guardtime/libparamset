@@ -2468,7 +2468,7 @@ const char* PARAM_SET_errorToString(int err) {
 	case PST_PARAM_CONVERT_NOT_PERFORMED:
 		return "PARAM object value conversion is skipped.";
 	case PST_ALIAS_NOT_SPECIFIED:
-		return "PARAM object alias do not exist.";
+		return "PARAM object alias does not exist.";
 	case PST_UNKNOWN_ERROR:
 		return "PARAM_SET unknown error.";
 	}
