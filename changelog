@@ -20,6 +20,7 @@ Version 1.0
 * IMPROVEMENT: (Internal) Object TASK_DEFINITION is used internally only.
 * IMPROVEMENT: (Internal) Object ITERATOR is used internally only.
 * IMPROVEMENT: (Internal) Test folder moved from "src/test" to "test".
+* FEATURE: Help text can be generated and auto formatted.
 * FEATURE: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
 * FEATURE: Doxygen documentation added.

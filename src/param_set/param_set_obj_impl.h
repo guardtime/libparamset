@@ -56,6 +56,7 @@ struct PARAM_VAL_st{
 struct PARAM_st{
 	char *flagName;					/* The name of the parameter. */
 	char *flagAlias;				/* The alias for the parameter. */
+	char *helpText;				/* The help text for a parameter. */
 	int constraints;			/* Constraint If there is more than 1 parameters allowed. For validity check. */
 	int highestPriority;			/* Highest priority of inserted values. */
 	int parsing_options;			/* Some options used when parsing variables. */
@@ -107,12 +108,14 @@ struct PARAM_st{
 	 * It is not ment to be used directly.
 	 */
 	char print_name_buf[256];
+	char print_name_alias_buf[256];
 
 	/**
 	 * Function \c getPrintName is used to return string representation of the
 	 * parameter.
 	 */
 	const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len);
+	const char* (*getPrintNameAlias)(PARAM *param, char *buf, unsigned buf_len);
 
 	/**
 	 * A function to expand tokens that contain wildcard character (WC) to array of

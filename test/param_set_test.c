@@ -1034,27 +1034,39 @@ static const char* getPrintName(PARAM *param, char *buf, unsigned buf_len) {
 	return buf;
 }
 
-static void Test_param_set_set_print_name(CuTest* tc) {
+static const char* getPrintNameAlias(PARAM *param, char *buf, unsigned buf_len) {
+	int count = 0;
+	const char *aliasName = NULL;
+
+	PARAM_getName(param, NULL, &aliasName);
+	PARAM_getValueCount(param, NULL, PST_PRIORITY_NONE, &count);
+
+	PST_snprintf(buf, buf_len, "%s[%i]", aliasName, count);
+	return buf;
+}
+
+
+
+
+static void test_param_set_set_print_name_abstract(CuTest* tc,
+		PARAM_SET *set,
+		int (*_setPrintName)(PARAM_SET *set, const char *names, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)),
+		int (*_getPrintName)(PARAM_SET *set, const char *name, const char **print_name),
+		const char* (*_getPrintNameAlias)(PARAM *param, char *buf, unsigned buf_len)) {
 	int res;
-	PARAM_SET *set = NULL;
 	const char *printName = NULL;
-	/**
-	 * Create set and add control functions.
-	 */
-	res = PARAM_SET_new("{1}{2}{3}{4}{5}{6}", &set);
-	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
 
-	res = PARAM_SET_setPrintName(set, "1", "<const 1>", NULL);
+	res = _setPrintName(set, "1", "<const 1>", NULL);
 	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
 
-	res = PARAM_SET_setPrintName(set, "2,3", "<const 23>", NULL);
+	res = _setPrintName(set, "2,3", "<const 23>", NULL);
 	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
 
-	res = PARAM_SET_setPrintName(set, "4", NULL, getPrintName);
+	res = _setPrintName(set, "4", NULL, _getPrintNameAlias);
 	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
 
-	res = PARAM_SET_setPrintName(set, "5,6", NULL, getPrintName);
+	res = _setPrintName(set, "5,6", NULL, _getPrintNameAlias);
 	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
 
 	res = PARAM_SET_add(set, "4", NULL, NULL, 0);
@@ -1067,23 +1079,165 @@ static void Test_param_set_set_print_name(CuTest* tc) {
 	CuAssert(tc, "Unable to set parameter.", res == PST_OK);
 
 
-	res = PARAM_SET_getPrintName(set, "1", &printName);
+	res = _getPrintName(set, "1", &printName);
 	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "<const 1>") == 0);
 
-	res = PARAM_SET_getPrintName(set, "2", &printName);
+	res = _getPrintName(set, "2", &printName);
 	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "<const 23>") == 0);
 
-	res = PARAM_SET_getPrintName(set, "3", &printName);
+	res = _getPrintName(set, "3", &printName);
 	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "<const 23>") == 0);
 
-	res = PARAM_SET_getPrintName(set, "4", &printName);
+	res = _getPrintName(set, "4", &printName);
 	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "4[1]") == 0);
 
-	res = PARAM_SET_getPrintName(set, "5", &printName);
+	res = _getPrintName(set, "5", &printName);
 	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "5[2]") == 0);
 
-	res = PARAM_SET_getPrintName(set, "6", &printName);
+	res = _getPrintName(set, "6", &printName);
 	CuAssert(tc, "Invalid string generated.", res == PST_OK && strcmp(printName, "6[0]") == 0);
+}
+
+static void Test_param_set_set_print_name(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+
+	res = PARAM_SET_new("{1}{2}{3}{4}{5}{6}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	test_param_set_set_print_name_abstract(tc, set, PARAM_SET_setPrintName, PARAM_SET_getPrintName, getPrintName);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_param_set_set_print_name_alias(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{a|1}{b|2}{c|3}{d|4}{e|5}{f|6}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	test_param_set_set_print_name_abstract(tc, set, PARAM_SET_setPrintNameAlias, PARAM_SET_getPrintNameAlias, getPrintNameAlias);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_basic_help_text_different_combinations(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *help = NULL;
+	char buf[1024];
+
+	char *expected_help_1 = "  -a    - This is a.\n";
+	char *expected_help_2 = "  -a    - This is a.\n  -b    - This is b.\n";
+	char *expected_help_3 = "  -b    - This is b.\n  -a    - This is a.\n";
+	char *expected_help_4 = "  -c    - (null)\n";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{a}{b}{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "x", "dummy");
+	CuAssert(tc, "Such a parameter does not exist.", res == PST_PARAMETER_NOT_FOUND);
+
+	res = PARAM_SET_setHelpText(set, "a", "This is a.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "b", "This is b.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "x", 2, 10, 80, buf, sizeof(buf)) == NULL);
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "a,x", 2, 10, 80, buf, sizeof(buf)) == NULL);
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "x,a", 2, 10, 80, buf, sizeof(buf)) == NULL);
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "a,x,b", 2, 10, 80, buf, sizeof(buf)) == NULL);
+
+	help = PARAM_SET_helpToString(set, "a", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help_1) == 0);
+
+	help = PARAM_SET_helpToString(set, "a,b", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help_2) == 0);
+
+	help = PARAM_SET_helpToString(set, "b,a", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help_3) == 0);
+
+
+	help = PARAM_SET_helpToString(set, "c", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help_4) == 0);
+	PARAM_SET_free(set);
+}
+
+static void Test_help_text_multi_line_description(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *help = NULL;
+	char buf[1024];
+
+	char *expected_help = "  -a    - This is parameters a long description string that must be formatted\n"
+						  "          correctly. It must be displayed on 3 lines and text must 10\n"
+						  "          characters indented.\n";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{a}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "a", "This is parameters a long description string that must be formatted correctly. It must be displayed on 3 lines and text must 10 characters indented.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	help = PARAM_SET_helpToString(set, "a", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help) == 0);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_help_text_multi_line_description_with_long_parameter(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *help = NULL;
+	char buf[1024];
+
+	char *expected_help = "  --this-is-long\n"
+						  "        - This is parameters that is long and has also a longe description\n"
+						  "          string on two lines.\n";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{this-is-long}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "this-is-long", "This is parameters that is long and has also a longe description string on two lines.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	help = PARAM_SET_helpToString(set, "this-is-long", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help) == 0);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_help_text_with_specified_alias(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *help = NULL;
+	char buf[1024];
+
+	char *expected_help = "  --input, -i\n"
+						  "        - This is a parameter that has long and also short version (alias).\n";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{input|i}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "input", "This is a parameter that has long and also short version (alias).");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	help = PARAM_SET_helpToString(set, "input", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help) == 0);
 
 	PARAM_SET_free(set);
 }
@@ -1113,6 +1267,11 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_is_set_by_name);
 	SUITE_ADD_TEST(suite, Test_set_get_str_multiple_parameters);
 	SUITE_ADD_TEST(suite, Test_param_set_set_print_name);
+	SUITE_ADD_TEST(suite, Test_param_set_set_print_name_alias);
+	SUITE_ADD_TEST(suite, Test_basic_help_text_different_combinations);
+	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description);
+	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description_with_long_parameter);
+	SUITE_ADD_TEST(suite, Test_help_text_with_specified_alias);
 	return suite;
 }
 

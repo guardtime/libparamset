@@ -117,6 +117,13 @@ static const char* wrapper_returnConstantPrintName(PARAM *param, char *buf, unsi
 	return param->print_name_buf;
 }
 
+static const char* wrapper_returnConstantPrintNameAlias(PARAM *param, char *buf, unsigned buf_len){
+	VARIABLE_IS_NOT_USED(buf);
+	VARIABLE_IS_NOT_USED(buf_len);
+	if (param == NULL) return NULL;
+	return param->print_name_alias_buf;
+}
+
 int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int pars_opt, PARAM **newObj){
 	int res;
 	PARAM *tmp = NULL;
@@ -136,6 +143,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 
 	tmp->flagName = NULL;
 	tmp->flagAlias = NULL;
+	tmp->helpText = NULL;
 	tmp->arg = NULL;
 	tmp->last_element = NULL;
 	tmp->itr = NULL;
@@ -151,6 +159,9 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 	tmp->expand_wildcard_ctx = NULL;
 	tmp->expand_wildcard_free = NULL;
 	tmp->getPrintName = wrapper_returnConstantPrintName;
+	tmp->getPrintNameAlias = wrapper_returnConstantPrintNameAlias;
+	tmp->print_name_buf[0] = '\0';
+	tmp->print_name_alias_buf[0] = '\0';
 	PST_snprintf(tmp->print_name_buf, sizeof(tmp->print_name_buf), "%s%s", (strlen(flagName) == 1 ? "-" : "--"), flagName);
 
 
@@ -167,6 +178,8 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 			res = PST_OUT_OF_MEMORY;
 			goto cleanup;
 		}
+
+		PST_snprintf(tmp->print_name_alias_buf, sizeof(tmp->print_name_alias_buf), "%s%s", (strlen(flagAlias) == 1 ? "-" : "--"), flagAlias);
 	}
 
 	tmp->flagAlias = tmpAlias;
@@ -193,6 +206,7 @@ void PARAM_free(PARAM *param) {
 	free(param->flagAlias);
 	if (param->itr) ITERATOR_free(param->itr);
 	if (param->arg) PARAM_VAL_free(param->arg);
+	if (param->helpText != NULL) free(param->helpText);
 
 	if (param->expand_wildcard_ctx != NULL && param->expand_wildcard_free != NULL) {
 		param->expand_wildcard_free(param->expand_wildcard_ctx);
@@ -263,9 +277,40 @@ int PARAM_setPrintName(PARAM *param, const char *constv, const char* (*getPrintN
 	return PST_OK;
 }
 
+int PARAM_setPrintNameAlias(PARAM *param, const char *constv, const char* (*getPrintNameAlias)(PARAM *param, char *buf, unsigned buf_len)) {
+	if (param == NULL || (getPrintNameAlias == NULL && constv == NULL)) return PST_INVALID_ARGUMENT;
+	if (param->flagAlias == NULL) return PST_ALIAS_NOT_SPECIFIED;
+
+	if (constv != NULL) {
+		param->getPrintNameAlias = wrapper_returnConstantPrintNameAlias;
+		PST_strncpy(param->print_name_alias_buf, constv, sizeof(param->print_name_alias_buf));
+	} else {
+		param->getPrintNameAlias = getPrintNameAlias;
+	}
+
+	return PST_OK;
+}
+
 const char* PARAM_getPrintName(PARAM *obj) {
 	if (obj == NULL) return NULL;
 	return obj->getPrintName(obj, obj->print_name_buf, sizeof(obj->print_name_buf));
+}
+
+const char* PARAM_getPrintNameAlias(PARAM *obj) {
+	if (obj == NULL || obj->flagAlias == NULL) return NULL;
+	return obj->getPrintNameAlias(obj, obj->print_name_alias_buf, sizeof(obj->print_name_alias_buf));
+}
+
+int PARAM_setHelpText(PARAM *param, const char *txt) {
+	if (param == NULL || txt == NULL) return PST_INVALID_ARGUMENT;
+	if (param->helpText != NULL) free(param->helpText);
+	param->helpText = new_string(txt);
+	return PST_OK;
+}
+
+const char* PARAM_getHelpText(PARAM *obj) {
+	if (obj == NULL) return NULL;
+	return obj->helpText;
 }
 
 int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio) {

@@ -111,6 +111,9 @@ enum PARAM_SET_ERR_enum {
 	/** Parameter conversion is not performed. Original input must be used. (See #PARAM_addControl and #PARAM_SET_addControl). */
 	PST_PARAM_CONVERT_NOT_PERFORMED,
 
+	/** Parameter alias is not specified and it is not possible to work with it. */
+	PST_ALIAS_NOT_SPECIFIED,
+
 	/** Unknown error. */
 	PST_UNKNOWN_ERROR,
 };
@@ -198,7 +201,7 @@ void PARAM_SET_free(PARAM_SET *set);
  * \note Note that \c controlFormat and \c controlContent may return any error code
  * but \c convert function should be used so that user error codes are not mixed with
  * \c PST_* error codes.
- * \see PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and #PARAM_SET_setWildcardExpander.
  * To get error reports related with functions \c controlFormat and \c controlContent,
  * see #PARAM_SET_isFormatOK and #PARAM_SET_invalidParametersToString.
  */
@@ -210,7 +213,7 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 
 /**
  * This function is used to alter the way the parameter is represented in (error)
- * messages or returned by #PARAM_getPrintName.
+ * messages, help text and returned by #PARAM_getPrintName.
  *
  * If \c constv is not \c NULL, a user specified constant value is used. If \c constv is
  * \c NULL an abstract function \c getPrintName must be specified that formats the string.
@@ -228,10 +231,48 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
  * \param	constv			Constant string representation of the parameter. Can be \c NULL.
  * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
- * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions, and PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions and #PARAM_SET_setWildcardExpander.
  */
 int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
 							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
+
+/**
+ * Same as #PARAM_SET_setPrintName but works with alias.
+ * \param	set				#PARAM_SET object.
+ * \param	names			List of names to add the functions.
+ * \param	constv			Constant string representation of the parameter alias. Can be \c NULL.
+ * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
+ * \return #PST_OK when successful, error code otherwise.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptionsand #PARAM_SET_setWildcardExpander.
+ */
+int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
+							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
+
+/**
+ * Specify help text for a parameter.
+ * \param	set		#PARAM_SET object.
+ * \param	names	List of names to add the help text.
+ * \param	txt		Help text for a parameter. Value is copied. Must NOT be NULL.
+ * \return #PST_OK when successful, error code otherwise.
+ * \see #PARAM_SET_setPrintName and #PARAM_SET_helpToString.
+ */
+int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
+
+/**
+ * This function is used to generate help text for parameters. Before any help text
+ * can be generated it must be configured for all the parameters with function
+ * #PARAM_SET_setHelpText. The way the parameter is represented can be modified
+ * with #PARAM_SET_setPrintName function.
+ * \param	set		#PARAM_SET object.
+ * \param	names	List of names to generate help for.
+ * \param	indent	Help text indention.
+ * \param	header	The size of the header (All the text and space before "parameter" in "  -a - parameter A.").
+ * \param	rowWith	The size of the row.
+ * \param	buf		Buffer.
+ * \param	buf_len	The size of \c buf.
+ * \return Returns \c buf if successful, NULL otherwise.
+ */
+char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent, int header, int rowWith, char *buf, size_t buf_len);
 
 /**
  * Appends value to the set. Invalid value format or content is not handled
@@ -338,16 +379,27 @@ int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int p
 
 /**
  * This function extracts parameters print name that is also displayed in (error)
- * messages.
- * to alter the result.
+ * messages and help text.
+ *
  * \param	set			#PARAM_SET object.
  * \param	name		Parameters name.
  * \param	print_name	Pointer to receiving pointer.
  * \return #PST_OK when successful, error code otherwise. Some more common error
  * codes: #PST_INVALID_ARGUMENT,  #PST_PARAMETER_NOT_FOUND;
- * \see #PARAM_SET_setPrintName to change the print name value.
+ * \see To change the print name value see #PARAM_SET_setPrintName.
  */
 int PARAM_SET_getPrintName(PARAM_SET *set, const char *name, const char **print_name);
+
+/**
+ * Same as #PARAM_SET_getPrintName but works with alias.
+ * \param	set			#PARAM_SET object.
+ * \param	name		Parameters alias name.
+ * \param	print_name	Pointer to receiving pointer.
+ * \return #PST_OK when successful, error code otherwise. Some more common error
+ * codes: #PST_INVALID_ARGUMENT,  #PST_PARAMETER_NOT_FOUND or #PST_ALIAS_NOT_SPECIFIED;
+ * \see #PARAM_SET_setPrintNameAlias to change the print name value.
+ */
+int PARAM_SET_getPrintNameAlias(PARAM_SET *set, const char *name, const char **print_name);
 
 /**
  * Removes all values from the specified parameter list. Parameter list is defined
@@ -558,7 +610,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
  * \param names			Parameter name list.
  * \param options		Parsing options.
  * \return #PST_OK if successful, error code otherwise.
- * \see #PARAM_SET_addControl, #PARAM_SET_setPrintName, and PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setPrintName, and #PARAM_SET_setWildcardExpander.
  */
 int PARAM_SET_setParseOptions(PARAM_SET *set, const char *names, int options);
 

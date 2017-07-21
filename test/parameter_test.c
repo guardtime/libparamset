@@ -631,8 +631,12 @@ static void Test_defaultPrintName(CuTest* tc) {
 	int res;
 	PARAM *param_1 = NULL;
 	PARAM *param_2 = NULL;
+	PARAM *param_3 = NULL;
+	PARAM *param_4 = NULL;
 	const char *expected_print_name_1 = "--string";
 	const char *expected_print_name_2 = "-s";
+	const char *expected_print_name_3 = "--long";
+	const char *expected_print_name_4 = "-l";
 
 	/* Create a single parameter without any special steps to alter its print name. */
 	res = PARAM_new("string", NULL, 0, 0, &param_1);
@@ -641,25 +645,72 @@ static void Test_defaultPrintName(CuTest* tc) {
 	res = PARAM_new("s", NULL, 0, 0, &param_2);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
+	res = PARAM_new("long", "l", 0, 0, &param_3);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("l", "long", 0, 0, &param_4);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
 
 	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_1), expected_print_name_1) == 0);
 	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_2), expected_print_name_2) == 0);
 
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_3), expected_print_name_3) == 0);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintNameAlias(param_3), expected_print_name_4) == 0);
+
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_4), expected_print_name_4) == 0);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintNameAlias(param_4), expected_print_name_3) == 0);
+
 	PARAM_free(param_1);
 	PARAM_free(param_2);
+	PARAM_free(param_3);
+	PARAM_free(param_4);
+}
+
+static const char* dummy_print_name_implementation(PARAM *param, char *buf, unsigned buf_len){
+	VARIABLE_IS_NOT_USED(param);
+	VARIABLE_IS_NOT_USED(buf);
+	VARIABLE_IS_NOT_USED(buf_len);
+	return NULL;
+}
+
+static void Test_PrintNameAlias_alias_do_not_exist(CuTest* tc) {
+	int res;
+	PARAM *param_1 = NULL;
+
+	/* Create a single parameter without any special steps to alter its print name. */
+	res = PARAM_new("string", NULL, 0, 0, &param_1);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_setPrintNameAlias(param_1, "const", NULL);
+	CuAssert(tc, "Unexpected return code. Adding print name must fail!", res == PST_ALIAS_NOT_SPECIFIED);
+
+	res = PARAM_setPrintNameAlias(param_1, NULL, dummy_print_name_implementation);
+	CuAssert(tc, "Unexpected return code. Adding print name must fail!", res == PST_ALIAS_NOT_SPECIFIED);
+
+	CuAssert(tc, "Alias must be NULL.", PARAM_getPrintNameAlias(param_1) == NULL);
+
+	PARAM_free(param_1);
 }
 
 static void Test_constantPrintName(CuTest* tc) {
 	int res;
 	PARAM *param = NULL;
 	char *expected_print_name = "constant";
+	char *expected_print_name_alias = "alias constant";
 
 	/* Create a single parameter without any special steps to alter its print name. */
-	res = PARAM_new("string", NULL, 0, 0, &param);
+	res = PARAM_new("string", "s", 0, 0, &param);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	res = PARAM_setPrintName(param, expected_print_name, NULL);
+	CuAssert(tc, "Unable to set print name.", res == PST_OK);
+
+	res = PARAM_setPrintNameAlias(param, expected_print_name_alias, NULL);
+	CuAssert(tc, "Unable to set print name alias.", res == PST_OK);
+
 	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param), expected_print_name) == 0);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintNameAlias(param), expected_print_name_alias) == 0);
 
 	PARAM_free(param);
 }
@@ -692,6 +743,22 @@ static void Test_getAttributes(CuTest* tc) {
 	PARAM_free(param);
 }
 
+static void Test_setHelpText(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	const char *expectedHelpText = "This is parameter p description.";
+
+	res = PARAM_new("p", NULL, 0, 0, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+	CuAssert(tc, "Help text must be NULL.", PARAM_getHelpText(param) == NULL);
+
+	res = PARAM_setHelpText(param, expectedHelpText);
+	CuAssert(tc, "Unable to add help text.", res == PST_OK);
+	CuAssert(tc, "Unexpected help text.", strcmp(PARAM_getHelpText(param), expectedHelpText) == 0);
+
+	PARAM_free(param);
+}
+
 static void Test_getName(CuTest* tc) {
 	int res;
 	PARAM *param = NULL;
@@ -720,9 +787,11 @@ CuSuite* ParameterTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_WildcarcExpander);
 	SUITE_ADD_TEST(suite, Test_root_and_get_values);
 	SUITE_ADD_TEST(suite, Test_defaultPrintName);
+	SUITE_ADD_TEST(suite, Test_PrintNameAlias_alias_do_not_exist);
 	SUITE_ADD_TEST(suite, Test_constantPrintName);
 	SUITE_ADD_TEST(suite, Test_getAttributes);
 	SUITE_ADD_TEST(suite, Test_getName);
+	SUITE_ADD_TEST(suite, Test_setHelpText);
 
 	return suite;
 }
