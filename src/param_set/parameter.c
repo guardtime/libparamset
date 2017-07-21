@@ -143,6 +143,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 
 	tmp->flagName = NULL;
 	tmp->flagAlias = NULL;
+	tmp->helpText = NULL;
 	tmp->arg = NULL;
 	tmp->last_element = NULL;
 	tmp->itr = NULL;
@@ -205,7 +206,7 @@ void PARAM_free(PARAM *param) {
 	free(param->flagAlias);
 	if (param->itr) ITERATOR_free(param->itr);
 	if (param->arg) PARAM_VAL_free(param->arg);
-
+	if (param->helpText != NULL) free(param->helpText);
 
 	if (param->expand_wildcard_ctx != NULL && param->expand_wildcard_free != NULL) {
 		param->expand_wildcard_free(param->expand_wildcard_ctx);
@@ -298,6 +299,18 @@ const char* PARAM_getPrintName(PARAM *obj) {
 const char* PARAM_getPrintNameAlias(PARAM *obj) {
 	if (obj == NULL || obj->flagAlias == NULL) return NULL;
 	return obj->getPrintNameAlias(obj, obj->print_name_alias_buf, sizeof(obj->print_name_alias_buf));
+}
+
+int PARAM_setHelpText(PARAM *param, const char *txt) {
+	if (param == NULL || txt == NULL) return PST_INVALID_ARGUMENT;
+	if (param->helpText != NULL) free(param->helpText);
+	param->helpText = new_string(txt);
+	return PST_OK;
+}
+
+const char* PARAM_getHelpText(PARAM *obj) {
+	if (obj == NULL) return NULL;
+	return obj->helpText;
 }
 
 int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio) {

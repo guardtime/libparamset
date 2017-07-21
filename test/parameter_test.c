@@ -668,6 +668,7 @@ static void Test_defaultPrintName(CuTest* tc) {
 }
 
 static const char* dummy_print_name_implementation(PARAM *param, char *buf, unsigned buf_len){
+	VARIABLE_IS_NOT_USED(param);
 	VARIABLE_IS_NOT_USED(buf);
 	VARIABLE_IS_NOT_USED(buf_len);
 	return NULL;
@@ -742,6 +743,22 @@ static void Test_getAttributes(CuTest* tc) {
 	PARAM_free(param);
 }
 
+static void Test_setHelpText(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	const char *expectedHelpText = "This is parameter p description.";
+
+	res = PARAM_new("p", NULL, 0, 0, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+	CuAssert(tc, "Help text must be NULL.", PARAM_getHelpText(param) == NULL);
+
+	res = PARAM_setHelpText(param, expectedHelpText);
+	CuAssert(tc, "Unable to add help text.", res == PST_OK);
+	CuAssert(tc, "Unexpected help text.", strcmp(PARAM_getHelpText(param), expectedHelpText) == 0);
+
+	PARAM_free(param);
+}
+
 static void Test_getName(CuTest* tc) {
 	int res;
 	PARAM *param = NULL;
@@ -774,6 +791,7 @@ CuSuite* ParameterTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_constantPrintName);
 	SUITE_ADD_TEST(suite, Test_getAttributes);
 	SUITE_ADD_TEST(suite, Test_getName);
+	SUITE_ADD_TEST(suite, Test_setHelpText);
 
 	return suite;
 }

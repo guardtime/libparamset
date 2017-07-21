@@ -213,7 +213,7 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 
 /**
  * This function is used to alter the way the parameter is represented in (error)
- * messages or returned by #PARAM_getPrintName.
+ * messages, help text and returned by #PARAM_getPrintName.
  *
  * If \c constv is not \c NULL, a user specified constant value is used. If \c constv is
  * \c NULL an abstract function \c getPrintName must be specified that formats the string.
@@ -243,10 +243,36 @@ int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
  * \param	constv			Constant string representation of the parameter alias. Can be \c NULL.
  * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
- * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions, #PARAM_SET_setHelpText and #PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptionsand #PARAM_SET_setWildcardExpander.
  */
 int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
 							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
+
+/**
+ * Specify help text for a parameter.
+ * \param	set		#PARAM_SET object.
+ * \param	names	List of names to add the help text.
+ * \param	txt		Help text for a parameter. Value is copied. Must NOT be NULL.
+ * \return #PST_OK when successful, error code otherwise.
+ * \see #PARAM_SET_setPrintName and #PARAM_SET_helpToString.
+ */
+int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
+
+/**
+ * This function is used to generate help text for parameters. Before any help text
+ * can be generated it must be configured for all the parameters with function
+ * #PARAM_SET_setHelpText. The way the parameter is represented can be modified
+ * with #PARAM_SET_setPrintName function.
+ * \param	set		#PARAM_SET object.
+ * \param	names	List of names to generate help for.
+ * \param	indent	Help text indention.
+ * \param	header	The size of the header (All the text and space before "parameter" in "  -a - parameter A.").
+ * \param	rowWith	The size of the row.
+ * \param	buf		Buffer.
+ * \param	buf_len	The size of \c buf.
+ * \return Returns \c buf if successful, NULL otherwise.
+ */
+char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent, int header, int rowWith, char *buf, size_t buf_len);
 
 /**
  * Appends value to the set. Invalid value format or content is not handled
@@ -353,6 +379,7 @@ int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int p
 
 /**
  * This function extracts parameters print name that is also displayed in (error)
+ * messages and help text.
  *
  * \param	set			#PARAM_SET object.
  * \param	name		Parameters name.

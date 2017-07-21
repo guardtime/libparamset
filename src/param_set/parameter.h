@@ -410,9 +410,9 @@ enum PARAM_PARS_OPTIONS_enum {
  * Create a new and empty parameter.
  *
  * \param	flagName	The parameters name.
- * \param	flagAlias	The alias for the name. Can be NULL.
+ * \param	flagAlias	The alias for the name. Can be <tt>NULL</tt>.
  * \param	constraint	Constraints for the parameter and its values (see #PARAM_CONSTRAINTS).
- * \param	pars_opt	Parsing Options (see [PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)).
+ * \param	pars_opt	Parsing Options (see [PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)). Can be <tt>0</tt>.
  * \param	newObj		Pointer to receiving pointer to new object.
  * \return #PST_OK when successful, error code otherwise.
  *
@@ -668,7 +668,21 @@ const char* PARAM_getPrintName(PARAM *obj);
  * \return String that is the string representation of the parameter alias. If alias do not exists \c NULL is returned.
  */
 const char* PARAM_getPrintNameAlias(PARAM *obj);
+/**
+ * This function is used to set help text for a parameter. The input value is copied.
+ * \param param			#PARAM object.
+ * \param txt			Help text for a parameter. Value is copied.
+ * \return #PST_OK when successful, error code otherwise.
+ */
+int PARAM_setHelpText(PARAM *param, const char *txt);
 
+/**
+ * Returns the help text of the parameter. See #PARAM_setHelpText to change the value.
+ * \param obj			#PARAM object.
+ * \return String that is the help text of the parameter. If value is not specified
+ * \c NULL is returned.
+ */
+const char* PARAM_getHelpText(PARAM *obj);
 
 /**
  * This function checks if parameter constraints are satisfied (see #PARAM_new
