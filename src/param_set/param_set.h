@@ -243,7 +243,7 @@ int PARAM_SET_setPrintName(PARAM_SET *set, const char *names,
  * \param	constv			Constant string representation of the parameter alias. Can be \c NULL.
  * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
- * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptionsand #PARAM_SET_setWildcardExpander.
+ * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions and #PARAM_SET_setWildcardExpander.
  */
 int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
 							const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len));
