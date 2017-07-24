@@ -173,9 +173,8 @@ void PARAM_SET_free(PARAM_SET *set);
  *
  * Function \c convert is used to repair / convert the c-string value before any
  * content or format check is performed. Takes two extra parameters for buffer and its
- * size. Return #PST_OK if conversion successful, error code otherwise. To skip
- * conversion #PST_PARAM_CONVERT_NOT_PERFORMED must be returned or \c value must be
- * copied to \c buf.
+ * size. Return #PST_OK if conversion is successful or #PST_PARAM_CONVERT_NOT_PERFORMED
+ * to skip conversion. Any other error code will break adding the value.
  *
  * <tt>int (*convert)(const char *value, char *buf, unsigned *buf_len)</tt>
  *
@@ -199,8 +198,9 @@ void PARAM_SET_free(PARAM_SET *set);
  * \param	extractObject	Function for object extraction.
  * \return #PST_OK if successful, error code otherwise.
  * \note Note that \c controlFormat and \c controlContent may return any error code
- * but \c convert function should be used so that user error codes are not mixed with
- * \c PST_* error codes.
+ * but \c convert function should return #PST_OK and #PST_PARAM_CONVERT_NOT_PERFORMED
+ * as any other error code will break adding the simple value, parsing configuration
+ * file or command-line.
  * \see #PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and #PARAM_SET_setWildcardExpander.
  * To get error reports related with functions \c controlFormat and \c controlContent,
  * see #PARAM_SET_isFormatOK and #PARAM_SET_invalidParametersToString.

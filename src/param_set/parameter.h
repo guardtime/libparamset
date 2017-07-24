@@ -445,9 +445,8 @@ void PARAM_free(PARAM *param);
  *
  * Function \c convert is used to repair / convert the c-string value before any
  * content or format check is performed. Takes two extra parameters for buffer and its
- * size. Return #PST_OK if conversion successful, error code otherwise. To skip
- * conversion #PST_PARAM_CONVERT_NOT_PERFORMED must be returned or \c value must be
- * copied to \c buf.
+ * size. Return #PST_OK if conversion is successful or #PST_PARAM_CONVERT_NOT_PERFORMED
+ * to skip conversion. Any other error code will break adding the value.
  *
  * <tt>int (*convert)(const char *value, char *buf, unsigned *buf_len)</tt>
  *
@@ -457,6 +456,10 @@ void PARAM_free(PARAM *param);
  * \param	controlContent	Function for content control.
  * \param	convert			Function for parameter value conversion.
  * \return #PST_OK if successful, error code otherwise.
+ * \note Note that \c controlFormat and \c controlContent may return any error code
+ * but \c convert function should return #PST_OK and #PST_PARAM_CONVERT_NOT_PERFORMED
+ * as any other error code will break adding the simple value, parsing configuration
+ * file or command-line.
  */
 int PARAM_addControl(PARAM *param, int (*controlFormat)(const char *), int (*controlContent)(const char *), int (*convert)(const char*, char*, unsigned));
 
