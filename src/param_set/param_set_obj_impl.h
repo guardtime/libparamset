@@ -141,6 +141,12 @@ struct PARAM_st{
 	void *expand_wildcard_ctx;
 
 	/**
+	 * List of characters the is used to identify the string that needs wildcard
+	 * processor to convert it.
+	 */
+	const char *expand_wildcard_char;
+
+	/**
 	 * An optional expaned wildcard ctx object.
 	 */
 	void (*expand_wildcard_free)(void *);

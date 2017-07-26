@@ -1044,6 +1044,7 @@ char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent
 }
 
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
+		const char* charList,
 		void *ctx,
 		void (*ctx_free)(void*),
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)){
@@ -1059,7 +1060,7 @@ int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 		res = param_set_getParameterByName(set, buf, &tmp);
 		if (res != PST_OK) return res;
 
-		res = PARAM_setWildcardExpander(tmp, ctx, ctx_free, expand_wildcard);
+		res = PARAM_setWildcardExpander(tmp, charList, ctx, ctx_free, expand_wildcard);
 		if (res != PST_OK) return res;
 	}
 

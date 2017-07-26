@@ -29,6 +29,7 @@
 
 #define FORMAT_OK 0
 #define VARIABLE_IS_NOT_USED(v) ((void)(v));
+#define WILDCAR_EXPANDER_DEF_CHAR "*?"
 
 static char *new_string(const char *str) {
 	char *tmp = NULL;
@@ -158,6 +159,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 	tmp->expand_wildcard = NULL;
 	tmp->expand_wildcard_ctx = NULL;
 	tmp->expand_wildcard_free = NULL;
+	tmp->expand_wildcard_char = WILDCAR_EXPANDER_DEF_CHAR;
 	tmp->getPrintName = wrapper_returnConstantPrintName;
 	tmp->getPrintNameAlias = wrapper_returnConstantPrintNameAlias;
 	tmp->print_name_buf[0] = '\0';
@@ -644,11 +646,18 @@ cleanup:
 	return res;
 }
 
-int PARAM_setWildcardExpander(PARAM *param, void *ctx, void (*ctx_free)(void*), int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
+int PARAM_setWildcardExpander(PARAM *param, const char* charList, void *ctx, void (*ctx_free)(void*), int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
 	if (param == NULL || expand_wildcard == NULL) return PST_INVALID_ARGUMENT;
 	param->expand_wildcard = expand_wildcard;
 	param->expand_wildcard_ctx = ctx;
 	param->expand_wildcard_free = ctx_free;
+
+	if (charList != NULL) {
+		param->expand_wildcard_char = charList;
+	} else {
+		param->expand_wildcard_char = WILDCAR_EXPANDER_DEF_CHAR;
+	}
+
 	return PST_OK;
 }
 
@@ -684,7 +693,7 @@ int PARAM_expandWildcard(PARAM *param, int *count) {
 			if (res != PST_OK) goto cleanup;
 
 			/* Check if there are wildcard characters. If not goto next value. */
-			if (strchr(value->cstr_value, '*') == NULL && strchr(value->cstr_value, '?') == NULL) continue;
+			if (strpbrk(value->cstr_value, param->expand_wildcard_char) == NULL) continue;
 
 			expanded_count = 0;
 			res = param->expand_wildcard(value, param->expand_wildcard_ctx, &expanded_count);

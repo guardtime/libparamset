@@ -767,8 +767,9 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
 
 /**
  * Specify a function to expand tokens that contain wildcard character (<tt>WC</tt>)
- * to array of new values. Characters '<tt>?</tt>' and '<tt>*</tt>' are \c WC.
- * Values containing \c WC are removed and replaced with the expanded values.
+ * to array of new values. By default characters '<tt>?</tt>' and '<tt>*</tt>' are \c WC.
+ * Values containing \c WC are removed and replaced with the expanded values. To
+ * use default \c WC set \c charList as <tt>NULL</tt>.
  *
  * <tt>int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)</tt>
  *
@@ -779,6 +780,7 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
  *
  * \param	set				#PARAM_SET object.
  * \param	names			List of names to add the functionality.
+ * \param	charList		List of wildcard characters used. When set to \c NULL \"<tt>*?</tt>\" is used.
  * \param	ctx				Data structure used by Wildcard expander. Can be \c NULL.
  * \param	ctx_free		Data structure release function. Can be \c NULL.
  * \param	expand_wildcard	Function pointer to Wildcard Expander function.
@@ -788,6 +790,7 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
  * \see #PARAM_SET_setPrintName, #PARAM_SET_addControl, #PARAM_expandWildcard, #PARAM_setWildcardExpander.
  */
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
+		const char* charList,
 		void *ctx,
 		void (*ctx_free)(void*),
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));

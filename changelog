@@ -9,8 +9,8 @@ Version 1.0
 * IMPROVEMENT: (Interface) Parsing option PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH changed to PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH.
 * IMPROVEMENT: (Interface) Parsing option PST_PRSCMD_HAS_MULTIPLE_INSTANCES changed to PST_PRSCMD_HAS_VALUE_SEQUENCE.
 * IMPROVEMENT: (Interface) PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
-* IMPROVEMENT: (Interface) PARAM_SET_setWildcardExpander interface changed - new parameter ctx_free added.
-* IMPROVEMENT: (Interface) PARAM_setWildcardExpander interface changed - new parameter ctx_free added.
+* IMPROVEMENT: (Interface) PARAM_SET_setWildcardExpander interface changed - new parameters ctx_free and charList added.
+* IMPROVEMENT: (Interface) PARAM_setWildcardExpander interface changed - new parameters ctx_free and charList added.
 * IMPROVEMENT: (Interface) Macros PST_FORMAT_STATUS_OK, PST_CONTENT_STATUS_OK and TASK_DEFINITION_MAX_COUNT are used internally only.
 * IMPROVEMENT: (Internal) Enumeration "enum_priority" renamed to "PST_PRIORITY_enum" and moved from param_set.h to param_value.h.
 * IMPROVEMENT: (Internal) Enumeration "enum_value_index" renamed to "PST_INDEX_enum" and moved from param_set.h to param_value.h.
