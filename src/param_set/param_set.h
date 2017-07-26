@@ -185,8 +185,9 @@ void PARAM_SET_free(PARAM_SET *set);
  * 2 elements, \c str is parameters value and \c obj is pointer to receiving pointer.
  * Calling #PARAM_SET_getObj both array elements in \c extra are pointing to #PARAM_SET
  * itself (<tt>void **extra = {set, set}</tt>), when calling #PARAM_SET_getObjExtended,
- * the second value is determined by the function call and extra parameter given
- * (<tt>void **extra = {set, extra}</tt>).
+ * the second value is determined by the function call and \c extra parameter given
+ * (<tt>void **extra = {set, extra}</tt>). If extracting of the object is successful
+ * #PST_OK must be returned, error code otherwise.
  *
  * <tt>int (*extractObject)(void **extra, const char *str, void **obj)</tt>
  *
@@ -340,9 +341,13 @@ int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int p
  * \param	priority	Priority that can be #PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher.
  * \param	at			Parameter index in the matching set composed with the constraints.
  * \param	obj			Pointer to receiving pointer to \c object returned.
- * \return #PST_OK when successful, error code otherwise. Some more common error
+ * \return #PST_OK when successful, error code otherwise. If object extractor implementation
+ * returns an error code, it is returned by this functionSome more common error
  * codes: 	#PST_INVALID_ARGUMENT,  #PST_PARAMETER_NOT_FOUND, #PST_PARAMETER_EMPTY,
  * #PST_PARAMETER_INVALID_FORMAT, #PST_PARAMETER_UNIMPLEMENTED_OBJ, #PST_PARAMETER_VALUE_NOT_FOUND.
+ * \note Note that if format or content status is invalid, it is not possible to extract
+ * the object. Custom object extractor may return error values that overlaps with
+ * local error codes!
  * \see #PARAM_SET_add, #PARAM_SET_addControl and #PARAM_SET_getObjExtended.
  */
 int PARAM_SET_getObj(PARAM_SET *set, const char *name, const char *source, int priority, int at, void **obj);

@@ -7,7 +7,7 @@ libparamset
 
 The libparamset provides the following functionality:
 * Parameters can be parsed from command-line, read from configuration file or inserted from the code.
-* Long and short parameters (-a and --long).
+* Short and long parameters (-a and --long).
 * Concatenating of flags with length 1 (-ab instead of -a -b).
 * One alias for the parameters names (e.g. --load and -l).
 * Individual parsing options for parameters ([PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)).
@@ -36,6 +36,7 @@ The libparamset provides the following functionality:
 * Task set, composed of multiple tasks, where from a task can be extracted by specified parameter set.
 * Auto-generated suggestions between multiple tasks for the user when it is not impossible to resolve which task the user wants to perform.
 * Auto-generated suggestions how to fix the task user tries to perform.
+* Parameters can be bound with description and formatted to human readable list for help text.
 
 Main objects
 ------------

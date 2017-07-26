@@ -498,7 +498,8 @@ int PARAM_setParseOption(PARAM *param, int option);
  * elements in \c extra are pointing to #PARAM_SET itself (<tt>void **extra = {set, set}</tt>),
  * when calling #PARAM_SET_getObjExtended, the second value is determined by
  * the function call and extra parameter given (<tt>void **extra = {set, extra}</tt>).
- *
+ * If extracting of the object is successful #PST_OK must be returned, error code
+ * otherwise.
  * <tt>int (*extractObject)(void **extra, const char *str, void **obj)</tt>
  *
  * \param	param				#PARAM object.
@@ -580,11 +581,13 @@ int PARAM_getName(PARAM *param, const char **name, const char **alias);
  * \param	extra		Pointer to optional extra data array.
  * \param	value		Pointer to the receiving pointer to the value.
  *
- * \return #PST_OK when successful, error code otherwise. More common errors
+ * \return #PST_OK when successful, error code otherwise. If object extractor implementation
+ * returns an error code, it is returned by this function. More common errors
  * #PST_INVALID_ARGUMENT, #PST_PARAMETER_EMPTY, #PST_PARAMETER_VALUE_NOT_FOUND,
  * #PST_PARAMETER_INVALID_FORMAT and #PST_PARAMETER_UNIMPLEMENTED_OBJ.
- * \note Noted that if format or content status is invalid, it is not possible to extract
- * the object.
+ * \note Note that if format or content status is invalid, it is not possible to extract
+ * the object. Custom object extractor may return error values that overlaps with
+ * local error codes!
  * \attention Returned value must be freed by the user if the implementation needs it.
  */
 int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void **extra, void **value);
