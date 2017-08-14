@@ -10,7 +10,7 @@ The libparamset provides the following functionality:
 * Short and long parameters (-a and --long).
 * Concatenating of flags with length 1 (-ab instead of -a -b).
 * One alias for the parameters names (e.g. --load and -l).
-* Individual parsing options for parameters ([PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)).
+* Individual parsing options for parameters ([PARAM_PARSE_OPTIONS](@ref PARAM_PARSE_OPTIONS_enum)).
   * Parameter with multiple coexisting values (-a v1 -a v2 ... -a vn, where -a = {"v1", "v2", ..., "vn"}).
   * Parameter that never takes a value (-a v1 -a -a, where -a = {NULL, NULL, NULL} and "v1" is unknown token).
   * Parameter that always takes a value (-a -a, where -a = {"-a"}).

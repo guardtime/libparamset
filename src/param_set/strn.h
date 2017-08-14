@@ -106,7 +106,7 @@ char *PST_strncpy (char *destination, const char *source, size_t n);
  * \param headerLen		The size of the header. Can be \c 0.
  * \param rowLen		The overall size of the line.
  * \param paramName		Parameter name used to compose header.
- * \param delimiter		Delimiter character used for delimiter that separates parameters name from description.
+ * \param delimiter		Delimiter character used for delimiter that separates parameter name from description.
  * \param desc		Format string, parameter description.
  * \param ...			Extra parameters for formatting.
  * \return The number of characters written, not including terminating \c null character. On error \c  0 is returned.
