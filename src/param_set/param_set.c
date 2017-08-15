@@ -1032,6 +1032,7 @@ char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent
 }
 
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
+		const char* charList,
 		void *ctx,
 		void (*ctx_free)(void*),
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)){
@@ -1047,7 +1048,7 @@ int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 		res = param_set_getParameterByName(set, buf, &tmp);
 		if (res != PST_OK) return res;
 
-		res = PARAM_setWildcardExpander(tmp, ctx, ctx_free, expand_wildcard);
+		res = PARAM_setWildcardExpander(tmp, charList, ctx, ctx_free, expand_wildcard);
 		if (res != PST_OK) return res;
 	}
 
@@ -2286,37 +2287,164 @@ char* PARAM_SET_typosToString(PARAM_SET *set, const char *prefix, char *buf, siz
 
 char* PARAM_SET_toString(PARAM_SET *set, char *buf, size_t buf_len) {
 	int res;
-	PARAM_VAL *param_value = NULL;
-	int i = 0;
-	const char *value = NULL;
-	const char *source = NULL;
-	int priority = 0;
-	int n = 0;
+	const size_t row_len = 80;
+	const size_t nr_field_len = 5;
+	const size_t source_field_len = 15;
+	const size_t prio_field_len = 4;
+	const size_t value_field_len = (row_len - 9 - source_field_len - nr_field_len - prio_field_len);
 	size_t count = 0;
+	int i = 0;
+	int n = 0;
+	PARAM_VAL *param_value = NULL;
+	char nr_header[256];
+	char value_header[256];
+	char source_header[256];
+	char priority_header[256];
+	char null_value[256];
+	char null_source[256];
 
 	if (set == NULL || buf == NULL || buf_len == 0) {
 		return NULL;
 	}
 
+	/* Generate constants for heading strings. */
+	PST_snprintf(nr_header, sizeof(nr_header), "%*snr", ((nr_field_len - 2)/2), "");
+	PST_snprintf(value_header, sizeof(value_header), "%*svalue", ((value_field_len - 5)/2), "");
+	PST_snprintf(source_header, sizeof(source_header), "%*ssource", ((source_field_len - 6)/2), "");
+	PST_snprintf(priority_header, sizeof(priority_header), "%*sprio", ((prio_field_len-4)/2), "");
 
-	count += PST_snprintf(buf + count, buf_len - count, "  %3s %10s %50s %10s\n",
-			"nr", "value", "source", "priority");
+	PST_snprintf(null_value, sizeof(null_value), "%*s-", value_field_len / 2 - 1, "");
+	PST_snprintf(null_source, sizeof(null_source), "%*s-", source_field_len / 2 - 1, "");
 
+	/* Print header. */
+	count += PST_snprintf(buf + count, buf_len - count, "%*s   %-*s   %-*s   %*s\n",
+			nr_field_len, nr_header,
+			value_field_len, value_header,
+			source_field_len, source_header,
+			prio_field_len, priority_header);
+
+	/* Cycle through parameters. */
 	for (i = 0; i < set->count; i++) {
-		count += PST_snprintf(buf + count, buf_len - count, "Parameter: '%s' (%i):\n",
+		count += PST_snprintf(buf + count, buf_len - count, "\n'%s' (%i):\n",
 				set->parameter[i]->flagName, set->parameter[i]->argCount);
 
-
+		/* Cycle through values. */
 		n = 0;
 		while (PARAM_getValue(set->parameter[i], NULL, PST_PRIORITY_NONE, n, &param_value) == PST_OK) {
+			const char *value = NULL;
+			const char *source = NULL;
+			int priority = 0;
+			size_t value_len;
+			size_t source_len;
+			size_t value_char_left;
+			size_t source_char_left;
+			int isValueDone = 0;
+			int isSourceDone = 0;
+			int first = 1;
+
 			res = PARAM_VAL_extract(param_value, &value, &source, &priority);
 			if (res != PST_OK) return NULL;
 
-			count += PST_snprintf(buf + count, buf_len - count, "  %2i) '%s' %50s %10i\n",
-					n,
-					value == NULL ? "-" : value,
-					source == NULL ? "-" : source,
-					priority);
+			value_len = (value == NULL) ? 0 : strlen(value);
+			source_len = (source == NULL) ? 0 : strlen(source);
+			value_char_left = (value == NULL) ? 0 : value_len;
+			source_char_left = (source == NULL) ? 0 : source_len;
+
+
+			do {
+				size_t valueTextWith = value_field_len - 2;
+				size_t sourceTextWith = source_field_len - 2;
+				int isLastValueLine = value_char_left <= valueTextWith;
+				int isLastSourceLine = source_char_left <= sourceTextWith;
+				size_t value_char_print_c = isLastValueLine ? value_char_left : valueTextWith;
+				size_t source_char_print_c = isLastSourceLine ? source_char_left : sourceTextWith;
+				char first_value_quote = (value == NULL || isValueDone) ? ' ' : '\'';
+				char last_value_quote = (value == NULL || isValueDone) ? ' ' : '\'';
+				char first_source_quote = (source == NULL || isSourceDone) ? ' ' : '\'';
+				char last_source_quote = (source == NULL || isSourceDone) ? ' ' : '\'';
+
+				if (value != NULL && value_char_left > 0) {
+					if (first && !isLastValueLine) {
+						first_value_quote = '"';
+						last_value_quote = ' ';
+					} else if (!first && !isLastValueLine) {
+						first_value_quote = ' ';
+						last_value_quote = ' ';
+					} else if (!first && isLastValueLine) {
+						first_value_quote = ' ';
+						last_value_quote = '"';
+					}
+				}
+
+				if (source != NULL && source_char_left > 0) {
+					if (first && !isLastSourceLine) {
+						first_source_quote = '"';
+						last_source_quote = ' ';
+					} else if (!first && !isLastSourceLine) {
+						first_source_quote = ' ';
+						last_source_quote = ' ';
+					} else if (!first && isLastSourceLine) {
+						first_source_quote = ' ';
+						last_source_quote = '"';
+					}
+				}
+
+				/* If value or source is NULL use "null" string. */
+				if (value == NULL) {
+					value_char_print_c = value_field_len / 2;
+					value = null_value;
+
+				}
+
+				if (source == NULL) {
+					source_char_print_c = source_field_len / 2;
+					source = null_source;
+				}
+
+				if (first) {
+					count += PST_snprintf(buf + count, buf_len - count, "%*i) | %c%-.*s%c%*s | %c%-*.*s%c%*s | %*i\n",
+							nr_field_len - 1,
+							n + 1,
+							first_value_quote,
+							value_char_print_c,
+							value,
+							last_value_quote,
+							valueTextWith - value_char_print_c,
+							"",
+							first_source_quote,
+							source_char_print_c, source_char_print_c,
+							source,
+							last_source_quote,
+							sourceTextWith - source_char_print_c,
+							"",
+							prio_field_len,
+							priority);
+				} else {
+					count += PST_snprintf(buf + count, buf_len - count, "%*s | %c%-.*s%c%*s | %c%-*.*s%c%*s | %*s\n",
+							nr_field_len,
+							"",
+							first_value_quote,
+							value_char_print_c,
+							value + (value_len - value_char_left),
+							last_value_quote,
+							valueTextWith - value_char_print_c,
+							"",
+							first_source_quote,
+							source_char_print_c,source_char_print_c,
+							source + (source_len - source_char_left),
+							last_source_quote,
+							sourceTextWith - source_char_print_c,
+							"",
+							prio_field_len,
+							"");
+				}
+
+				value_char_left = isLastValueLine ? 0 : value_char_left - valueTextWith;
+				source_char_left = isLastSourceLine ? 0 : source_char_left - sourceTextWith;
+				isValueDone = value_char_left == 0;
+				isSourceDone = source_char_left == 0;
+				first = 0;
+			} while(value_char_left || source_char_left);
 
 			n++;
 		}

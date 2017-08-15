@@ -93,6 +93,7 @@ fi
 %{_includedir}/param_set/strn.h
 %{_includedir}/param_set/task_def.h
 %{_includedir}/param_set/version.h
+%{_includedir}/param_set/wildcardexpanders.h
 %{_libdir}/libparamset.a
 %{_libdir}/libparamset.la
 # %{_libdir}/pkgconfig/libparamset.pc

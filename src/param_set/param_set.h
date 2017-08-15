@@ -324,7 +324,7 @@ int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int p
 /**
  * Extracts object from the #PARAM_SET. If no object extractor (see #PARAM_SET_addControl)
  * is set, a string (see #PARAM_SET_getStr instead) value is returned. By default the user
- * <b>MUST NOT</b> free the returned object. If a custom object extractor function
+ * must not free the returned object. If a custom object extractor function
  * is used, object must be freed if implementation requires it.
  *
  * Values are filtered by constraints. If multiple names (<em>e.g. name1,name2,name3</em>)
@@ -767,8 +767,9 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
 
 /**
  * Specify a function to expand tokens that contain wildcard character (<tt>WC</tt>)
- * to array of new values. Characters '<tt>?</tt>' and '<tt>*</tt>' are \c WC.
- * Values containing \c WC are removed and replaced with the expanded values.
+ * to array of new values. By default characters '<tt>?</tt>' and '<tt>*</tt>' are \c WC.
+ * Values containing \c WC are removed and replaced with the expanded values. To
+ * use default \c WC set \c charList as <tt>NULL</tt>.
  *
  * <tt>int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)</tt>
  *
@@ -778,16 +779,19 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
  *
  *
  * \param	set				#PARAM_SET object.
- * \param	names			List of names to add the functionality for.
+ * \param	names			List of names to add the functionality.
+ * \param	charList		List of wildcard characters used. When set to \c NULL \"<tt>*?</tt>\" is used.
  * \param	ctx				Data structure used by Wildcard expander. Can be \c NULL.
  * \param	ctx_free		Data structure release function. Can be \c NULL.
  * \param	expand_wildcard	Function pointer to Wildcard Expander function.
  * \return #PST_OK if successful, error code otherwise.
  * \note #PARAM_SET_parseCMD must be used and parsing option #PST_PRSCMD_EXPAND_WILDCARD
  * must be set using #PARAM_SET_setParseOptions.
- * \see #PARAM_SET_setPrintName, #PARAM_SET_addControl, #PARAM_expandWildcard, #PARAM_setWildcardExpander.
+ * \see #PARAM_SET_setPrintName, #PARAM_SET_addControl, #PARAM_expandWildcard,
+ * #PARAM_setWildcardExpander and [Implemented wildcard expanders](@ref wildcardexpanders.h).
  */
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
+		const char* charList,
 		void *ctx,
 		void (*ctx_free)(void*),
 		int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));

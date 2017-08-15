@@ -39,6 +39,7 @@ LIB_OBJ = \
 	$(OBJ_DIR)\strn.obj \
 	$(OBJ_DIR)\parameter.obj \
 	$(OBJ_DIR)\task_def.obj \
+	$(OBJ_DIR)\wildcardexpanders.obj
 
 
 #Compiler and linker configuration
