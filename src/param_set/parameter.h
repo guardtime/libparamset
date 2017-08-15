@@ -740,6 +740,7 @@ int PARAM_clearValue(PARAM *param, const char *source, int prio, int at);
  * \return #PST_OK if successful, error code otherwise.
  * \note #PARAM_SET_parseCMD must be used and parsing option #PST_PRSCMD_EXPAND_WILDCARD
  * must be set using #PARAM_SET_setParseOptions.
+ * \see [Implemented wildcard expanders](@ref wildcardexpanders.h)
  */
 int PARAM_setWildcardExpander(PARAM *param, const char* charList, void *ctx, void (*ctx_free)(void*), int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift));
 

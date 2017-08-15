@@ -787,7 +787,8 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
  * \return #PST_OK if successful, error code otherwise.
  * \note #PARAM_SET_parseCMD must be used and parsing option #PST_PRSCMD_EXPAND_WILDCARD
  * must be set using #PARAM_SET_setParseOptions.
- * \see #PARAM_SET_setPrintName, #PARAM_SET_addControl, #PARAM_expandWildcard, #PARAM_setWildcardExpander.
+ * \see #PARAM_SET_setPrintName, #PARAM_SET_addControl, #PARAM_expandWildcard,
+ * #PARAM_setWildcardExpander and [Implemented wildcard expanders](@ref wildcardexpanders.h).
  */
 int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 		const char* charList,

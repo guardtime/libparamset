@@ -31,6 +31,7 @@ The libparamset provides the following functionality:
 * Abstract format and content check functionality with auto-generated error messages.
 * Abstract parameter transformation or repair functionality.
 * Abstract Wildcard expander (can be used to make -i * work on Windows).
+  * Implemented wildcards for Windows file system.
 * Abstract object parsing functionality (e.g. extract double or file).
 * Multiple parameter sets can be merged.
 * Task set, composed of multiple tasks, where from a task can be extracted by specified parameter set.
@@ -92,6 +93,10 @@ Code example
 #include <param_set/param_set.h>
 #include <param_set/task_def.h>
 
+#ifdef _WIN32
+#   include <param_set/wildcardexpanders.h>
+#endif
+
 enum {
 	VALUE_OK = 0,
 	VALUE_IS_NULL = 0x01,
@@ -122,9 +127,20 @@ int main(int argc, char** argv, char **envp) {
 	PARAM_SET_new("{i}{o}{dump}{debug}{r}{help|h}", &set);
 	PARAM_SET_addControl(set, "o", isFormatOk_path, NULL, convertRepair_path, NULL);
 	PARAM_SET_addControl(set, "i", isFormatOk_path, isContentOk_path, convertRepair_path, NULL);
-	PARAM_SET_setParseOptions(set, "i,o", PST_PRSCMD_HAS_VALUE);
+	PARAM_SET_setParseOptions(set, "o", PST_PRSCMD_HAS_VALUE);
 	PARAM_SET_setParseOptions(set, "dump,debug,h,r", PST_PRSCMD_HAS_NO_VALUE);
 
+	/**
+	 * To enable Windows file system wildcards, specify the wildcard expander
+	 * function implementation and enable parsing option that enable wildcard
+	 * processor.
+	 */
+#ifdef _WIN32
+	PARAM_SET_setWildcardExpander(set, "i", NULL, NULL, NULL, PST_WCF_Win32FileWildcard);
+	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE |  PST_PRSCMD_EXPAND_WILDCARD);
+#else
+	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE);
+#endif
 
 	/**
 	 * Describe different tasks:
@@ -215,7 +231,7 @@ int isContentOk_path(const char* fname) {
 	int result = 1;
 	FILE *f = NULL;
 	f = fopen(fname, "r");
-	result = f == NULL ? VALUE_FILE_DOES_NOT_EXIST : 0;
+	result = f == NULL ? VALUE_FILE_DOES_NOT_EXIST : VALUE_OK;
 	if (f != NULL) fclose(f);
 	return result;
 }
