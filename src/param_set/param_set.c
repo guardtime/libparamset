@@ -442,9 +442,6 @@ static int string_is_substring_at_the_beginning(const char *str, const char *sub
 	return (ret_str == str || ret_substr == substr) ? 1 : 0;
 }
 
-//#define dbg_print_(format, ...) printf(format, ##__VA_ARGS__)
-#define dbg_print_(format, ...) ;
-
 
 static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sens, int max_count, TYPO *typo_index){
 	int numOfElements = 0;
@@ -460,15 +457,12 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 	array = set->parameter;
 
 
-	dbg_print_("%10s", str);
 	for (i = 0; i < numOfElements; i++) {
 		typo_index[i].name = NULL;
 		typo_index[i].isTypo = 0;
 		typo_index[i].difference = 100;
-		dbg_print_("%10s", array[i]->flagName);
 	}
-	dbg_print_("\n");
-	dbg_print_("%10s", "f(x) = ");
+
 	/**
 	 * Analyze the set for possible typos.
 	 */
@@ -519,8 +513,6 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 			typo_index[i].difference -= 15;
 		}
 
-		dbg_print_("%5i%2c%3c", typo_index[i].difference, isSubstring ? 'S' : '-', isSubstringAtTheBeginning ? 'B' : '-');
-
 		/**
 		 * Register the smallest difference value.
 		 */
@@ -531,17 +523,13 @@ static int param_set_analyze_similarity(PARAM_SET *set, const char *str, int sen
 
 	}
 
-	dbg_print_("\n..............\n");
-	dbg_print_("%12s %2i/%2i, %s\n", "typo", 0,0, "suggestion");
 	for (i = 0; i < numOfElements; i++) {
 		if (typo_index[i].difference < 90 && typo_index[i].difference <= smallest_difference + sens) {
 			typo_count++;
-			dbg_print_("%12s %2i/%2i, %s\n", str, typo_index[i].difference, smallest_difference, typo_index[i].name); typo_index[i].isTypo = 1;
+			typo_index[i].isTypo = 1;
 		}
 	}
-	dbg_print_("\n..............\n");
 
-	dbg_print_("RET %i\n", typo_count <= max_count ? 1 : 0);
 	return (typo_count > 0 && typo_count <= max_count) ? 1 : 0;
 }
 
@@ -1701,45 +1689,8 @@ static int get_parameter_from_token(PARAM_SET *set, const char *token, int *toke
 	return PST_OK;
 }
 
-static char* token_type_to_string(int type, char *buf, size_t len) {
-	PST_snprintf(buf, len, "[%s%s%s%s%s%s%s%s]",
-			(type & TOKEN_IS_VALUE) ? "V:" : "",
-			(type & TOKEN_HAS_DASH) ? "D:" : "",
-			(type & TOKEN_HAS_DOUBLE_DASH) ? "DD:" : "",
-			(type & TOKEN_MATCHES_PARAMETER) ? "M:" : "",
-			(type & TOKEN_FLAG_LEN_0) ? "L0:" : "",
-			(type & TOKEN_FLAG_LEN_1) ? "L1:" : "",
-			(type & TOKEN_FLAG_LEN_N) ? "LN:" : "",
-			(type & TOKEN_UNKNOW) ? "?:" : "");
-	return buf;
-}
-
-static char* pars_flags_to_string(int type, char *buf, size_t len) {
-	PST_snprintf(buf, len, "$[%s%s%s%s%s%s%s]",
-			(type == PST_PRSCMD_NONE) ? "-" : "",
-			((type & PST_PRSCMD_DEFAULT) == PST_PRSCMD_DEFAULT) ? "D:" : "",
-			(type & PST_PRSCMD_HAS_NO_VALUE) ? "NV:" : "",
-			(type & PST_PRSCMD_HAS_VALUE) ? "V:" : "",
-			(type & PST_PRSCMD_HAS_VALUE_SEQUENCE) ? "M:" : "",
-			(type & PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER) ? "PPBR:" : "",
-			(type & PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH) ? "MBR:" : "");
-	return buf;
-}
-
-static char* break_type_to_string(int type, char *buf, size_t len) {
-	PST_snprintf(buf, len, "[%s%s%s%s]",
-			(type & 1) ? "MATCH_BREAK  " : "",
-			(type & 2) ? "POT_PARAM_BREAK   " : "",
-			(type & 4) ? "NO_PARA_BREAK" : "",
-			(type & 8) ? "VAL_SAT_BREAK" : "");
-	return buf;
-}
-
-
 
 static void print_nothing(const char* format, ...) {(void)(format);}
-//#define dpgprint printf
-#define dpgprint print_nothing
 
 typedef struct COL_REC_st {
 	PARAM *parameter;
@@ -1898,8 +1849,6 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 	char *token = NULL;
 	int token_type = 0;
 	PARAM *tmp_parameter = NULL;
-	char buf[1024];
-	char buf2[1024];
 	int is_parameter_opened = 0;
 	int token_match_break = 0;
 	int token_pot_param_break = 0;
@@ -1936,8 +1885,6 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 			res = get_parameter_from_token(set, token, &token_type, &tmp_parameter);
 			if (res != PST_OK) goto cleanup;
 
-			dpgprint("Token '%10s' %8s %10s\n", token, token_type_to_string(token_type, buf, sizeof(buf)), pars_flags_to_string(tmp_parameter != NULL ? tmp_parameter->parsing_options : 0, buf2, sizeof(buf2)));
-
 
 			if (is_parameter_opened) {
 				token_match_break = ((TOKEN_IS_MATCH(token_type)
@@ -1951,20 +1898,15 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 				if (!token_no_param_break && !token_pot_param_break && !token_match_break) {
 						res = PARAM_addValue(opened_parameter, token, source, priority);
 						if (res != PST_OK) goto cleanup;
-						dpgprint("P:VALUE++ (%s = %s)\n", opened_parameter->flagName, token);
 						value_counter++;
 				}
 
 				value_saturation_break = (value_counter && (PARAM_isParseOptionSet(opened_parameter, PST_PRSCMD_DEFAULT) || PARAM_isParseOptionSet(opened_parameter, PST_PRSCMD_HAS_VALUE))) ? 8 : 0;
 
 				if (token_match_break || token_pot_param_break || token_no_param_break || value_saturation_break || last_token_break) {
-					dpgprint("----------------------------------\n");
 					if (value_counter == 0) {
 						res = PARAM_SET_add(set, opened_parameter->flagName, NULL, source, priority);
 						if (res != PST_OK) goto cleanup;
-						dpgprint("P:CLOSE (%s = NULL)%s\n", opened_parameter->flagName, break_type_to_string(token_match_break + token_pot_param_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
-					} else {
-						dpgprint("P:CLOSE (%s ---)%s\n", opened_parameter->flagName, break_type_to_string(token_match_break + token_pot_param_break + token_no_param_break + value_saturation_break, buf, sizeof(buf)));
 					}
 
 					is_parameter_opened = 0;
@@ -1986,8 +1928,6 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 
 			/* If parameter is not opened and the match is found, set is_parameter_opened flag and initialize opened_parameter.*/
 			if (!is_parameter_opened && TOKEN_IS_VALID_FOR_OPEN(token_type)) {
-				dpgprint("----------------------------------\n");
-				dpgprint("P:OPEN %s\n", token);
 				is_parameter_opened = 1;
 				value_counter = 0;
 				opened_parameter = tmp_parameter;
@@ -2006,7 +1946,6 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 		 */
 		if (!is_parameter_opened) {
 			if (COLLECTORS_disableParsing(collector, token_type)) {
-				dpgprint("--------------PARSING CLOSED %X\n", token_type );
 				token_type = 0;
 				continue;
 			}
@@ -2017,13 +1956,10 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 			 * If it does, break. If it does not add typo or unknown.
 			 */
 			if (TOKEN_IS_BUNCH_OF_FLAGS_PARAM(token_type)) {
-				dpgprint("------------BUNCH OF FLAGS-----------------\n");
 				res = param_set_addRawParameter(token, NULL, source, set, priority);
 				if (res != PST_OK) goto cleanup;
-				dpgprint("------------------  DONE   -----------------\n");
 				continue;
 			} else if (COLLECTORS_add(collector, token_type, source, priority, token) > 0) {
-				dpgprint("Collected '%s'.\n", token);
 				continue;
 			} else {
 				if (TOKEN_IS_NULL_HAS_DOUBLE_DASH(token_type) || TOKEN_IS_NULL_HAS_DASH(token_type)) {
@@ -2032,7 +1968,6 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 					res = param_set_add_typo_or_unknown(set, typo_helper, source, remove_dashes(token), NULL);
 				}
 				if (res != PST_OK) goto cleanup;
-				dpgprint("Typo added '%s'\n", token);
 				continue;
 			}
 

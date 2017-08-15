@@ -28,8 +28,6 @@
 #include "param_set_obj_impl.h"
 #include "strn.h"
 
-#define debug_array_printf 	{int n; for (n = 0; n < task_set->count; n++) {printf("[%2.2f:%2i]", task_set->cons[n], task_set->index[n]);}printf("\n");}
-
 
 static int new_string(const char *str, char **out) {
 	char *tmp = NULL;
@@ -266,8 +264,6 @@ int TASK_DEFINITION_analyzeConsistency(TASK_DEFINITION *def, PARAM_SET *set, dou
 
 	forbiddentSet = forCount - forMissing;
 
-//	printf("M %i/%i F %i/%i\n", manMissing, manCount, forMissing, forCount);
-
 	/**
 	 * First flag in category is most important and gives 0.5 of consistency and
 	 * another 0.5 comes from all other mandatory flags. Every forbidden flag
@@ -278,7 +274,6 @@ int TASK_DEFINITION_analyzeConsistency(TASK_DEFINITION *def, PARAM_SET *set, dou
 
 	def->consistency = defMan - defFor;
 
-//	printf(">>> consistency (%i %s) %f\n",def->id, def->name, def->consistency);
 
 	if (manMissing == 0 && forbiddentSet == 0){
 		def->isConsistent = 1;
@@ -353,7 +348,6 @@ int TASK_DEFINITION_getMoreConsistent(TASK_DEFINITION *A, TASK_DEFINITION *B, PA
 				if (strcmp(bufA, bufB) == 0 && PARAM_SET_isSetByName(set, bufA) && PARAM_SET_isSetByName(set, bufB)) {
 						A_different_set_flag_count--;
 						B_different_set_flag_count--;
-//						printf("%s--\n", bufA);
 				}
 			}
 		}
@@ -366,7 +360,6 @@ int TASK_DEFINITION_getMoreConsistent(TASK_DEFINITION *A, TASK_DEFINITION *B, PA
 				if (strcmp(bufA, bufB) == 0 && PARAM_SET_isSetByName(set, bufA) && PARAM_SET_isSetByName(set, bufB)) {
 						A_different_set_flag_count--;
 						B_different_set_flag_count--;
-//						printf("%s--\n", bufA);
 				}
 			}
 		}
@@ -375,8 +368,6 @@ int TASK_DEFINITION_getMoreConsistent(TASK_DEFINITION *A, TASK_DEFINITION *B, PA
 			tmp = NULL;
 		} else {
 			tmp = ((double)A_different_set_flag_count * A->consistency > (double)B_different_set_flag_count * B->consistency) ? A : B;
-//			printf("%s %i compared to %s %i, more consistent is %s %i\n", A->name, A->id, B->name, B->id, tmp->name, tmp->id);
-//			printf("A: %f and B: %f\n", (double)A_different_set_flag_count * A->consistency , (double)B_different_set_flag_count * B->consistency);
 		}
 	} else if (consisteny_A == consisteny_B || fabs(consisteny_A - consisteny_B) >= 0.00000000001) {
 		tmp = NULL;
@@ -425,7 +416,6 @@ char* TASK_DEFINITION_toString(TASK_DEFINITION *def, char *buf, size_t buf_len) 
 		count += PST_snprintf(buf + count, buf_len - count, ")");
 	}
 
-//	count += PST_snprintf(buf + count, buf_len - count, "\n");
 	return buf;
 }
 
@@ -680,7 +670,6 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 	 * with less consistent. If consistency is very similar analyze the order
 	 * in more precise way.
 	 */
-//	debug_array_printf
 	for (i = 0; i < task_set->count; i++) {
 		for (j = i + 1; j < task_set->count; j++) {
 			if (fabs(task_set->cons[i] - task_set->cons[j]) <= sensitivity) {
@@ -721,7 +710,6 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 
 			}
 		}
-//		debug_array_printf
 	}
 
 	task_set->isAnalyzed = 1;
