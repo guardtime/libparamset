@@ -324,7 +324,7 @@ int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int p
 /**
  * Extracts object from the #PARAM_SET. If no object extractor (see #PARAM_SET_addControl)
  * is set, a string (see #PARAM_SET_getStr instead) value is returned. By default the user
- * <b>MUST NOT</b> free the returned object. If a custom object extractor function
+ * must not free the returned object. If a custom object extractor function
  * is used, object must be freed if implementation requires it.
  *
  * Values are filtered by constraints. If multiple names (<em>e.g. name1,name2,name3</em>)

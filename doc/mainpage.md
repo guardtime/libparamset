@@ -1,36 +1,39 @@
 PARAM SET Overview {#mainpage}
 ============
-The libparamset is a software development kit for handling command-line parameters and program tasks. Parameters can be read from command-line and a task can be extrated that matches with the given input. Process is covered with error detection and functions that generates helpful feedback messages to the user.
+The libparamset is a software development kit, written in plain C, for handling command-line parameters and program tasks. Parameters can be read from command-line and a task can be extracted that matches with the given input. Process is covered with error detection and functions that generates helpful feedback messages to the user.
 
 libparamset
 -----------
 
 The libparamset provides the following functionality:
 * Parameters can be parsed from command-line, read from configuration file or inserted from the code.
-* Short and long parameters (-a and --long).
-* Concatenating of flags with length 1 (-ab instead of -a -b).
-* One alias for the parameters names (e.g. --load and -l).
+* Short and long parameters ("-a" and "--long").
+* Concatenating of flags with length 1 ("-ab" instead of "-a -b").
+* One alias for the parameter name (e.g. "--load" and "-l").
 * Individual parsing options for parameters ([PARAM_PARS_OPTIONS](@ref PARAM_PARS_OPTIONS_enum)).
-  * Parameter with multiple coexisting values (-a v1 -a v2 ... -a vn, where -a = {"v1", "v2", ..., "vn"}).
-  * Parameter that never takes a value (-a v1 -a -a, where -a = {NULL, NULL, NULL} and "v1" is unknown token).
-  * Parameter that always takes a value (-a -a, where -a = {"-a"}).
+  * Parameter with multiple coexisting values ("-a v1 -a v2 ... -a vn", where -a = {'v1', 'v2', ..., 'vn'}).
+  * Parameter that never takes a value ("-a v1 -a -a", where -a = {NULL, NULL, NULL} and 'v1' is unknown token).
+  * Parameter that always takes a value ("-a -a", where -a = {'-a'}).
   * Existing parameter break that takes next token as it's value only if it's not an existing parameter.
-  * Possible parameter break that takes next token as it's value only if it does not look like possible parameter (-a v1 -a -b, where -a = {"v1", NULL})
-  * Parameter "--", that will redirect every next token to a specified parameter(s).
-  * Parameter that collects values that are not bound with any parameter ("-i x y ...", where "x" is bound with "-i" but "y" is not).
-  * Parameter value sequence with (existing or possible) parameter break ("-a v1 v2 ... vn -b", where -a = {"v1", "v2", ..., "vn"}).
+  * Possible parameter break that takes next token as it's value only if it does not look like possible parameter ("-a v1 -a -b", where -a = {'v1', NULL})
+  * Parameter value sequence with (existing or possible) parameter break ("-a v1 v2 ... vn -b", where -a = {'v1', 'v2', ..., 'vn'}).
   * Parameter that is hidden from the command-line but can be inserted from the code or configuration file.
   * Parameter that do not generate any typo errors (useful when hiding a parameter from command-line).
-* Values can be filtered by, name (e.g. -i as "i" and  --long as "long" ), source (e.g. "default"), priority (e.g. 3) and index (0 - n).
-* Values can be counted by, name, source and priority (e.g. 3).
+  * Value collectors.
+    * Parameter "--", that will redirect every next token to a specified parameter(s).
+    * Parameter that collects values that are not bound with any parameter ("-i x y ...", where 'x' is bound with '-i' but 'y' is not).
+    * Parameter that collects all unknown parameters ("-plah plah", where '-plah' is collected and 'plah' is unknown token).
+    * Individual collector count limiters (e.g. no more than 5 values).
+* Values can be filtered by, name (e.g. -i as 'i' and  --long as 'long' ), source (e.g. 'default'), priority (e.g. 3) and index (0 - n).
+* Values can be counted by name, source and priority (e.g. 3).
 * Values can be filtered as the last or the first with the highest or the lowest priority.
 * Values can be counted as the highest or the lowest priority.
 * Parameter default name that is shown in error messages (print name) can be replaced with custom string (constant or generated).
-* Auto-generated typo suggestions (e.g. Did You mean "--long" instead of "--song"?).
+* Auto-generated typo suggestions (e.g. Did You mean '--long' instead of '--song'?).
 * Auto-generated unknown parameter error messages.
 * Abstract format and content check functionality with auto-generated error messages.
 * Abstract parameter transformation or repair functionality.
-* Abstract Wildcard expander (can be used to make -i * work on Windows).
+* Abstract Wildcard expander (can be used to make '-i *' work on Windows).
   * Implemented wildcards for Windows file system.
 * Abstract object parsing functionality (e.g. extract double or file).
 * Multiple parameter sets can be merged.
@@ -114,6 +117,7 @@ int main(int argc, char** argv, char **envp) {
 	TASK_SET *task_set = NULL;
 	TASK *pTask = NULL;
 	char buf[1024];
+	char debug[0xffff];
 
 
 	/**
@@ -130,6 +134,13 @@ int main(int argc, char** argv, char **envp) {
 	PARAM_SET_setParseOptions(set, "o", PST_PRSCMD_HAS_VALUE);
 	PARAM_SET_setParseOptions(set, "dump,debug,h,r", PST_PRSCMD_HAS_NO_VALUE);
 
+	/* Document options. */
+	PARAM_SET_setHelpText(set, "i", "File input. To specify multiple input files, use -i multiple times or use wildcards.");
+	PARAM_SET_setHelpText(set, "o", "Output file.");
+	PARAM_SET_setHelpText(set, "r", "Reverse file.");
+	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
+	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
+
 	/**
 	 * To enable Windows file system wildcards, specify the wildcard expander
 	 * function implementation and enable parsing option that enable wildcard
@@ -145,13 +156,15 @@ int main(int argc, char** argv, char **envp) {
 	/**
 	 * Describe different tasks:
 	 * util -h
-	 * util -i file_in --dump [-o file_out]
+	 * util -i file_in --dump
 	 * util -i file_in -o file_out -r
+	 * util --debug [options, except -h]
 	 */
 	TASK_SET_new(&task_set);
-	TASK_SET_add(task_set, 0, "Help", "h", NULL, NULL, NULL);
-	TASK_SET_add(task_set, 1, "Dump file", "i,dump", NULL, "h,r", NULL);
-	TASK_SET_add(task_set, 2, "Reverse file", "i,r,o", NULL, "h,dump", NULL);
+	TASK_SET_add(task_set, 0, "Help",			"h",		NULL, NULL,			NULL);
+	TASK_SET_add(task_set, 1, "Only Dump file",	"i,dump",	NULL, "h,r,o,debug",NULL);
+	TASK_SET_add(task_set, 2, "Reverse file",	"i,r,o",	NULL, "h,debug",	NULL);
+	TASK_SET_add(task_set, 3, "Debug",			"debug",	NULL, "h",			NULL);
 
 	/* Parse command-line. */
 	PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
@@ -190,7 +203,10 @@ int main(int argc, char** argv, char **envp) {
 	/* Task is extracted, check which one to run. */
 	switch(TASK_getID(pTask)) {
 		case 0:
-			printf("Print help.\n");
+			printf(	"Usage:\n"
+					"  util -i file [-r -o file][--dump]\n"
+					"  util --debug\n\n");
+			printf(	"Options:\n%s", PARAM_SET_helpToString(set, "i,o,r,h,dump,debug", 2, 10, 80, buf, sizeof(buf)));
 		break;
 
 		case 1:
@@ -199,6 +215,10 @@ int main(int argc, char** argv, char **envp) {
 
 		case 2:
 			printf("Reverse File.\n");
+		break;
+
+		case 3:
+			printf("Debug information:\n%s\n", PARAM_SET_toString(set, debug, sizeof(debug)));
 		break;
 
 		default:
@@ -231,7 +251,7 @@ int isContentOk_path(const char* fname) {
 	int result = 1;
 	FILE *f = NULL;
 	f = fopen(fname, "r");
-	result = f == NULL ? VALUE_FILE_DOES_NOT_EXIST : VALUE_OK;
+	result = f == NULL ? VALUE_FILE_DOES_NOT_EXIST : 0;
 	if (f != NULL) fclose(f);
 	return result;
 }
