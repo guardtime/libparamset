@@ -6,7 +6,7 @@ The libparamset provides the following functionality:
 * Short and long parameters ("-a" and "--long").
 * Concatenating of flags with length 1 ("-ab" instead of "-a -b").
 * One alias for the parameter name (e.g. "--load" and "-l").
-* Individual parsing options for parameters ([PARAM_PARSE_OPTIONS](@ref PARAM_PARSE_OPTIONS_enum)).
+* Individual parsing options for parameters.
   * Parameter with multiple coexisting values ("-a v1 -a v2 ... -a vn", where -a = {'v1', 'v2', ..., 'vn'}).
   * Parameter that never takes a value ("-a v1 -a -a", where -a = {NULL, NULL, NULL} and 'v1' is unknown token).
   * Parameter that always takes a value ("-a -a", where -a = {'-a'}).
@@ -16,10 +16,10 @@ The libparamset provides the following functionality:
   * Parameter that is hidden from the command-line but can be inserted from the code or configuration file.
   * Parameter that do not generate any typo errors (useful when hiding a parameter from command-line).
   * Value collectors.
-    * Parameter "--", that will redirect every next token to a specified parameter(s).
-    * Parameter that collects values that are not bound with any parameter ("-i x y ...", where 'x' is bound with '-i' but 'y' is not).
-    * Parameter that collects all unknown parameters ("-plah plah", where '-plah' is collected and 'plah' is unknown token).
-    * Individual collector count limiters (e.g. no more than 5 values).
+    - Parameter "--", that will redirect every next token to a specified parameter(s).
+    - Parameter that collects values that are not bound with any parameter ("-i x y ...", where 'x' is bound with '-i' but 'y' is not).
+    - Parameter that collects all unknown parameters ("-plah plah", where '-plah' is collected and 'plah' is unknown token).
+    - Individual collector count limiters (e.g. no more than 5 values).
 * Values can be filtered by, name (e.g. -i as 'i' and  --long as 'long' ), source (e.g. 'default'), priority (e.g. 3) and index (0 - n).
 * Values can be counted by name, source and priority (e.g. 3).
 * Values can be filtered as the last or the first with the highest or the lowest priority.
