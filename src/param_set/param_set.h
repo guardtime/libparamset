@@ -256,6 +256,10 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
  * \param	txt		Help text for a parameter. Value is copied. Must NOT be NULL.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_SET_setPrintName and #PARAM_SET_helpToString.
+ *
+ *
+ *
+ * 
  */
 int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
 
