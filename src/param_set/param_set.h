@@ -256,6 +256,10 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
  * \param	txt		Help text for a parameter. Value is copied. Must NOT be NULL.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_SET_setPrintName and #PARAM_SET_helpToString.
+ *
+ *
+ *
+ * 
  */
 int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
 
@@ -450,7 +454,7 @@ int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *sourc
  *
  * \param	set		#PARAM_SET object.
  * \param	names	Parameter name list.
- * \return \c 1 if is set, \c 0 otherwise.
+ * \return 1 if is set, 0 otherwise.
  */
 int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names);
 
@@ -461,14 +465,14 @@ int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names);
  *
  * \param	set		#PARAM_SET object.
  * \param	names	Parameter name list.
- * \return \c 1 if is at least one is set, \c 0 otherwise.
+ * \return 1 if is at least one is set, 0 otherwise.
  */
 int PARAM_SET_isOneOfSetByName(const PARAM_SET *set, const char *names);
 
 /**
  * Controls if the format and content of the parameters is OK.
  * \param	set		#PARAM_SET object.
- * \return \c 0 if format is invalid, \c 1 otherwise.
+ * \return 0 if format is invalid, 1 otherwise.
  * \see #PARAM_SET_addControl and #PARAM_SET_invalidParametersToString.
  */
 int PARAM_SET_isFormatOK(const PARAM_SET *set);
@@ -476,7 +480,7 @@ int PARAM_SET_isFormatOK(const PARAM_SET *set);
 /**
  * Controls if the the constraints are violated.
  * \param	set		#PARAM_SET object.
- * \return \c 0 if constraints are OK, \c 1 otherwise. <tt>-1</tt> if an error occurred.
+ * \return 0 if constraints are OK, 1 otherwise. <tt>-1</tt> if an error occurred.
  * \see #PARAM_SET_new.
  */
 int PARAM_SET_isConstraintViolation(const PARAM_SET *set);
@@ -507,7 +511,7 @@ int PARAM_SET_isConstraintViolation(const PARAM_SET *set);
  * \endcode
  *
  * \param	set		#PARAM_SET object.
- * \return \c 0 if set contains possible typos, \c 1 otherwise.
+ * \return 0 if set contains possible typos, 1 otherwise.
  * \see #PARAM_SET_typosToString, #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
  */
 int PARAM_SET_isTypoFailure(const PARAM_SET *set);
@@ -515,7 +519,7 @@ int PARAM_SET_isTypoFailure(const PARAM_SET *set);
 /**
  * Controls if there are some syntax errors after reading configuration file.
  * \param	set		#PARAM_SET object.
- * \return \c 0 if set contains possible typos, \c 1 otherwise.
+ * \return 0 if set contains possible typos, 1 otherwise.
  * \see #PARAM_SET_readFromFile.
  */
 int PARAM_SET_isSyntaxError(const PARAM_SET *set);
@@ -523,7 +527,7 @@ int PARAM_SET_isSyntaxError(const PARAM_SET *set);
 /**
  * Controls if there are some undefined parameters read from command-line or file.
  * \param	set		#PARAM_SET object.
- * \return \c 0 if set contains unknown parameters, \c 1 otherwise.
+ * \return 0 if set contains unknown parameters, 1 otherwise.
  * \see #PARAM_SET_unknownsToString, #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
  */
 int PARAM_SET_isUnknown(const PARAM_SET *set);
@@ -758,9 +762,9 @@ int parse_key_value_pair(const char *line, char *key, char *value, size_t buf_le
  * \param	file		A file pointer that is us used for reading from.
  * \param	buf			A buffer to store the line.
  * \param	len			Size of the buffer.
- * \param	row_pointer	Pointer to the row counting value. Initial value pointed to must be \c 0. If not used can be \c NULL.
+ * \param	row_pointer	Pointer to the row counting value. Initial value pointed to must be 0. If not used can be \c NULL.
  * \param	read_count	Pointer to character counting value. If not used can be \c NULL.
- * \return Return \c 0 if successful, \c EOF if end of file.
+ * \return Return 0 if successful, \c EOF if end of file.
  */
 int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *read_count);
 

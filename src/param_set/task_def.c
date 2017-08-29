@@ -111,10 +111,10 @@ static int task_definition_getAtLeastOneSetMetrica(TASK_DEFINITION *def, PARAM_S
 	return PST_OK;
 }
 
-static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **new){
+static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **newObj){
 	TASK *tmp = NULL;
 
-	if (new == NULL) return PST_INVALID_ARGUMENT;
+	if (newObj == NULL) return PST_INVALID_ARGUMENT;
 
 	tmp = (TASK*)malloc(sizeof(TASK));
 	if (tmp == NULL) return PST_OUT_OF_MEMORY;
@@ -123,7 +123,7 @@ static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **new){
 	tmp->id = pDef->id;
 	tmp->set = pSet;
 
-	*new = tmp;
+	*newObj = tmp;
 	return PST_OK;
 }
 
@@ -147,12 +147,12 @@ PARAM_SET *TASK_getSet(TASK *task) {
 	else return task->set;
 }
 
-int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore, TASK_DEFINITION **new) {
+int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore, TASK_DEFINITION **newObj) {
 	int res;
 	TASK_DEFINITION *tmp = NULL;
 	char buf[1024];
 
-	if (name == NULL || man == NULL || new == NULL) {
+	if (name == NULL || man == NULL || newObj == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
@@ -205,7 +205,7 @@ int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *a
 		if (res != PST_OK) goto cleanup;
 	}
 
-	*new = tmp;
+	*newObj = tmp;
 	tmp = NULL;
 	res = PST_OK;
 
@@ -533,12 +533,12 @@ char* TASK_DEFINITION_ignoredParametersToString(TASK_DEFINITION *def, PARAM_SET 
 }
 
 
-int TASK_SET_new(TASK_SET **new) {
+int TASK_SET_new(TASK_SET **newObj) {
 	int res;
 	TASK_SET *tmp = NULL;
 	int i;
 
-	if (new == NULL) {
+	if (newObj == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
@@ -563,7 +563,7 @@ int TASK_SET_new(TASK_SET **new) {
 	}
 
 
-	*new = tmp;
+	*newObj = tmp;
 	tmp = NULL;
 	res = PST_OK;
 

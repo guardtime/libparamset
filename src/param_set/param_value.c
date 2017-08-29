@@ -71,13 +71,13 @@ cleanup:
 	return res;
 }
 
-int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL **new) {
+int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL **newObj) {
 	int res;
 	PARAM_VAL *tmp = NULL;
 	char *tmp_value = NULL;
 	char *tmp_source = NULL;
 
-	if (new == NULL) {
+	if (newObj == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
@@ -130,11 +130,11 @@ int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL
 	 * If receiving pointer is NULL, initialize it. If receiving pointer is not
 	 * NULL iterate through linked list and append the value to the end.
 	 */
-	if (*new == NULL) {
-		tmp->previous = *new;
-		*new = tmp;
+	if (*newObj == NULL) {
+		tmp->previous = *newObj;
+		*newObj = tmp;
 	} else {
-		PARAM_VAL *current = *new;
+		PARAM_VAL *current = *newObj;
 
 		res = PARAM_VAL_insert(current, NULL, PST_PRIORITY_NONE, PST_INDEX_LAST, tmp);
 		if (res != PST_OK) goto cleanup;

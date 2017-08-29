@@ -86,11 +86,11 @@ enum PST_INDEX_enum {
  * \param value		Value as c-string. Can be \c NULL.
  * \param source	Describes the source e.g. file name or environment variable. Can be \c NULL.
  * \param priority	Priority of the parameter, must be positive.
- * \param new		Pointer to receiving pointer or pointer to existing value.
+ * \param newObj	Pointer to receiving pointer or pointer to existing value.
  * \return #PST_OK when successful, error code otherwise.
  * \note The root value must be freed by calling #PARAM_VAL_free.
  */
-int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL **new);
+int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL **newObj);
 
 /**
  * Extracts element from \c target list (see #PARAM_VAL_getElement) and

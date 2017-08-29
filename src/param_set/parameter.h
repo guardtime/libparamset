@@ -433,7 +433,7 @@ void PARAM_free(PARAM *param);
  * the first parameters as c-string value (must not fail if is \c NULL). All the
  * functions are applied when adding the value to the #PARAM object.
  *
- * Function \c controlFormat is to check the format. Return \c 0 if format is ok,
+ * Function \c controlFormat is to check the format. Return 0 if format is ok,
  * error code otherwise.
  *
  * <tt>int (*controlFormat)(const char *str)</tt>

@@ -950,7 +950,7 @@ static int param_set_set_print_name(PARAM_SET *set, const char *names,
 	const char *pName = NULL;
 	char buf[1024];
 
-	if (set == NULL || names == NULL || (constv == NULL && getPrintName == NULL) || (constv != NULL && getPrintName != NULL)) return PST_INVALID_ARGUMENT;
+	if (set == NULL || names == NULL || param_setPrintName == NULL || (constv == NULL && getPrintName == NULL) || (constv != NULL && getPrintName != NULL)) return PST_INVALID_ARGUMENT;
 
 	pName = names;
 	while ((pName = extract_next_name(pName, isValidNameChar, buf, sizeof(buf), NULL)) != NULL) {
@@ -1247,7 +1247,7 @@ static int param_set_get_print_name(PARAM_SET *set, const char *name, const char
 	PARAM *param = NULL;
 	const char *tmp = NULL;
 
-	if (set == NULL || name == NULL) {
+	if (set == NULL || name == NULL || print_name == NULL || param_get_print_name == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
@@ -1718,12 +1718,12 @@ static void COLLECTORS_free(COLLECTORS *obj) {
 	free(obj);
 }
 
-static int COLLECTORS_new(PARAM_SET *set, COLLECTORS **new) {
+static int COLLECTORS_new(PARAM_SET *set, COLLECTORS **newObj) {
 	int res = PST_UNKNOWN_ERROR;
 	int i = 0;
 	COLLECTORS *tmp = NULL;
 
-	if (set == NULL || new == NULL) {
+	if (set == NULL || newObj == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
@@ -1770,7 +1770,7 @@ static int COLLECTORS_new(PARAM_SET *set, COLLECTORS **new) {
 	}
 
 
-	*new = tmp;
+	*newObj = tmp;
 	tmp = NULL;
 	res = PST_OK;
 
