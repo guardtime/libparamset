@@ -9,7 +9,7 @@ The libparamset provides the following functionality:
 * Parameters can be parsed from command-line, read from configuration file or inserted from the code.
 * Short and long parameters ("-a" and "--long").
 * Concatenating of flags with length 1 ("-ab" instead of "-a -b").
-* One alias for the parameter name (e.g. "--load" and "-l").
+* One alias for the parameter name (e.g. "--load" and "-l" or "--version" and "--VERSION").
 * Individual parsing options for parameters ([PARAM_PARSE_OPTIONS](@ref PARAM_PARSE_OPTIONS_enum)).
   * Parameter with multiple coexisting values ("-a v1 -a v2 ... -a vn", where -a = {'v1', 'v2', ..., 'vn'}).
   * Parameter that never takes a value ("-a v1 -a -a", where -a = {NULL, NULL, NULL} and 'v1' is unknown token).

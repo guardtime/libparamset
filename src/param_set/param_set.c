@@ -657,8 +657,6 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 			if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) {
 				goto cleanup;
 			}
-
-			res = PST_OK;
 		} else {
 			char str_flg[2] = {255,0};
 			int itr = 0;
@@ -682,8 +680,6 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 					if (res != PST_OK && res != PST_PARAMETER_IS_UNKNOWN && res != PST_PARAMETER_IS_TYPO) {
 						goto cleanup;
 					}
-
-					res = PST_OK;
 				}
 			} else {
 				res = param_set_add_typo_or_unknown(set, typo_list, source, flag, NULL);
@@ -1557,12 +1553,10 @@ int PARAM_SET_readFromFile(PARAM_SET *set, const char *fname, const char* source
 			PST_snprintf(buf, sizeof(buf), "Syntax error at line %4i. Unknown character. '%.60s'.\n", line_nr, line);
 			PARAM_addValue(set->syntax, buf, source, priority);
 			error_count++;
-			res = PST_OK;
 		} else if (flag[0] != '-' && flag[0] != '\0') {
 			PST_snprintf(buf, sizeof(buf) , "Syntax error at line %4i. Missing character '-'. '%.60s'.\n", line_nr, line);
 			PARAM_addValue(set->syntax, buf, source, priority);
 			error_count++;
-			res = PST_OK;
 		} else if (res != PST_OK) {
 			goto cleanup;
 		}
@@ -1690,8 +1684,6 @@ static int get_parameter_from_token(PARAM_SET *set, const char *token, int *toke
 	return PST_OK;
 }
 
-
-static void print_nothing(const char* format, ...) {(void)(format);}
 
 typedef struct COL_REC_st {
 	PARAM *parameter;

@@ -609,7 +609,7 @@ char* PARAM_constraintErrorToString(PARAM *param, const char *prefix, char *buf,
 	}
 
 	if (constraints & PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) {
-		count += param_add_constraint_error_to_buf(param, "Duplicate parameters in priority levels ", prefix, buf + count, buf_len - count);
+		param_add_constraint_error_to_buf(param, "Duplicate parameters in priority levels ", prefix, buf + count, buf_len - count);
 	}
 
 	return buf;
@@ -731,12 +731,11 @@ cleanup:
 
 char* PARAM_toString(const PARAM *param, char *buf, size_t buf_len)  {
 	char sub_buf[2048];
-	size_t count = 0;
 
 	if (param == NULL || buf == NULL || buf_len == 0) return 0;
 
 
-	count += PST_snprintf(buf + count, buf_len - count, "%s(%i)->%s", param->flagName, param->argCount,
+	PST_snprintf(buf, buf_len, "%s(%i)->%s", param->flagName, param->argCount,
 			PARAM_VAL_toString(param->arg, sub_buf, sizeof(sub_buf)));
 
 	return buf;

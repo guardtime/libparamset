@@ -222,7 +222,6 @@ size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int
 		size_t word_len = 0;
 		char wordBuffer[1024];
 
-		c = 0;
 		word_len = getWord(wordBuffer, sizeof(wordBuffer), next, &next);
 		if (next == NULL) break;
 

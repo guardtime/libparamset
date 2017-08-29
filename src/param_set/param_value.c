@@ -160,7 +160,6 @@ void PARAM_VAL_free(PARAM_VAL *rootValue) {
 
 	if (rootValue == NULL) return;
 
-	to_be_freed = rootValue;
 	next = rootValue;
 
 	do {
@@ -555,7 +554,7 @@ int ITERATOR_set(ITERATOR *itr, PARAM_VAL *new_root, const char* source, int pri
 
 cleanup:
 
-	return PST_OK;
+	return res;
 }
 
 int ITERATOR_new(PARAM_VAL *root, ITERATOR **itr) {

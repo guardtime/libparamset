@@ -413,7 +413,7 @@ char* TASK_DEFINITION_toString(TASK_DEFINITION *def, char *buf, size_t buf_len) 
 			round++;
 		}
 
-		count += PST_snprintf(buf + count, buf_len - count, ")");
+		PST_snprintf(buf + count, buf_len - count, ")");
 	}
 
 	return buf;
@@ -493,7 +493,7 @@ char *TASK_DEFINITION_howToRepair_toString(TASK_DEFINITION *def, PARAM_SET *set,
 			}
 		}
 	}
-	if (err_printed) count += PST_snprintf(buf + count, buf_len - count, ".\n");
+	if (err_printed) PST_snprintf(buf + count, buf_len - count, ".\n");
 
 	return buf;
 }
@@ -527,7 +527,7 @@ char* TASK_DEFINITION_ignoredParametersToString(TASK_DEFINITION *def, PARAM_SET 
 		}
 	}
 
-	if (err_printed) count += PST_snprintf(buf + count, buf_len - count, ".\n");
+	if (err_printed) PST_snprintf(buf + count, buf_len - count, ".\n");
 
 	return buf;
 }
