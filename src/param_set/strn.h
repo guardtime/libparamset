@@ -101,9 +101,9 @@ char *PST_strncpy (char *destination, const char *source, size_t n);
  *
  * \param buf			Pointer to buffer.
  * \param buf_len		The size of the buffer.
- * \param indent		The size of regular indention. Can be \c 0.
- * \param nxtLnIndnt	The amount of extra indention beginning from the next line. Can be \c 0.
- * \param headerLen		The size of the header. Can be \c 0.
+ * \param indent		The size of regular indention. Can be 0.
+ * \param nxtLnIndnt	The amount of extra indention beginning from the next line. Can be 0.
+ * \param headerLen		The size of the header. Can be 0.
  * \param rowLen		The overall size of the line.
  * \param paramName		Parameter name used to compose header.
  * \param delimiter		Delimiter character used for delimiter that separates parameter name from description.

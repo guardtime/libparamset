@@ -41,10 +41,10 @@ typedef struct TASK_st TASK;
 
 /**
  * Create an empty #TASK_SET object.
- * \param new	Pointer to receiving pointer to #TASK_SET object.
+ * \param newObj	Pointer to receiving pointer to #TASK_SET object.
  * \return #PST_OK if successful, error code otherwise.
  */
-int TASK_SET_new(TASK_SET **new);
+int TASK_SET_new(TASK_SET **newObj);
 
 /**
  * Function to free #TASK_SET object.

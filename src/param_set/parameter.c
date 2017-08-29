@@ -107,6 +107,7 @@ cleanup:
 
 static int wrapper_returnStr(void **extra, const char* str, void** obj){
 	VARIABLE_IS_NOT_USED(extra);
+	if (obj == NULL) return PST_INVALID_ARGUMENT;
 	*obj = (void*)str;
 	return PST_OK;
 }
