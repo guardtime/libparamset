@@ -256,10 +256,6 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
  * \param	txt		Help text for a parameter. Value is copied. Must NOT be NULL.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_SET_setPrintName and #PARAM_SET_helpToString.
- *
- *
- *
- * 
  */
 int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
 
@@ -268,12 +264,12 @@ int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
  * can be generated it must be configured for all the parameters with function
  * #PARAM_SET_setHelpText. The way the parameter is represented can be modified
  * with #PARAM_SET_setPrintName function.
- * \param	set		#PARAM_SET object.
- * \param	names	List of names to generate help for.
- * \param	indent	Help text indention.
- * \param	header	The size of the header (All the text and space before "parameter" in "  -a - parameter A.").
- * \param	rowWith	The size of the row.
- * \param	buf		Buffer.
+ * \param	set			#PARAM_SET object.
+ * \param	names		List of names to generate help for.
+ * \param	indent		Help text indention.
+ * \param	header		The size of the header (All the text and space before "parameter" in "  -a - parameter A.").
+ * \param	rowWidth	The size of the row.
+ * \param	buf			Buffer.
  * \param	buf_len	The size of \c buf.
  * \return Returns \c buf if successful, NULL otherwise.
  */

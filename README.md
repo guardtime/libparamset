@@ -34,7 +34,7 @@ The libparamset provides the following functionality:
 * Abstract object parsing functionality (e.g. extract double or file).
 * Multiple parameter sets can be merged.
 * Task set, composed of multiple tasks, where from a task can be extracted by specified parameter set.
-* Auto-generated suggestions between multiple tasks for the user when it is not impossible to resolve which task the user wants to perform.
+* Auto-generated suggestions between multiple tasks for the user when it is not possible to resolve which task the user wants to perform.
 * Auto-generated suggestions how to fix the task user tries to perform.
 * Parameters can be bound with description and formatted to human readable list for help text.
 
@@ -65,7 +65,7 @@ If the latest version is needed or the package is not available for the platform
 
 ## Usage ##
 
-### Workflow ##
+### Workflow ###
 
 - Include param_set.h and task_def.h.
 - Configure parameters.
@@ -95,11 +95,60 @@ If the latest version is needed or the package is not available for the platform
 - Release object with TASK_SET_free and PARAM_SET_free.
 
 
-### Code example ##
-A simple example of a command-line tool that uses libparamset to specife parameter set and task set, read the command-line, handle errors and gives user some feedback to help get things working.
+### Code examples ###
+
+Example 1:
+A really basic example that illustrates just how to parse the command-line options without any error handling and do the task. See example 2 for more advanced use case.
 ```C
 #include <stdio.h>
-#include <string.h>
+#include <param_set/param_set.h>
+
+
+int main(int argc, char** argv) {
+	PARAM_SET *set = NULL;
+	char buf[0xffff];
+
+	/* Create new param_set object. */
+	PARAM_SET_new("{i}{o}{dump}{debug}{r}{help|h}", &set);
+
+	/* Parse command-line. */
+	PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+
+	/* Document options. */
+	PARAM_SET_setHelpText(set, "i", "File input. To specify multiple input files, use -i multiple times.");
+	PARAM_SET_setHelpText(set, "o", "Output file.");
+	PARAM_SET_setHelpText(set, "r", "Reverse file.");
+	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
+	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
+	PARAM_SET_setHelpText(set, "debug", "Print param_setobject.");
+
+	/*
+	 * See PARAM_SET_isSetByName, PARAM_SET_isOneOfSetByName, PARAM_SET_getStr,
+	 * PARAM_SET_getValueCount and PARAM_SET_getObj to work with parameters.
+	 */
+	if (PARAM_SET_isSetByName(set, "h")) {
+		printf( "Usage:\n"
+					"  util -i file [-r -o file][--dump]\n"
+					"  util --debug\n\n");
+		printf( "Options:\n%s", PARAM_SET_helpToString(set, "i,o,r,h,dump,debug", 2, 10, 80, buf, sizeof(buf)));
+	} else if (PARAM_SET_isSetByName(set, "i,dump") && !PARAM_SET_isSetByName(set, "r,o,debug")) {
+		printf("Dump File.\n");
+	} else if (PARAM_SET_isSetByName(set, "i,r,o") && !PARAM_SET_isSetByName(set, "debug")) {
+		printf("Reverse File.\n");
+	} else if (PARAM_SET_isSetByName(set, "debug")) {
+		printf("Debug information:\n%s\n", PARAM_SET_toString(set, buf, sizeof(buf)));
+	} else {
+		printf("Unknown task. Use -h to get some help.\n");
+	}
+
+	PARAM_SET_free(set);
+}
+```
+
+Example 2:
+A simple example of a command-line tool that uses libparamset to specify parameter set and task set, parse the command-line, handle errors and gives user some feedback to help get things working.
+```C
+#include <stdio.h>
 #include <param_set/param_set.h>
 #include <param_set/task_def.h>
 
@@ -127,7 +176,7 @@ int main(int argc, char** argv, char **envp) {
 	char debug[0xffff];
 
 
-	/**
+	/*
 	 * Configure parameter set and its parameters.
 	 * 1) Both o and i must not be NULL or empty string.
 	 * 2) Both o and i converts '\' into '/'.
@@ -147,8 +196,9 @@ int main(int argc, char** argv, char **envp) {
 	PARAM_SET_setHelpText(set, "r", "Reverse file.");
 	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
 	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
+	PARAM_SET_setHelpText(set, "debug", "Print param_setobject.");
 
-	/**
+	/*
 	 * To enable Windows file system wildcards, specify the wildcard expander
 	 * function implementation and enable parsing option that enable wildcard
 	 * processor.
@@ -160,7 +210,7 @@ int main(int argc, char** argv, char **envp) {
 	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE);
 #endif
 
-	/**
+	/*
 	 * Describe different tasks:
 	 * util -h
 	 * util -i file_in --dump
@@ -207,7 +257,11 @@ int main(int argc, char** argv, char **envp) {
 		goto cleanup;
 	}
 
-	/* Task is extracted, check which one to run. */
+	/*
+	 * Task is extracted, check which one to run.
+	 * See PARAM_SET_isSetByName, PARAM_SET_isOneOfSetByName, PARAM_SET_getStr,
+	 * PARAM_SET_getValueCount and PARAM_SET_getObj to work with parameters.
+	 */
 	switch(TASK_getID(pTask)) {
 		case 0:
 			printf(	"Usage:\n"
@@ -280,6 +334,7 @@ int convertRepair_path(const char* arg, char* buf, unsigned len){
 }
 
 ```
+
 ## License ##
 
 See `LICENSE` file.
