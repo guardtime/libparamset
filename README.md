@@ -196,7 +196,7 @@ int main(int argc, char** argv, char **envp) {
 	PARAM_SET_setHelpText(set, "r", "Reverse file.");
 	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
 	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
-	PARAM_SET_setHelpText(set, "debug", "Print param_setobject.");
+	PARAM_SET_setHelpText(set, "debug", "Print param_set object.");
 
 	/*
 	 * To enable Windows file system wildcards, specify the wildcard expander
@@ -205,7 +205,7 @@ int main(int argc, char** argv, char **envp) {
 	 */
 #ifdef _WIN32
 	PARAM_SET_setWildcardExpander(set, "i", NULL, NULL, NULL, PST_WCF_Win32FileWildcard);
-	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE |  PST_PRSCMD_EXPAND_WILDCARD);
+	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_EXPAND_WILDCARD);
 #else
 	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE);
 #endif

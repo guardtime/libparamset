@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 	PARAM_SET_setHelpText(set, "r", "Reverse file.");
 	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
 	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
-	PARAM_SET_setHelpText(set, "debug", "Print param_setobject.");
+	PARAM_SET_setHelpText(set, "debug", "Print param_set object.");
 
 	/*
 	 * See PARAM_SET_isSetByName, PARAM_SET_isOneOfSetByName, PARAM_SET_getStr,

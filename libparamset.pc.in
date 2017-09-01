@@ -17,31 +17,13 @@
 # reserves and retains all trademark rights.
 #
 
-.PHONY: doc test
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
 
-AUTOMAKE_OPTIONS = foreign
-
-SUBDIRS = src/param_set test doc
-
-ZIPDOC_DIR = ${PACKAGE}-${VERSION}-htmldoc
-
-dist_doc_DATA = changelog LICENSE
-
-EXTRA_DIST = VERSION ABI_VERSION $(dist_doc_DATA) doc/doxyfile doc/mainpage.md
-
-
-test: check
-	./test/test test/resource
-
-# You'll need valgrind for this target.
-#
-# yum install valgrind
-memtest: check
-	valgrind --xml=yes --xml-file=valgrind.xml ./test/test test/resource
-
-doc: doc/doxyfile
-	$(MAKE) -C doc htmldoc
-
-doc-zip: doc
-	cp -r doc/html ${ZIPDOC_DIR}
-	zip -r ${ZIPDOC_DIR}.zip ${ZIPDOC_DIR}
+Name: @PACKAGE@
+Description: GuardTime KSI API
+Version: @VERSION@
+Libs: -L${libdir} -lparamset -lrt
+Cflags: -I${includedir}
