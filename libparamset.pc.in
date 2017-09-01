@@ -23,7 +23,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: @PACKAGE@
-Description: GuardTime KSI API
+Description: Command-line Parameter and Task handling library.
 Version: @VERSION@
 Libs: -L${libdir} -lparamset -lrt
 Cflags: -I${includedir}
