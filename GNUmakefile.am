@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2015 Guardtime, Inc.
+# Copyright 2013-2017 Guardtime, Inc.
 #
 # This file is part of the Guardtime client SDK.
 #
@@ -27,7 +27,7 @@ ZIPDOC_DIR = ${PACKAGE}-${VERSION}-htmldoc
 
 dist_doc_DATA = changelog LICENSE
 
-EXTRA_DIST = VERSION $(dist_doc_DATA) doc/doxyfile doc/mainpage.md
+EXTRA_DIST = VERSION ABI_VERSION $(dist_doc_DATA) doc/doxyfile doc/mainpage.md
 
 
 test: check
@@ -38,7 +38,7 @@ test: check
 # yum install valgrind
 memtest: check
 	valgrind --xml=yes --xml-file=valgrind.xml ./test/test test/resource
-	
+
 doc: doc/doxyfile
 	$(MAKE) -C doc htmldoc
 

@@ -1,6 +1,6 @@
 Version 1.0
 
-2017-07-x 1.0.0
+2017-09-x 1.0.0
 
 * IMPROVEMENT: (Interface) Abstract function extractObject extra parameter type changed from void* to void** (see PARAM_SET_addControl).
 * IMPROVEMENT: (Interface) Function convert interface, specified by PARAM_addControl and PARAM_SET_addControl, changed to return PST_OK when successful, error code otherwise.
@@ -21,6 +21,7 @@ Version 1.0
 * IMPROVEMENT: (Internal) Object ITERATOR is used internally only.
 * IMPROVEMENT: (Internal) Test folder moved from "src/test" to "test".
 * FEATURE: Help text can be generated and auto formatted.
+* FEATURE: Debian packaging implemented.
 * FEATURE: Windows file system wildcard implementation included to predefined wildcard expanders.
 * FEATURE: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
