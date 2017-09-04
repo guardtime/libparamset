@@ -1,6 +1,6 @@
 Version 1.0
 
-2017-09-x 1.0.0
+2017-09-4 1.0.187
 
 * IMPROVEMENT: (Interface) Abstract function extractObject extra parameter type changed from void* to void** (see PARAM_SET_addControl).
 * IMPROVEMENT: (Interface) Function convert interface, specified by PARAM_addControl and PARAM_SET_addControl, changed to return PST_OK when successful, error code otherwise.
