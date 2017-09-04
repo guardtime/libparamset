@@ -19,6 +19,7 @@ Version 1.0
 * IMPROVEMENT: (Internal) TASK_SET and TASK objects type definitions moved from param_set.h to task_def.h.
 * IMPROVEMENT: (Internal) Object TASK_DEFINITION is used internally only.
 * IMPROVEMENT: (Internal) Object ITERATOR is used internally only.
+* IMPROVEMENT: (Internal) Tests are run with resource folder "test" instead of  "test/resource".
 * IMPROVEMENT: (Internal) Test folder moved from "src/test" to "test".
 * FEATURE: Help text can be generated and auto formatted.
 * FEATURE: Debian packaging implemented.

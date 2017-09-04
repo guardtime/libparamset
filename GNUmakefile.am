@@ -31,13 +31,13 @@ EXTRA_DIST = VERSION ABI_VERSION $(dist_doc_DATA) doc/doxyfile doc/mainpage.md
 
 
 test: check
-	./test/test test/resource
+	./test/test test
 
 # You'll need valgrind for this target.
 #
 # yum install valgrind
 memtest: check
-	valgrind --xml=yes --xml-file=valgrind.xml ./test/test test/resource
+	valgrind --xml=yes --xml-file=valgrind.xml ./test/test test
 
 doc: doc/doxyfile
 	$(MAKE) -C doc htmldoc

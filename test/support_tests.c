@@ -61,7 +61,7 @@ static const char *projectRoot = NULL;
 static char pathBuffer[2048];
 
 const char *getFullResourcePath(const char* resource) {
-	snprintf(pathBuffer, sizeof(pathBuffer), "%s%c%s", projectRoot, DIR_SEP, resource);
+	snprintf(pathBuffer, sizeof(pathBuffer), "%s%cresource%c%s", projectRoot, DIR_SEP, DIR_SEP, resource);
 	return pathBuffer;
 }
 
