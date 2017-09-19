@@ -1,8 +1,13 @@
-*.sh eol=lf
-configure.ac eol=lf
-GNUmakefile.am eol=lf
-libparamset.spec.in eol=lf
-libparamset.spec eol=lf
-VERSION eol=lf
-changelog eol=lf
 changelog merge=union
+
+
+# Files that are text files. Line endings are normalized when pushed to
+# repository. Line endings in working tree are as specified.
+*.sh          text eol=lf
+*.ac          text eol=lf
+*.am          text eol=lf
+*.in          text eol=lf
+doxyfile      text eol=lf
+changelog     text eol=lf
+VERSION       text eol=lf
+ABI_VERSION   text eol=lf
