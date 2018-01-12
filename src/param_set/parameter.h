@@ -66,7 +66,7 @@ struct PARAM_ATR_st {
 	/** c-string value. */
 	char *cstr_value;
 
-	/** Optional c-string source description, e.g. file, environment. */
+	/** Optional C-string source description, e.g. file, environment. */
 	char *source;
 
 	/** Priority level constraint. */

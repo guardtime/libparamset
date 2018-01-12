@@ -39,13 +39,13 @@ enum PARAM_SET_ERR_enum {
 	/** Everything is OK! */
 	PST_OK = 0,
 
-	/** Function parameters are invalid - maybe \c NULL pointer or some value out of range. */
+	/** Function parameters are invalid, check for \c NULL pointers or out of range values. */
 	PST_INVALID_ARGUMENT = PARAM_SET_ERROR_BASE,
 
-	/** Input content or syntax is wrong (e.g. parsing command-line or configuration file). */
+	/** Input content or syntax is wrong (e.g. parsing command line or configuration file). */
 	PST_INVALID_FORMAT,
 
-	/** Indicates index out of boundaries. */
+	/** Index out of boundaries. */
 	PST_INDEX_OVF,
 
 	/** Parameter with the given name does not exist in the given set. */
@@ -57,7 +57,7 @@ enum PARAM_SET_ERR_enum {
 	/** The parameter value count is zero.*/
 	PST_PARAMETER_EMPTY,
 
-	/** Parameter added to the set is possible typo. */
+	/** Parameter added to the set is possibly a typo. */
 	PST_PARAMETER_IS_TYPO,
 
 	/** Parameter added to the set is unknown. */
@@ -87,7 +87,7 @@ enum PARAM_SET_ERR_enum {
 	/** It was not possible to extract a consistent task from the task set. */
 	PST_TASK_ZERO_CONSISTENT_TASKS,
 
-	/** There are two consistent tasks but only 1 is expected. */
+	/** There are two consistent tasks while only one is expected. */
 	PST_TASK_MULTIPLE_CONSISTENT_TASKS,
 
 	/** Task set is empty.*/
@@ -102,13 +102,13 @@ enum PARAM_SET_ERR_enum {
 	/** Wildcard processor error occurred. */
 	PST_WILDCARD_ERROR,
 
-	/** Undefined behaviour occurred. It may be a bug, some memory error. */
+	/** Undefined behaviour occurred (e.g. a bug, unrecognised memory error). */
 	PST_UNDEFINED_BEHAVIOUR,
 
 	/** Unable to set the combination of command-line parser options. */
 	PST_PRSCMD_INVALID_COMBINATION,
 
-	/** Parameter conversion is not performed. Original input must be used. (See #PARAM_addControl and #PARAM_SET_addControl). */
+	/** Parameter conversion is not performed, original input must be used. (See #PARAM_addControl and #PARAM_SET_addControl). */
 	PST_PARAM_CONVERT_NOT_PERFORMED,
 
 	/** Parameter alias is not specified and it is not possible to work with it. */
@@ -125,15 +125,14 @@ enum PARAM_SET_ERR_enum {
 typedef struct PARAM_SET_st PARAM_SET;
 
 /**
- * This function returns a pointer to a constant string describing the
+ * \return A constant pointer to a constant string describing the
  * version number of the package.
- * \return A constant pointer to a string.
  */
 const char *PST_getVersion(void);
 
 /**
  * Creates new #PARAM_SET object using parameter names.
- * Parameter names are defined using string <em>"{name|alias}*{name|alias}*..."</em> where
+ * Parameter names are defined using string <em>'{name|alias}*{name|alias}*...'</em> where
  *
  * \c name - parameter name,
  *
@@ -141,7 +140,7 @@ const char *PST_getVersion(void);
  *
  * \c '*' - can have multiple values.
  *
- * Exampl: <em>"{h|help}{file}*{o}*{n}"</em>.
+ * Example: <em>'{h|help}{file}*{o}*{n}'</em>.
  * \param	names	Pointer to parameter names.
  * \param	set		Pointer to receiving pointer to #PARAM_SET object.
  * \return #PST_OK if successful, error code otherwise.
@@ -149,14 +148,14 @@ const char *PST_getVersion(void);
 int PARAM_SET_new(const char *names, PARAM_SET **set);
 
 /**
- * Function to free #PARAM_SET.
+ * Frees the  #PARAM_SET.
  * \param	set	#PARAM_SET object.
  */
 void PARAM_SET_free(PARAM_SET *set);
 
 /**
  * Adds several optional functions to a set of parameters. Each function takes
- * one parameters as c-string value (must not fail if is \c NULL). All the
+ * one parameter as C-string value (must not fail if is \c NULL). All the
  * functions except \c extractObject are applied when adding the value to the
  * #PARAM_SET object. Function \c extractObject is applied when calling #PARAM_SET_getObj
  * or #PARAM_SET_getObjExtended.
@@ -171,7 +170,7 @@ void PARAM_SET_free(PARAM_SET *set);
  *
  * <tt>int (*controlContent)(const char *str)</tt>
  *
- * Function \c convert is used to repair / convert the c-string value before any
+ * Function \c convert is used to repair/convert the C-string value before any
  * content or format check is performed. Takes two extra parameters for buffer and its
  * size. Return #PST_OK if conversion is successful or #PST_PARAM_CONVERT_NOT_PERFORMED
  * to skip conversion. Any other error code will break adding the value.
@@ -180,14 +179,14 @@ void PARAM_SET_free(PARAM_SET *set);
  *
  * Function \c extractObject is used to extract an object from the parameter value.
  * Function \c extractObject affects #PARAM_SET_getObj and  #PARAM_SET_getObjExtended
- * behaviour. If not specified, the default function is used that extracts the
- * c-string value. Parameter \c extra is <tt>void**</tt> pointer to array with
+ * behavior. If not specified, the default function is used that extracts the
+ * C-string value. Parameter \c extra is <tt>void**</tt> pointer to array with
  * 2 elements, \c str is parameter value and \c obj is pointer to receiving pointer.
  * Calling #PARAM_SET_getObj both array elements in \c extra are pointing to #PARAM_SET
  * itself (<tt>void **extra = {set, set}</tt>), when calling #PARAM_SET_getObjExtended,
  * the second value is determined by the function call and \c extra parameter given
- * (<tt>void **extra = {set, extra}</tt>). If extracting of the object is successful
- * #PST_OK must be returned, error code otherwise.
+ * (<tt>void **extra = {set, extra}</tt>). If extracting of the object is successful,
+ * #PST_OK is returned, error code otherwise.
  *
  * <tt>int (*extractObject)(void **extra, const char *str, void **obj)</tt>
  *
@@ -201,7 +200,7 @@ void PARAM_SET_free(PARAM_SET *set);
  * \note Note that \c controlFormat and \c controlContent may return any error code
  * but \c convert function should return #PST_OK and #PST_PARAM_CONVERT_NOT_PERFORMED
  * as any other error code will break adding the simple value, parsing configuration
- * file or command-line.
+ * file or command line.
  * \see #PARAM_SET_setParseOptions, #PARAM_SET_setPrintName and #PARAM_SET_setWildcardExpander.
  * To get error reports related to functions \c controlFormat and \c controlContent,
  * see #PARAM_SET_isFormatOK and #PARAM_SET_invalidParametersToString.
@@ -213,24 +212,26 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
 		int (*extractObject)(void **, const char *, void**));
 
 /**
- * This function is used to alter the way the parameter is represented in (error)
+ * Alters the way the parameter is represented in (error)
  * messages, help text and returned by #PARAM_getPrintName.
  *
  * If \c constv is not \c NULL, a user specified constant value is used. If \c constv is
- * \c NULL an abstract function \c getPrintName must be specified that formats the string.
- * Default print format for long and short parameters are <em>'--long-option'</em> and <em>'-a'</em>.
+ * \c NULL, an abstract function \c getPrintName must be specified that formats the string.
+ * Default print format for long and short parameters are  \c '\-\-long' and \c '-a'</em>.
  *
  * <tt>const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)</tt>
  *
- * \c param   - this PARAM object.
- * \c buf     - Internal buffer with constant size. May be left unused.
- * \c buf_len - The size of the internal buffer.
- * Returns string that is the string representation of parameter.
+ * <ul>
+ * <li>\c param   - this PARAM object.</li>
+ * <li>\c buf     - Internal buffer with constant size. May be left unused.</li>
+ * <li>\c buf_len - The size of the internal buffer.</li>
+ * <li>Returns string that is the string representation of parameter.</li>
+ * </ul>
  *
  * \param	set				#PARAM_SET object.
  * \param	names			List of names to add the functions for.
- * \param	constv			Constant string representation of the parameter. Can be \c NULL.
- * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. Can be \c NULL.
+ * \param	constv			Constant string representation of the parameter, may be \c NULL.
+ * \param	getPrintName	Abstract function implementation. Has effect only when \c constv is \c NULL. May be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_SET_addControl, #PARAM_SET_setParseOptions and #PARAM_SET_setWildcardExpander.
  */
@@ -260,14 +261,15 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
 int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
 
 /**
- * This function is used to generate help text for parameters. Before any help text
+ * Generates help text for parameters. Before any help text
  * can be generated it must be configured for all the parameters with function
  * #PARAM_SET_setHelpText. The way the parameter is represented can be modified
  * with #PARAM_SET_setPrintName function.
+ *
  * \param	set			#PARAM_SET object.
  * \param	names		List of names to generate help for.
  * \param	indent		Help text indention.
- * \param	header		The size of the header (All the text and space before "parameter" in "  -a - parameter A.").
+ * \param	header		The size of the header (all the text and space before 'parameter' in '  -a - parameter A.').
  * \param	rowWidth	The size of the row.
  * \param	buf			Buffer.
  * \param	buf_len	The size of \c buf.
@@ -383,7 +385,7 @@ int PARAM_SET_getObjExtended(PARAM_SET *set, const char *name, const char *sourc
 int PARAM_SET_getAtr(PARAM_SET *set, const char *name, const char *source, int priority, int at, PARAM_ATR *atr);
 
 /**
- * This function extracts parameters print name that is also displayed in (error)
+ * Extracts parameter's print name that is also displayed in (error)
  * messages and help text.
  *
  * \param	set			#PARAM_SET object.
@@ -408,7 +410,7 @@ int PARAM_SET_getPrintNameAlias(PARAM_SET *set, const char *name, const char **p
 
 /**
  * Removes all values from the specified parameter list. Parameter list is defined
- * as <em>"p1,p2,p3 ..."</em>.
+ * as <em>'p1,p2,p3 ...'</em>.
  * \param set	#PARAM_SET object.
  * \param names	Parameter name list.
  * \return #PST_OK if successful, error code otherwise.
@@ -418,7 +420,7 @@ int PARAM_SET_clearParameter(PARAM_SET *set, const char *names);
 
 /**
  * Removes a value specified by the constraints from the specified parameter list.
- * Parameter list is defined as <em>"p1,p2,p3 ..."</em>.
+ * Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
  *
  * \param	set			#PARAM_SET object.
  * \param	names		Parameter name list.
@@ -431,7 +433,7 @@ int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, 
 
 /**
  * Counts all the existing parameter values in the list composed by the parameter
- * list and constraints specified. Parameter list is defined as <em>"p1,p2,p3 ..."</em>.
+ * list and constraints specified. Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
  *
  * \param	set			#PARAM_SET object.
  * \param	names		Parameter name list.
@@ -446,7 +448,7 @@ int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *sourc
 /**
  * Searches for a parameter defined in the list by name and checks <b>if all</b> the
  * parameters have at least one values set. Even if the value format or content is
- * invalid, true is returned. Parameter list is defined as <em>"p1,p2,p3 ..."</em>.
+ * invalid, true is returned. Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
  *
  * \param	set		#PARAM_SET object.
  * \param	names	Parameter name list.
@@ -457,7 +459,7 @@ int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names);
 /**
  * Searches for a parameter defined in the list by name and checks if <b>at least one</b>
  * of the parameters have at least on values set. Even if the value format or
- * content is invalid, true is returned. Parameter list is defined as <em>"p1,p2,p3 ..."</em>.
+ * content is invalid, true is returned. Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
  *
  * \param	set		#PARAM_SET object.
  * \param	names	Parameter name list.
@@ -482,7 +484,7 @@ int PARAM_SET_isFormatOK(const PARAM_SET *set);
 int PARAM_SET_isConstraintViolation(const PARAM_SET *set);
 
 /**
- * Controls if there are some undefined parameters read from command-line or
+ * Controls if there are some undefined parameters read from command line or
  * file, similar to the defined ones - possible typos. Typos are detected using
  * the \c difference value calculated as specified below:
  *
@@ -521,7 +523,7 @@ int PARAM_SET_isTypoFailure(const PARAM_SET *set);
 int PARAM_SET_isSyntaxError(const PARAM_SET *set);
 
 /**
- * Controls if there are some undefined parameters read from command-line or file.
+ * Controls if there are some undefined parameters read from command line or file.
  * \param	set		#PARAM_SET object.
  * \return 0 if set contains unknown parameters, 1 otherwise.
  * \see #PARAM_SET_unknownsToString, #PARAM_SET_add, #PARAM_SET_parseCMD and #PARAM_SET_readFromFile.
@@ -530,7 +532,7 @@ int PARAM_SET_isUnknown(const PARAM_SET *set);
 
 /**
  * Reads parameter values from file into predefined #PARAM_SET. File must be
- * formatted one parameter (and its possible value) per line. To add a comment "<tt>#</tt>"
+ * formatted one parameter (and its possible value) per line. To add a comment '<tt>#</tt>'
  * must be inserted at the beginning of the line. To learn how the key-value pairs
  * are precisely extracted see #parse_key_value_pair and #read_line.
  * Format of parameters:
@@ -581,11 +583,11 @@ int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *sou
 
 
 /**
- * This function is used to parse command-line parameters. It is similar to
+ * Parses command-line parameters. It is similar to
  * #PARAM_SET_readFromCMD but extends its functionality. For example it is possible
  * to have a parameter that always interprets the next token as its value, even
  * if it is identical to some command-line parameter. To redirect all tokens after
- * "--" to specified parameter or process some parameters with configured wildcard
+ * '\-\-' to specified parameter or process some parameters with configured wildcard
  * expander see #PARAM_SET_setParseOptions;
  *
  * to specify parse option for each command line parameter.
@@ -608,7 +610,7 @@ int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *sou
 int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source, int priority);
 
 /**
- * This function is used to specify parsing options ([PARAM_PARSE_OPTIONS](@ref PARAM_PARSE_OPTIONS_enum)) used
+ * Specifies the parsing options ([PARAM_PARSE_OPTIONS](@ref PARAM_PARSE_OPTIONS_enum)) used
  * by #PARAM_SET_parseCMD.
  *
  * \param set			#PARAM_SET object.
@@ -633,7 +635,7 @@ int PARAM_SET_setParseOptions(PARAM_SET *set, const char *names, int options);
 int PARAM_SET_IncludeSet(PARAM_SET *target, PARAM_SET *src);
 
 /**
- * A debug function to generate #PARAM_SET string representation.
+ * Generates #PARAM_SET string representation for debugging.
  * \param	set		#PARAM_SET object.
  * \param	buf		Receiving buffer.
  * \param	buf_len	Receiving buffer size.
@@ -708,10 +710,8 @@ const char* PARAM_SET_errorToString(int err);
 char* PARAM_SET_syntaxErrorsToString(const PARAM_SET *set, const char *prefix, char *buf, size_t buf_len);
 
 /**
- * Function that can be used to separate names from string. A function \c isValidNameChar
- * must be defined to separate valid name characters from all kind of separators.
- * Function returns a pointer inside \c name_string that can be used in next iteration
- * to extract next name.
+ * Separates names from a string. A function \c isValidNameChar
+ * must be defined to separate valid name characters from the separators.
  *
  * \param	name_string		A string full of names that are separated from each other.
  * \param	isValidNameChar	Function that defines valid name characters.
@@ -724,7 +724,7 @@ char* PARAM_SET_syntaxErrorsToString(const PARAM_SET *set, const char *prefix, c
 const char* extract_next_name(const char* name_string, int (*isValidNameChar)(int), char *buf, short len, int *flags);
 
 /**
- * Extract a key value pair from the line. Value part can be wrapped inside
+ * Extracts a key value pair from the line. Value part can be wrapped inside
  * double quote marks (<em>"</em>) to include whitespace characters. Use back slash
  * (<em>\\</em>) as escape character for itself and for double quotes. Some examples:
  *
@@ -748,7 +748,7 @@ const char* extract_next_name(const char* name_string, int (*isValidNameChar)(in
 int parse_key_value_pair(const char *line, char *key, char *value, size_t buf_len);
 
 /**
- * Read a line from a file (opened with \c fopen in mode \c r) ant track the lines.
+ * Reads a line from a file (opened with \c fopen in mode \c r) and tracks the lines.
  * Supported line endings:
  * \code{.txt}
  * MAC  \r      CR      0x0d
@@ -766,23 +766,24 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
 
 
 /**
- * Specify a function to expand tokens that contain wildcard character (<tt>WC</tt>)
+ * Specifies a function to expand tokens that contain wildcard character (<tt>WC</tt>)
  * to array of new values. By default characters '<tt>?</tt>' and '<tt>*</tt>' are \c WC.
  * Values containing \c WC are removed and replaced with the expanded values. To
  * use default \c WC set \c charList as <tt>NULL</tt>.
  *
  * <tt>int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)</tt>
  *
- * \c param_value - The value of the current parameter that contains <tt>WC</tt>.
- * \c ctx - Additional data structure (same object as #PARAM_SET_setWildcardExpander input parameter <tt>ctx</tt>.
- * \c value_shift - Output parameter for the count of values expanded.
- *
+ * <ul>
+ * <li>\c param_value - The value of the current parameter that contains <tt>WC</tt>.</li>
+ * <li>\c ctx - Additional data structure (same object as #PARAM_SET_setWildcardExpander input parameter <tt>ctx</tt>).</li>
+ * <li>\c value_shift - Output parameter for the count of values expanded.</li>
+ * </ul>
  *
  * \param	set				#PARAM_SET object.
  * \param	names			List of names to add the functionality.
- * \param	charList		List of wildcard characters used. When set to \c NULL \"<tt>*?</tt>\" is used.
- * \param	ctx				Data structure used by Wildcard expander. Can be \c NULL.
- * \param	ctx_free		Data structure release function. Can be \c NULL.
+ * \param	charList		List of wildcard characters used. When set to \c NULL, '<tt>*?</tt>' is used.
+ * \param	ctx				Data structure used by Wildcard expander, can be \c NULL.
+ * \param	ctx_free		Data structure release function, can be \c NULL.
  * \param	expand_wildcard	Function pointer to Wildcard Expander function.
  * \return #PST_OK if successful, error code otherwise.
  * \note #PARAM_SET_parseCMD must be used and parsing option #PST_PRSCMD_EXPAND_WILDCARD
@@ -801,4 +802,3 @@ int PARAM_SET_setWildcardExpander(PARAM_SET *set, const char *names,
 #endif
 
 #endif
-
