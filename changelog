@@ -28,6 +28,7 @@ Version 1.0
 * FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
 * FEATURE: Doxygen documentation added.
 * BUGFIX: Small mathematical correction applied for typo detection (has fractional effect in typo detection).
+* BUGFIX: Seemingly random segemntation fault fixed in support_test.c.
 
 2016-11-30 0.2.0 - First code in repository that is never packaged. Code was copied and included as source files.
 
