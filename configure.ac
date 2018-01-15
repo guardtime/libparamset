@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2017 Guardtime, Inc.
+# Copyright 2013-2018 Guardtime, Inc.
 #
 # This file is part of the Guardtime client SDK.
 #
@@ -68,5 +68,5 @@ AC_SUBST(VER_MINOR)
 AC_SUBST(VER_BUILD)
 AC_CONFIG_FILES([src/param_set/version.h])
 
-AC_CONFIG_FILES([GNUmakefile src/param_set/GNUmakefile test/GNUmakefile packaging/redhat/libparamset.spec doc/GNUmakefile packaging/deb/libparamset/DEBIAN/control packaging/deb/libparamset/DEBIAN/control-devel packaging/deb/libparamset/DEBIAN/control-source libparamset.pc])
+AC_CONFIG_FILES([GNUmakefile src/param_set/GNUmakefile test/GNUmakefile packaging/redhat/libparamset.spec doc/GNUmakefile packaging/deb/control packaging/deb/rules libparamset.pc])
 AC_OUTPUT

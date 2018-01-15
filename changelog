@@ -21,6 +21,7 @@ Version 1.0
 * IMPROVEMENT: (Internal) Object ITERATOR is used internally only.
 * IMPROVEMENT: (Internal) Tests are run with resource folder "test" instead of  "test/resource".
 * IMPROVEMENT: (Internal) Test folder moved from "src/test" to "test".
+* IMPROVEMENT: DEB packaging implemented.
 * FEATURE: Help text can be generated and auto formatted.
 * FEATURE: Debian packaging implemented.
 * FEATURE: Windows file system wildcard implementation included to predefined wildcard expanders.
