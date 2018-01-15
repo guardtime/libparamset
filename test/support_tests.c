@@ -75,7 +75,7 @@ static void escapeStr(const char *str, CuString *escaped) {
 	static const char *repl[] = { "lt", "gt", "amp", "quot", "#39"};
 	while (*str) {
 		/* Find the index of current char. */
-		p = (long long int)(strchr(replIndex, *str) - (int64_t)replIndex);
+		p = (long long int)(strchr(replIndex, *str) - replIndex);
 		/* If the character is found, use the replacement */
 		if (p >= 0) {
 			CuStringAppendFormat(escaped, "&%s", repl[p]);
