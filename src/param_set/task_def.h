@@ -40,35 +40,35 @@ typedef struct TASK_SET_st TASK_SET;
 typedef struct TASK_st TASK;
 
 /**
- * Create an empty #TASK_SET object.
+ * Creates an empty #TASK_SET object.
  * \param newObj	Pointer to receiving pointer to #TASK_SET object.
  * \return #PST_OK if successful, error code otherwise.
  */
 int TASK_SET_new(TASK_SET **newObj);
 
 /**
- * Function to free #TASK_SET object.
+ * Frees the #TASK_SET object.
  * \param	obj	#TASK_SET object.
  */
 void TASK_SET_free(TASK_SET *obj);
 
 /**
- * This function is used to add tasks to the task set. Task is composed from
- * \c id, \c name and different groups of command line parameters. Command-line
+ * Adds tasks to the task set. Task is composed from
+ * \c ID, \c name and different groups of command-line parameters. Command-line
  * parameter is said to be set when #PARAM object from #PARAM_SET is not empty (is
- * specified on command-line, with or without a value). A group is specified by
+ * specified on command line, with or without a value). A group is specified by
  * string containing command-line parameter names separated with comma
- * (e.g. "input,output,h"). Note that the names do not contain prefix "-" and "--"
- * where parameters are parsed from command-line (see #PARAM_SET_parseCMD).
+ * (e.g. 'input,output,h'). Note that the names do not contain prefix '\-' and '\-\-'
+ * where parameters are parsed from command line (see #PARAM_SET_parseCMD).
  *
  * Command-line parameter groups:
  * - \c mandatory - All parameters specified must be set.
  * - <tt> at least one </tt> -	At least one parameter from group must be set.
- * - \c forbidden - Any parameter from this group <b>must not</b> be set.
+ * - \c forbidden - Any parameter from this group must <b>NOT</b> be set.
  * - \c ignored - All parameters from this set can be ignored or even removed (see #TASK_SET_cleanIgnored).
  *
  * \param task_set		#TASK_SET object.
- * \param id			The ID of the task.
+ * \param id			The \c ID of the task.
  * \param name			Name or description of the task.
  * \param man			Mandatory parameters.
  * \param atleastone	Parameter where at least one must be set. Can be \c NULL.
@@ -79,29 +79,29 @@ void TASK_SET_free(TASK_SET *obj);
 int TASK_SET_add(TASK_SET *task_set, int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore);
 
 /**
- * Performs analysis on the #TASK_SET with parameters from #PARAM_SET. After analyze
+ * Performs analysis on the #TASK_SET with parameters from #PARAM_SET. After analyzing
  * it is possible to extract one consistent #TASK from the #TASK_SET (see
  * #TASK_SET_getConsistentTask) or in case of an error, check if one task from the
- * #TASK_SET stands out as the possible target and give user some hints how to fix.
- * If it is not possible to assume what task the user is trying to accomplish, show
- * user the tasks that have the most similar patterns compared to the given input.
+ * #TASK_SET stands out as the possible target and give user some hints how to fix it.
+ * If it is not possible to assume what task the user is trying to accomplish, shows
+ * user the tasks that have the most similar patterns compared to the given input
  * (see #TASK_SET_isOneFromSetTheTarget, #TASK_SET_howToRepair_toString and
  * #TASK_SET_suggestions_toString).
  *
- * The analysis and error handling is based on the task \c consistency value. Consistency
+ * The analysis and error handling is based on the task \c consistency value. \c Consistency
  * \c 1.0 means that it is possible to perform the task with given parameters and
- * \b less than \c 1.0 means it is not. The consistency of a task is calculated
+ * \b less than \c 1.0 means it is not. The \c consistency of a task is calculated
  * from command-line parameter groups (see #TASK_SET_add). To get a consistent
  * task, all mandatory parameters must be set and there must not be a single
- * forbidden parameter set. The consistency of a task is calculated as follows:
+ * forbidden parameter set. The \c consistency of a task is calculated as follows:
  *
  * \code{.txt}
  *                    man_mis + atl_mis + forbidden
  * consistency = 1 -  -----------------------------  , where
  *                        man_count + atl_count
  *
- *   atl_count - Count of parameters that are set from group "at least one".
- *   atl_mis   - 0 if at least one parameter from group "at least one" is set, 1 otherwise.
+ *   atl_count - Count of parameters that are set from group 'at least one'.
+ *   atl_mis   - 0 if at least one parameter from group 'at least one' is set, 1 otherwise.
  *   forbidden - Count of forbidden parameters that are set.
  *   man_count - Count of all mandatory parameters.
  *   man_mis   - Count of missing mandatory parameters.
@@ -127,16 +127,15 @@ int TASK_SET_add(TASK_SET *task_set, int id, const char *name, const char *man, 
  *
  * \param task_set		#TASK_SET object.
  * \param set			#PARAM_SET object.
- * \param sensitivity	Analyze sensitivity .
+ * \param sensitivity	Analysis sensitivity.
  * \return #PST_OK if successful, error code otherwise. Some more common error
  * codes: #PST_TASK_SET_HAS_NO_DEFINITIONS and #PST_TASK_UNABLE_TO_ANALYZE_PARAM_SET_CHANGED.
  */
 int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensitivity);
 
 /**
- * This function is used to extract one single consistent task from the #TASK_SET
- * that is the task user wants to execute. Before this #TASK_SET_analyzeConsistency
- * must be called.
+ * Extracts one single consistent task, the one that user wants to execute, from the #TASK_SET.
+ * Before this #TASK_SET_analyzeConsistency must be called.
  * \param task_set		#TASK_SET object.
  * \param task			Pointer to receiving pointer to #TASK object.
  * \return #PST_OK if successful, error code otherwise. Some more common error
@@ -146,20 +145,21 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 int TASK_SET_getConsistentTask(TASK_SET *task_set, TASK **task);
 
 /**
+ * Extracts the most consistent task from the #TASK_SET which may have more than one consistent task in it.
  * If there is no single consistent task in #TASK_SET, it is possible that user
  * has made an error by specifying too few or too many parameters. In this case,
  * it may be possible to extract the task that is assumed to be the one that user
  * is trying to accomplish. Task is extracted if there is a single task that has
- * its consistency higher than any other task by the value of \c diff.
+ * \c consistency higher than any other task by the value of \c diff.
  * \param task_set		#TASK_SET object.
- * \param diff			Task consistency difference.
- * \param ID			Output parameter for task ID.
+ * \param diff			Task \c consistency difference.
+ * \param ID			Output parameter for task \c ID.
  * \return #PST_OK if successful, error code otherwise.
  */
 int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff, int *ID);
 
 /**
- * This function removes all ignored parameters (see #TASK_SET_add) from the
+ * Removes all ignored parameters (see #TASK_SET_add) from the
  * #PARAM_SET object used to perform analysis (see #TASK_SET_analyzeConsistency).
  *
  * \param task_set		#TASK_SET object.
@@ -170,10 +170,10 @@ int TASK_SET_isOneFromSetTheTarget(TASK_SET *task_set, double diff, int *ID);
 int TASK_SET_cleanIgnored(TASK_SET *task_set, TASK *task, int *removed);
 
 /**
- * Generates suggestion message from pre analyzed #TASK_SET to help user figure
+ * Generates suggestion message from pre-analyzed #TASK_SET to help user figure
  * out what task he or she wants to accomplish. The maximum number of tasks
  * suggested is specified by \c depth. Suggested tasks are ordered by the
- * consistency value starting from the highest (see #TASK_SET_analyzeConsistency).
+ * \c consistency value starting from the highest (see #TASK_SET_analyzeConsistency).
  * \param	task_set		#TASK_SET object.
  * \param	depth			Maximum count of tasks displayed.
  * \param	buf				Receiving buffer.
@@ -183,13 +183,13 @@ int TASK_SET_cleanIgnored(TASK_SET *task_set, TASK *task, int *removed);
 char* TASK_SET_suggestions_toString(TASK_SET *task_set, int depth, char *buf, size_t buf_len);
 
 /**
- * Generates suggestion message from pre analyzed (see #TASK_SET_analyzeConsistency)
+ * Generates suggestion message from pre-analyzed
  * #TASK_SET to help user figure out how to fix the task with \c ID
- * (see #TASK_SET_isOneFromSetTheTarget to get ID of the task that user is trying
+ * (see #TASK_SET_analyzeConsistency; see #TASK_SET_isOneFromSetTheTarget to get \c ID of the task that user is trying
  * to accomplish).
  * \param	task_set		#TASK_SET object.
  * \param	set				#PARAM_SET object.
- * \param	ID				Tasks ID.
+ * \param	ID				Tasks \c ID.
  * \param	prefix			Prefix for the message. Can be \c NULL.
  * \param	buf				Receiving buffer.
  * \param	buf_len			Receiving buffer size.
@@ -198,21 +198,21 @@ char* TASK_SET_suggestions_toString(TASK_SET *task_set, int depth, char *buf, si
 char* TASK_SET_howToRepair_toString(TASK_SET *task_set, PARAM_SET *set, int ID, const char *prefix, char *buf, size_t buf_len);
 
 /**
- * Getter method to extract #TASK id.
+ * Gets the #TASK \c ID.
  * \param task	#TASK object.
- * \return Task ID.
+ * \return Task \c ID.
  */
 int TASK_getID(TASK *task);
 
 /**
- * Getter method to extract #TASK name.
+ * Gets the #TASK name.
  * \param task	#TASK object.
  * \return Task name.
  */
 const char* TASK_getName(TASK *task);
 
 /**
- * Getter method to extract #PARAM_SET object used to analyze \c task consistancy
+ * Gets the #PARAM_SET object used to analyze task's \c consistency
  * (see #TASK_SET_analyzeConsistency).
  * \param task	#TASK object.
  * \return #PARAM_SET object.
@@ -225,4 +225,3 @@ PARAM_SET *TASK_getSet(TASK *task);
 #endif
 
 #endif
-

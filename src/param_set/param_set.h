@@ -254,7 +254,7 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
  * Specify help text for a parameter.
  * \param	set		#PARAM_SET object.
  * \param	names	List of names to add the help text for.
- * \param	txt		Help text for a parameter. Value is copied. Must NOT be NULL.
+ * \param	txt		Help text for a parameter. Value is copied. Must NOT be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_SET_setPrintName and #PARAM_SET_helpToString.
  */
@@ -273,7 +273,7 @@ int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
  * \param	rowWidth	The size of the row.
  * \param	buf			Buffer.
  * \param	buf_len	The size of \c buf.
- * \return Returns \c buf if successful, NULL otherwise.
+ * \return Returns \c buf if successful, \c NULL otherwise.
  */
 char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent, int header, int rowWidth, char *buf, size_t buf_len);
 
@@ -769,7 +769,7 @@ int read_line(FILE *file, char *buf, size_t len, size_t *row_pointer, size_t *re
  * Specifies a function to expand tokens that contain wildcard character (<tt>WC</tt>)
  * to array of new values. By default characters '<tt>?</tt>' and '<tt>*</tt>' are \c WC.
  * Values containing \c WC are removed and replaced with the expanded values. To
- * use default \c WC set \c charList as <tt>NULL</tt>.
+ * use default \c WC set \c charList as \c NULL.
  *
  * <tt>int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)</tt>
  *

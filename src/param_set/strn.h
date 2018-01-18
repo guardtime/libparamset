@@ -1,4 +1,4 @@
-/*
+NULL/*
  * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
@@ -28,34 +28,34 @@ extern "C" {
 
 
 /**
- * Platform independent version of snprintf.
- * \param[in]		buf		Pointer to buffer.
- * \param[in]		n		Maximum number of bytes to be written into buffer. Includes terminating \c null character.
- * \param[in]		format	Format string.
- * \param[in]		...		Extra parameters for formatting.
- * \return The number of characters written, not including terminating \c null character. On error \c  0 is returned.
+ * Platform independent version of \c snprintf.
+ * \param		buf		Pointer to buffer.
+ * \param		n		Maximum number of bytes to be written into buffer. Includes terminating \c NULL character.
+ * \param		format	Format string.
+ * \param		...		Extra parameters for formatting.
+ * \return The number of characters written, not including terminating \c NULL character. On error \c  0 is returned.
  */
 size_t PST_snprintf(char *buf, size_t n, const char *format, ... );
 
 /**
- * Platform independent version of strncpy that guarantees \c null terminated
+ * Platform independent version of \c strncpy that guarantees \c NULL terminated
  * destination. To copy \c N characters from source to destination \c n and size of
  * destination must be <tt>N + 1</tt>.
- * \param[in]		destination Pointer to destination.
- * \param[in]		source		Pointer to source.
- * \param[in]		n			Maximum number of characters to be copied including terminating \c null.
- * \return The pointer to destination is returned. On error \c NULL is returned.
+ * \param		destination Pointer to destination.
+ * \param		source		Pointer to source.
+ * \param		n			Maximum number of characters to be copied including terminating \c NULL.
+ * \return The pointer to destination. On error \c NULL is returned.
  */
 char *PST_strncpy (char *destination, const char *source, size_t n);
 
 /**
- * This function works similar to the #PST_snprintf but is used to print text for
+ * Similar to the #PST_snprintf but is used to print text for
  * command-line help. Formatter can:
  *
- *  + Print formatted text (\c desc) thats maximum length (including indention) is \c rowLen.
- *  + Print indented text (\c desc) where indention is size of \c indent. See Example 1.
- *  + Print indented text (\c desc) where next line has extra indention in size of \c nxtLnIndnt. See Example 2.
- *  + Print a header in size of \c headerLen. It is composed of \c paramName and \c delimiter (including \c indent). If real header is larger than \c headerLen, it is printed without delimiter on the first line. In that case \c delimiter is printed on the next row followed by description (\c desc). See Example 3 and Example 4.
+ *  + Print formatted text (\c desc) with maximum length (including indention) of \c rowLen.
+ *  + Print indented text (\c desc) with indention of \c indent. See Example 1.
+ *  + Print indented text (\c desc) where next line has extra indention of \c nxtLnIndnt. See Example 2.
+ *  + Print a header with length of \c headerLen. It is composed of \c paramName and \c delimiter (including \c indent). If real header is larger than \c headerLen, it is printed without delimiter on the first line. In that case \c delimiter is printed on the next row followed by description (\c desc). See Example 3 and Example 4.
  *
  * Usage and examples:
  * \code{.txt}
@@ -101,15 +101,15 @@ char *PST_strncpy (char *destination, const char *source, size_t n);
  *
  * \param buf			Pointer to buffer.
  * \param buf_len		The size of the buffer.
- * \param indent		The size of regular indention. Can be 0.
- * \param nxtLnIndnt	The amount of extra indention beginning from the next line. Can be 0.
- * \param headerLen		The size of the header. Can be 0.
+ * \param indent		The size of regular indention. Can be \c 0.
+ * \param nxtLnIndnt	The amount of extra indention beginning from the next line. Can be \c 0.
+ * \param headerLen		The size of the header. Can be \c 0.
  * \param rowLen		The overall size of the line.
  * \param paramName		Parameter name used to compose header.
  * \param delimiter		Delimiter character used for delimiter that separates parameter name from description.
  * \param desc		Format string, parameter description.
  * \param ...			Extra parameters for formatting.
- * \return The number of characters written, not including terminating \c null character. On error \c  0 is returned.
+ * \return The number of characters written, not including terminating \c NULL character. On error \c  0 is returned.
  */
 size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int headerLen, int rowLen, const char *paramName, const char delimiter, const char *desc, ...);
 /*
@@ -121,4 +121,3 @@ size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int
 #endif
 
 #endif	/* STRN_H */
-
