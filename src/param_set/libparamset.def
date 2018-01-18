@@ -1,0 +1,150 @@
+;
+; Copyright 2013-2017 Guardtime, Inc.
+;
+; This file is part of the Guardtime client SDK.
+;
+; Licensed under the Apache License, Version 2.0 (the "License").
+; You may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+;     http://www.apache.org/licenses/LICENSE-2.0
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES, CONDITIONS, OR OTHER LICENSES OF ANY KIND, either
+; express or implied. See the License for the specific language governing
+; permissions and limitations under the License.
+; "Guardtime" and "KSI" are trademarks or registered trademarks of
+; Guardtime, Inc., and no license to trademarks is granted; Guardtime
+; reserves and retains all trademark rights.
+;
+
+VERSION 1
+
+
+;Exported functions
+
+;param_set.h
+EXPORTS
+    PST_getVersion
+	PARAM_SET_new
+	PARAM_SET_free
+	PARAM_SET_addControl
+	PARAM_SET_setPrintName
+	PARAM_SET_setPrintNameAlias
+	PARAM_SET_setHelpText
+	PARAM_SET_helpToString
+	PARAM_SET_add
+	PARAM_SET_getStr
+	PARAM_SET_getObj
+	PARAM_SET_getObjExtended
+	PARAM_SET_getAtr
+	PARAM_SET_getPrintName
+	PARAM_SET_getPrintNameAlias
+	PARAM_SET_clearParameter
+	PARAM_SET_clearValue
+	PARAM_SET_getValueCount
+	PARAM_SET_isSetByName
+	PARAM_SET_isOneOfSetByName
+	PARAM_SET_isFormatOK
+	PARAM_SET_isConstraintViolation
+	PARAM_SET_isTypoFailure
+	PARAM_SET_isSyntaxError
+	PARAM_SET_isUnknown
+	PARAM_SET_readFromFile
+	PARAM_SET_readFromCMD
+	PARAM_SET_parseCMD
+	PARAM_SET_setParseOptions
+	PARAM_SET_IncludeSet
+	PARAM_SET_toString
+	PARAM_SET_typosToString
+	PARAM_SET_unknownsToString
+	PARAM_SET_invalidParametersToString
+	PARAM_SET_constraintErrorToString
+	PARAM_SET_errorToString
+	PARAM_SET_syntaxErrorsToString
+	PARAM_SET_setWildcardExpander
+	extract_next_name
+	parse_key_value_pair
+	read_line
+
+;param_value.h
+EXPORTS
+	PARAM_VAL_new
+	PARAM_VAL_insert
+	PARAM_VAL_free
+	PARAM_VAL_getElement
+	PARAM_VAL_popElement
+	PARAM_VAL_extract
+	PARAM_VAL_getElementCount
+	PARAM_VAL_getInvalidCount
+	PARAM_VAL_getPriority
+	PARAM_VAL_getErrors
+	PARAM_VAL_getInvalid
+	PARAM_VAL_toString
+	
+;parameter.h
+EXPORTS
+	PARAM_new
+	PARAM_free
+	PARAM_addControl
+	PARAM_isParseOptionSet
+	PARAM_setParseOption
+	PARAM_setObjectExtractor
+	PARAM_addValue
+	PARAM_getValue
+	PARAM_getAtr
+	PARAM_getName
+	PARAM_getObject
+	PARAM_getInvalid
+	PARAM_getValueCount
+	PARAM_getInvalidCount
+	PARAM_setPrintName
+	PARAM_setPrintNameAlias
+	PARAM_getPrintName
+	PARAM_getPrintNameAlias
+	PARAM_setHelpText
+	PARAM_getHelpText
+	PARAM_checkConstraints
+	PARAM_clearAll
+	PARAM_clearValue
+	PARAM_setWildcardExpander
+	PARAM_expandWildcard
+	PARAM_toString
+	PARAM_constraintErrorToString
+	
+;task_def.h
+EXPORTS
+	TASK_SET_new
+	TASK_SET_free
+	TASK_SET_add
+	TASK_SET_analyzeConsistency
+	TASK_SET_getConsistentTask
+	TASK_SET_isOneFromSetTheTarget
+	TASK_SET_cleanIgnored
+	TASK_SET_suggestions_toString
+	TASK_SET_howToRepair_toString
+	TASK_getID
+	TASK_getName
+	TASK_getSet
+	
+;wildcardexpanders.h
+EXPORTS
+	PST_WCF_Win32FileWildcard
+	
+;strn.h
+EXPORTS
+	PST_snprintf
+	PST_strncpy
+	PST_snhiprintf
+	
+;internal.h
+	TASK_DEFINITION_new
+	TASK_DEFINITION_free
+	TASK_DEFINITION_analyzeConsistency
+	TASK_DEFINITION_getMoreConsistent
+	TASK_DEFINITION_toString
+	TASK_DEFINITION_howToRepair_toString
+	TASK_DEFINITION_ignoredParametersToString
+	ITERATOR_new
+	ITERATOR_free
+	ITERATOR_set
+	ITERATOR_fetch
