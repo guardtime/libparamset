@@ -1,4 +1,4 @@
-# libparamset #
+# libparamset
 The `libparamset` is a software development kit, written in plain C, for handling command-line parameters and program tasks. Parameters can be read from command line and a task can be extracted that matches with the given input. Process is covered with error detection and functions that generate helpful feedback messages to the user.
 
 The `libparamset` provides the following functionality:
@@ -18,10 +18,10 @@ The `libparamset` provides the following functionality:
   + Value collectors:
     - Parameter `--`, that will redirect every next token to a specified parameter(s).
     - Parameter that collects values that are not bound with any parameter (`-i x y ...`, where `x` is bound with `-i` but `y` is not).
-    - Parameter that collects all unknown parameters (`-plah plah`, where `-plah` is collected and `plah` is unknown token).
-    - Individual collector count limiters (e.g. no more than 5 values).
-* Values can be filtered by name (e.g. `-i` as `i` and  `--long` as `long`), source (e.g. `default`), priority (e.g. 3) and index (0 - n).
-* Values can be counted by name, source and priority (e.g. 3).
+    - Parameter that collects all unknown parameters (`-unknown unknown`, where `-unknown` is collected and `unknown` is unknown token).
+    - Individual collector count limiters (e.g. no more than `5` values).
+* Values can be filtered by name (e.g. `-i` as `i` and  `--long` as `long`), source (e.g. `default`), priority (e.g. `3`) and index (`0 - n`).
+* Values can be counted by name, source and priority (e.g. `3`).
 * Values can be filtered as the last or the first with the highest or the lowest priority.
 * Values can be counted as the highest or the lowest priority.
 * Parameter default name that is shown in error messages (print name) can be replaced with custom string (constant or generated).
@@ -39,7 +39,7 @@ The `libparamset` provides the following functionality:
 * Parameters can be bound with description and formatted to human readable list for help text.
 
 
-## Installation ##
+## Installation
 
 To use `libparamset` in your C/C++ project, link it against the `libparamset` binary.
 
@@ -97,8 +97,8 @@ If the latest version is needed or the package is not available for the platform
 
 ### Code examples ###
 
-#### Example 1:
-The following is a very basic example that illustrates how to parse the command-line options without any error handling and perform the task. See Example 2 for more advanced use case.
+#### Example 1
+A very basic example that illustrates how to parse the command-line options without any error handling and perform the task. See Example 2 for more advanced use case.
 
 ```C
 #include <stdio.h>
@@ -146,8 +146,8 @@ int main(int argc, char** argv) {
 }
 ```
 
-#### Example 2:
-The following is a simple example of a command-line tool that uses `libparamset` to specify parameter set and task set, parse the command line, handle errors and give some feedback to the user to help get things working.
+#### Example 2
+A simple example of a command-line tool that uses `libparamset` to specify parameter set and task set, parse the command line, handle errors and give some feedback to the user to help get things working.
 
 ```C
 #include <stdio.h>

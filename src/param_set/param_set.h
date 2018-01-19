@@ -132,15 +132,16 @@ const char *PST_getVersion(void);
 
 /**
  * Creates new #PARAM_SET object using parameter names.
- * Parameter names are defined using string <em>'{name|alias}*{name|alias}*...'</em> where
+ * Parameter names are defined using string '<tt>{name|alias}*{name|alias}*...</tt>' where
  *
  * \c name - parameter name,
  *
  * \c alias - alias for the name,
  *
- * \c '*' - can have multiple values.
+ * \c * - can have multiple values.
  *
- * Example: <em>'{h|help}{file}*{o}*{n}'</em>.
+ * Example: <tt>{h|help}{file}*{o}*{n}</tt>
+ *
  * \param	names	Pointer to parameter names.
  * \param	set		Pointer to receiving pointer to #PARAM_SET object.
  * \return #PST_OK if successful, error code otherwise.
@@ -302,7 +303,7 @@ int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const cha
  * extractor is set, a string value is always extracted. The user <b>MUST  NOT</b> free
  * the returned string.
  *
- * Values are filtered by constraints. If multiple names (<em>e.g. name1,name2,name3</em>)
+ * Values are filtered by constraints. If multiple names (e.g. <tt>name1,name2,name3</tt>)
  * are specified, process is started with the first name and \c at is used to index
  * over all specified values. If some parameters in the name list do not contain any values matching
  * the constraints, the next name is selected without an error (if there exists a next value).
@@ -329,7 +330,7 @@ int PARAM_SET_getStr(PARAM_SET *set, const char *name, const char *source, int p
  * must not free the returned object. If a custom object extractor function
  * is used, object must be freed if implementation requires it.
  *
- * Values are filtered by constraints. If multiple names (<em>e.g. name1,name2,name3</em>)
+ * Values are filtered by constraints. If multiple names (e.g. <tt>name1,name2,name3</tt>)
  * are specified, process is started with the first name and \c at is used to index
  * over all specified values. If some parameters in the name list do not contain any values matching
  * the constraints, the next name is selected without an error (if there exists a next value).
@@ -410,7 +411,7 @@ int PARAM_SET_getPrintNameAlias(PARAM_SET *set, const char *name, const char **p
 
 /**
  * Removes all values from the specified parameter list. Parameter list is defined
- * as <em>'p1,p2,p3 ...'</em>.
+ * as '<tt>p1,p2,p3 ...</tt>'.
  * \param set	#PARAM_SET object.
  * \param names	Parameter name list.
  * \return #PST_OK if successful, error code otherwise.
@@ -420,7 +421,7 @@ int PARAM_SET_clearParameter(PARAM_SET *set, const char *names);
 
 /**
  * Removes a value specified by the constraints from the specified parameter list.
- * Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
+ * Parameter list is defined as '<tt>p1,p2,p3 ...</tt>'.
  *
  * \param	set			#PARAM_SET object.
  * \param	names		Parameter name list.
@@ -433,7 +434,7 @@ int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, 
 
 /**
  * Counts all the existing parameter values in the list composed by the parameter
- * list and constraints specified. Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
+ * list and constraints specified. Parameter list is defined as '<tt>p1,p2,p3 ...</tt>'.
  *
  * \param	set			#PARAM_SET object.
  * \param	names		Parameter name list.
@@ -446,9 +447,9 @@ int PARAM_SET_clearValue(PARAM_SET *set, const char *names, const char *source, 
 int PARAM_SET_getValueCount(PARAM_SET *set, const char *names, const char *source, int priority, int *count);
 
 /**
- * Searches for a parameter defined in the list by name and checks <b>if all</b> the
+ * Searches for a parameter defined in the list by name and checks if <b>all</b> the
  * parameters have at least one values set. Even if the value format or content is
- * invalid, true is returned. Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
+ * invalid, true is returned. Parameter list is defined as '<tt>p1,p2,p3 ...</tt>'.
  *
  * \param	set		#PARAM_SET object.
  * \param	names	Parameter name list.
@@ -459,7 +460,7 @@ int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names);
 /**
  * Searches for a parameter defined in the list by name and checks if <b>at least one</b>
  * of the parameters have at least on values set. Even if the value format or
- * content is invalid, true is returned. Parameter list is defined as <em>'p1,p2,p3 ...'</em>.
+ * content is invalid, true is returned. Parameter list is defined as '<tt>p1,p2,p3 ...</tt>'.
  *
  * \param	set		#PARAM_SET object.
  * \param	names	Parameter name list.
@@ -468,7 +469,7 @@ int PARAM_SET_isSetByName(const PARAM_SET *set, const char *names);
 int PARAM_SET_isOneOfSetByName(const PARAM_SET *set, const char *names);
 
 /**
- * Controls if the format and content of the parameters is OK.
+ * Controls if the format and content of the parameters are OK.
  * \param	set		#PARAM_SET object.
  * \return 0 if format is invalid, 1 otherwise.
  * \see #PARAM_SET_addControl and #PARAM_SET_invalidParametersToString.
@@ -503,7 +504,7 @@ int PARAM_SET_isConstraintViolation(const PARAM_SET *set);
  *
  * The \c difference value with the unknown \c token is calculated for every known
  * parameter in the \c set and the smallest value is saved as \c smdiff. An unknown
- * token is interpreted as typo if there exists at least one parameter so thats:
+ * token is interpreted as typo if there exists at least one parameter so that:
  * \code{.txt}
  * difference < 90 && difference < (smdiff + 10)
  * \endcode
@@ -554,7 +555,7 @@ int PARAM_SET_isUnknown(const PARAM_SET *set);
 int PARAM_SET_readFromFile(PARAM_SET *set, const char *fname, const char* source, int priority);
 
 /**
- * Reads parameter values from command-line into predefined #PARAM_SET. Parameters
+ * Reads parameter values from command line into predefined #PARAM_SET. Parameters
  * are stored in internal data structures where one parameter can have multiple values.
  * If configured, all values read are checked against checking functions (see
  * #PARAM_SET_addControl). See #PARAM_SET_isSetByName, #PARAM_SET_getStr and
@@ -587,16 +588,17 @@ int PARAM_SET_readFromCMD(PARAM_SET *set, int argc, char **argv, const char *sou
  * #PARAM_SET_readFromCMD but extends its functionality. For example it is possible
  * to have a parameter that always interprets the next token as its value, even
  * if it is identical to some command-line parameter. To redirect all tokens after
- * '\-\-' to specified parameter or process some parameters with configured wildcard
- * expander see #PARAM_SET_setParseOptions;
+ * '\-\-' to specified parameter, or process some parameters with configured wildcard
+ * expander see #PARAM_SET_setParseOptions.
  *
- * to specify parse option for each command line parameter.
+ * To specify parse option for each command line parameter:
  * \code{.txt}
  * --long       - Long parameter without value.
  * --long <arg> - Long parameter with value.
  * -i <arg>     - Short parameter with value.
  * -vxn         - Bunch of flags.
  * \endcode
+ *
  * \param	set			#PARAM_SET object.
  * \param	argc		Count of command line strings.
  * \param	argv		Array of command line strings.
@@ -725,8 +727,8 @@ const char* extract_next_name(const char* name_string, int (*isValidNameChar)(in
 
 /**
  * Extracts a key value pair from the line. Value part can be wrapped inside
- * double quote marks (<em>"</em>) to include whitespace characters. Use back slash
- * (<em>\\</em>) as escape character for itself and for double quotes. Some examples:
+ * double quote marks (<tt>\"</tt>) to include whitespace characters. Use back slash
+ * (<tt>\\</tt>) as escape character for itself and for double quotes. Some examples:
  *
  * \code{.txt}
  * key = value
