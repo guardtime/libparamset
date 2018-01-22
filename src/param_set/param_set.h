@@ -136,9 +136,9 @@ const char *PST_getVersion(void);
  *
  * \c name - parameter name,
  *
- * \c alias - alias for the name,
+ * \c alias - alias for the name (optional),
  *
- * \c * - can have multiple values.
+ * \c * - indicates the possibility of multiple values (optional), for usage instructions, see #PARAM_SET_isConstraintViolation and #PARAM_SET_constraintErrorToString.
  *
  * Example: <tt>{h|help}{file}*{o}*{n}</tt>
  *
