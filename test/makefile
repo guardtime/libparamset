@@ -84,7 +84,9 @@ default: $(BIN_DIR)\$(TOOL_NAME).exe
 #Linking
 $(BIN_DIR)\$(TOOL_NAME).exe: $(BIN_DIR) $(OBJ_DIR) $(OBJ_CUTEST_DIR) $(TOOL_OBJ) $(CUTEST_OBJ)
 	link $(LDFLAGS) /OUT:$@ $(TOOL_OBJ) $(CUTEST_OBJ) $(EXT_LIB)
-
+!IF "$(DLL)" == "dll"
+	copy "$(PARAM_SET_LIB_DIR)\$(PARAM_SET_LIB_NAME)$(RTL).dll" "$(BIN_DIR)\" /Y /D
+!ENDIF
 
 #C file compilation
 {$(SRC_DIR)\}.c{$(OBJ_DIR)\}.obj:
