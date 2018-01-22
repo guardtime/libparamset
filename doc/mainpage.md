@@ -22,7 +22,7 @@ The `libparamset` provides the following functionality:
   * Value collectors:
     * Parameter `--`, that will redirect every next token to a specified parameter(s).
     * Parameter that collects values that are not bound with any parameter (`-i x y ...`, where `x` is bound with `-i` but `y` is not).
-    * Parameter that collects all unknown parameters (`-unknown unknown`, where `-unknown` is collected and `unknown` is unknown token).
+    * Parameter that collects all unknown parameters (`--unknown unknown`, where `--unknown` is collected and `unknown` is unknown token).
     * Individual collector count limiters (e.g. no more than `5` values).
 * Values can be filtered by, name (e.g. `-i` as `i` and  `--long` as `long`), source (e.g. `default`), priority (e.g. `3`) and index (`0 - n`).
 * Values can be counted by name, source and priority (e.g. `3`).
