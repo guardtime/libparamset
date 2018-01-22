@@ -34,7 +34,7 @@ extern "C" {
  * original value is still removed.
  *
  * When setting this function with #PARAM_SET_setWildcardExpander, set \c charList
- * (may also be \"<tt>?*</tt>\") and \c ctx  as \c NULL.
+ * (may also be '<tt>?*</tt>') and \c ctx  as \c NULL.
  *
  * \param param_value	PARAM_VAL object.
  * \param ctx			Additional ctx. Set as \c NULL.
@@ -51,4 +51,3 @@ int PST_WCF_Win32FileWildcard(PARAM_VAL *param_value, void *ctx, int *value_shif
 #endif
 
 #endif	/* WILDCARDEXPANDER_H */
-

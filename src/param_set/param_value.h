@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 /**
- * Parameter value object. It holds values in list in order of insertion. Values
+ * Parameter value object. Holds values in list in the order of insertion. Values
  * can be filtered with constraints - source, priority and index. Values are held
  * in linked list.
  */
@@ -58,10 +58,10 @@ enum PST_PRIORITY_enum {
 	/** The valid highest priority level.*/
 	PST_PRIORITY_VALID_ROOF = PST_PRIORITY_VALID_BASE + PST_PRIORITY_COUNT - 1 ,
 
-	/** To extract values higher than A, use priority A + #PST_PRIORITY_HIGHER_THAN*/
+	/** Extract values higher than A, use priority A + #PST_PRIORITY_HIGHER_THAN*/
 	PST_PRIORITY_HIGHER_THAN = PST_PRIORITY_VALID_ROOF + 1,
 
-	/** To extract values lower than A, use priority A + #PST_PRIORITY_LOWER_THAN*/
+	/** Extract values lower than A, use priority A + #PST_PRIORITY_LOWER_THAN*/
 	PST_PRIORITY_LOWER_THAN = PST_PRIORITY_HIGHER_THAN + PST_PRIORITY_COUNT,
 
 	 /** Priorities greater than that are all invalid. */
@@ -72,10 +72,10 @@ enum PST_PRIORITY_enum {
  * List of special index macros used for filtering the parameter values.
  */
 enum PST_INDEX_enum {
-	/** Return the last value found with specified constraints. */
+	/** Returns the last value found with specified constraints. */
 	PST_INDEX_LAST = -1,
 
-	/** Return the first value found with specified constraints. */
+	/** Returns the first value found with specified constraints. */
 	PST_INDEX_FIRST = 0,
 };
 
@@ -83,8 +83,8 @@ enum PST_INDEX_enum {
  * Creates a new #PARAM_VAL object. If \c new is pointer to \c NULL, a new
  * object is created. If \c new points to existing #PARAM_VAL object, a new
  * value is created and appended to the end of the list.
- * \param value		Value as c-string. Can be \c NULL.
- * \param source	Describes the source e.g. file name or environment variable. Can be \c NULL.
+ * \param value		Value as C-string, can be \c NULL.
+ * \param source	Describes the source, e.g. file name or environment variable. Can be \c NULL.
  * \param priority	Priority of the parameter, must be positive.
  * \param newObj	Pointer to receiving pointer or pointer to existing value.
  * \return #PST_OK when successful, error code otherwise.
@@ -100,8 +100,8 @@ int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL
  * \param	source		Constraint for the source.
  * \param	priority	Constraint for the priority.
  * \param	at			Parameter index in the matching set composed with the constraints.
- * \param	obj			New obj to be inserted.
- * \return \c PST_OK when successful, error code otherwise..
+ * \param	obj			New \c obj to be inserted.
+ * \return \c PST_OK when successful, error code otherwise.
  */
 int PARAM_VAL_insert(PARAM_VAL *target, const char* source, int priority, int at, PARAM_VAL *obj);
 
@@ -116,9 +116,9 @@ void PARAM_VAL_free(PARAM_VAL *rootValue);
  * priority level at the given index. If \c at is #PST_INDEX_LAST, the last element is
  * extracted. If priority is #PST_PRIORITY_NONE, every element is counted and returned
  * at given index. If priority is #PST_PRIORITY_VALID_BASE (<tt>0</tt>) or higher, only
- * elements at the given priority are counted and extracted. For example if list contains
- * 2 lower priority values followed by higher priority value at position 3 and \c at
- * is 0, function returns the last value (but the first value matching the priority).
+ * elements at the given priority are counted and extracted. For example, if list contains
+ * <tt>2</tt> lower priority values followed by higher priority value at position <tt>3</tt> and \c at
+ * is <tt>0</tt>, function returns the last value (but the first value matching the priority).
  * Priority #PST_PRIORITY_LOWEST and #PST_PRIORITY_HIGHEST are used to extract only
  * the lowest and the highest priority values. Use #PST_PRIORITY_HIGHER_THAN + \c priority
  * or #PST_PRIORITY_LOWER_THAN + \c priority to extract values with higher or lower
@@ -135,7 +135,7 @@ void PARAM_VAL_free(PARAM_VAL *rootValue);
 int PARAM_VAL_getElement(PARAM_VAL *rootValue, const char* source, int priority, int at, PARAM_VAL** val);
 
 /**
- * This function pops an element out of the \c rootValue and outputs it via \c val.
+ * Pops an element out of the \c rootValue and outputs it via \c val.
  *
  * \param	rootValue	The pointer to pointer to the first #PARAM_VAL link in the linked list.
  * \param	source		Constraint for the source.
@@ -151,7 +151,7 @@ int PARAM_VAL_getElement(PARAM_VAL *rootValue, const char* source, int priority,
 int PARAM_VAL_popElement(PARAM_VAL **rootValue, const char* source, int priority, int at, PARAM_VAL** val);
 
 /**
- * Getter method for #PARAM_VAL data fields.
+ * Gets the #PARAM_VAL data fields.
  * \param	rootValue	#PARAM_VAL object.
  * \param	value		Pointer to receiving pointer to value. Can be \c NULL.
  * \param	source		Pointer to receiving pointer to source. Can be \c NULL.
@@ -161,19 +161,19 @@ int PARAM_VAL_popElement(PARAM_VAL **rootValue, const char* source, int priority
 int PARAM_VAL_extract(PARAM_VAL *rootValue, const char **value, const char **source, int *priority);
 
 /**
- * Count the values with given constraints. If there are no values matching the
- * constraints, 0 is returned.
+ * Counts the values with given constraints. If there are no values matching the
+ * constraints, <tt>0</tt> is returned.
  * \param	rootValue	The first #PARAM_VAL link in the linked list.
  * \param	source		Constraint for the source.
  * \param	prio		Constraint for the priority.
  * \param	count		Pointer to integer receiving the count value.
- * \return #PST_OK when successful, error code otherwise..
+ * \return #PST_OK when successful, error code otherwise.
  */
 int PARAM_VAL_getElementCount(PARAM_VAL *rootValue, const char *source, int prio, int *count);
 
 /**
- * Count the invalid values with given constraints. If there are no values matching the
- * constraints, 0 is returned.
+ * Counts the invalid values with given constraints. If there are no values matching the
+ * constraints, <tt>0</tt> is returned.
  * \param	rootValue	The first #PARAM_VAL link in the linked list.
  * \param	source		Constraint for the source.
  * \param	prio		Constraint for the priority.
@@ -183,23 +183,23 @@ int PARAM_VAL_getElementCount(PARAM_VAL *rootValue, const char *source, int prio
 int PARAM_VAL_getInvalidCount(PARAM_VAL *rootValue, const char *source, int prio, int *count);
 
 /**
- * Extract the next priority level via \c nextPrio compared with \c current priority.
- * If \c current is set to #PST_PRIORITY_HIGHEST or #PST_PRIORITY_LOWEST the lowest
- * or the highest value is returned. If \c current is set to other values lower than
- * #PST_PRIORITY_VALID_BASE an error is returned. If current is set to a value
- * that is exactly the priority of the highest value error code
+ * Extracts the next priority level via \c nextPrio compared with \c current priority.
+ * If \c current is set to #PST_PRIORITY_HIGHEST or #PST_PRIORITY_LOWEST the highest
+ * or the lowest value is returned. If \c current is set to other values lower than
+ * #PST_PRIORITY_VALID_BASE, an error is returned. If \c current is set to a value
+ * that is exactly the priority of the highest value, error code
  * #PST_PARAMETER_VALUE_NOT_FOUND is returned, as there is no parameter that has
  * priority level higher that \c current.
  *
  * \param	rootValue	The first #PARAM_VAL link in the linked list.
  * \param	current		Priority value.
- * \param	nextPrio	Next highest priority or the lowest or highest.
+ * \param	nextPrio	Next highest priority, or the lowest, or the highest.
  * \return #PST_OK when successful, error code otherwise.
  */
 int PARAM_VAL_getPriority(PARAM_VAL *rootValue, int current, int *nextPrio);
 
 /**
- * Getter method for format and content status. #PARAM_addValue
+ * Gets the format and content status of #PARAM_addValue.
  * \param	rootValue	#PARAM_VAL object.
  * \param	format		Pointer to integer to store the format status.
  * \param	content		Pointer to integer to store the content status.

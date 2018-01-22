@@ -1,36 +1,36 @@
-# libparamset #
-The libparamset is a software development kit, written in plain C, for handling command-line parameters and program tasks. Parameters can be read from command-line and a task can be extracted that matches with the given input. Process is covered with error detection and functions that generates helpful feedback messages to the user.
+# libparamset
+The `libparamset` is a software development kit, written in plain C, for handling command-line parameters and program tasks. Parameters can be read from command line and a task can be extracted that matches with the given input. Process is covered with error detection and functions that generate helpful feedback messages to the user.
 
-The libparamset provides the following functionality:
-* Parameters can be parsed from command-line, read from configuration file or inserted from the code.
-* Short and long parameters ("-a" and "--long").
-* Concatenating of flags with length 1 ("-ab" instead of "-a -b").
-* One alias for the parameter name (e.g. "--load" and "-l" or "--version" and "--VERSION").
-* Individual parsing options for parameters.
-  * Parameter with multiple coexisting values ("-a v1 -a v2 ... -a vn", where -a = {'v1', 'v2', ..., 'vn'}).
-  * Parameter that never takes a value ("-a v1 -a -a", where -a = {NULL, NULL, NULL} and 'v1' is unknown token).
-  * Parameter that always takes a value ("-a -a", where -a = {'-a'}).
-  * Existing parameter break that takes next token as it's value only if it's not an existing parameter.
-  * Possible parameter break that takes next token as it's value only if it does not look like possible parameter ("-a v1 -a -b", where -a = {'v1', NULL})
-  * Parameter value sequence with (existing or possible) parameter break ("-a v1 v2 ... vn -b", where -a = {'v1', 'v2', ..., 'vn'}).
-  * Parameter that is hidden from the command-line but can be inserted from the code or configuration file.
-  * Parameter that do not generate any typo errors (useful when hiding a parameter from command-line).
-  * Value collectors.
-    - Parameter "--", that will redirect every next token to a specified parameter(s).
-    - Parameter that collects values that are not bound with any parameter ("-i x y ...", where 'x' is bound with '-i' but 'y' is not).
-    - Parameter that collects all unknown parameters ("-plah plah", where '-plah' is collected and 'plah' is unknown token).
-    - Individual collector count limiters (e.g. no more than 5 values).
-* Values can be filtered by, name (e.g. -i as 'i' and  --long as 'long' ), source (e.g. 'default'), priority (e.g. 3) and index (0 - n).
-* Values can be counted by name, source and priority (e.g. 3).
+The `libparamset` provides the following functionality:
+* Parameters can be parsed from command line, read from configuration file, or inserted from the code.
+* Short and long parameters are recognised (`-a` and `--long`).
+* Concatenating of flags with length 1 (`-ab` instead of `-a -b`).
+* One alias for the parameter name (e.g. `--load` and `-l` or `--version` and `--VERSION`).
+* Individual parsing options for parameters:
+  + Parameter with multiple coexisting values (`-a v1 -a v2 ... -a vn`, where `-a = {v1, v2, ..., vn}`).
+  + Parameter that never takes a value (`-a v1 -a -a`, where `-a = {NULL, NULL, NULL}` and `v1` is unknown token).
+  + Parameter that always takes a value (`-a -a`, where `-a = {-a}`).
+  + Existing parameter break that takes next token as it's value only if it's not an existing parameter.
+  + Possible parameter break that takes next token as it's value only if it does not look like possible parameter (`-a v1 -a -b`, where `-a = {v1, NULL}`).
+  + Parameter value sequence with (existing or possible) parameter break (`-a v1 v2 ... vn -b`, where `-a = {v1, v2, ..., vn}`).
+  + Parameter that is hidden from the command line but can be inserted from the code or configuration file.
+  + Parameter that does not generate any typo errors (useful when hiding a parameter from command line).
+  + Value collectors:
+    - Parameter `--`, that will redirect every next token to a specified parameter(s).
+    - Parameter that collects values that are not bound with any parameter (`-i x y ...`, where `x` is bound with `-i` but `y` is not).
+    - Parameter that collects all unknown parameters (`--unknown unknown`, where `--unknown` is collected and `unknown` is unknown token).
+    - Individual collector count limiters (e.g. no more than `5` values).
+* Values can be filtered by name (e.g. `-i` as `i` and  `--long` as `long`), source (e.g. `default`), priority (e.g. `3`) and index (`0 - n`).
+* Values can be counted by name, source and priority (e.g. `3`).
 * Values can be filtered as the last or the first with the highest or the lowest priority.
 * Values can be counted as the highest or the lowest priority.
 * Parameter default name that is shown in error messages (print name) can be replaced with custom string (constant or generated).
-* Auto-generated typo suggestions (e.g. Did You mean '--long' instead of '--song'?).
+* Auto-generated typo suggestions (e.g. Did You mean `--long` instead of `--song`?).
 * Auto-generated unknown parameter error messages.
 * Abstract format and content check functionality with auto-generated error messages.
 * Abstract parameter transformation or repair functionality.
-* Abstract Wildcard expander (can be used to make '-i *' work on Windows).
-  * Implemented wildcards for Windows file system.
+* Abstract Wildcard expander (can be used to make `-i *` work on Windows).
+  + Implemented wildcards for Windows file system.
 * Abstract object parsing functionality (e.g. extract double or file).
 * Multiple parameter sets can be merged.
 * Task set, composed of multiple tasks, where from a task can be extracted by specified parameter set.
@@ -39,9 +39,9 @@ The libparamset provides the following functionality:
 * Parameters can be bound with description and formatted to human readable list for help text.
 
 
-## Installation ##
+## Installation
 
-To use libparamset in your C/C++ project, link it against the libparamset binary.
+To use `libparamset` in your C/C++ project, link it against the `libparamset` binary.
 
 ### Latest Release from Guardtime Repository
 
@@ -50,55 +50,56 @@ In order to install the `libparamset` CentOS/RHEL packages directly from the Gua
 ```
 cd /etc/yum.repos.d
 
-# In case of RHEL / CentOS 6
+# In case of RHEL/CentOS 6
 sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el6.repo
 
-# In case of RHEL / CentOS 7
+# In case of RHEL/CentOS 7
 sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el7.repo
 
-yum install ksi-tools
+yum install libparamset
 ```
 
 ### From Source Code
 
-If the latest version is needed or the package is not available for the platform you are using, check out source code from Github and build it using `gcc` or `VS`. To build the libparamset, you need to have gcc and autotools. For building under Windows you need the Windows SDK.
+If the latest version is needed or the package is not available for the platform you are using, check out source code from Github and build it using `gcc` or `VS`. To build the `libparamset`, you need to have `gcc` and `autotools`. For building in Windows you need the Windows SDK.
 
 ## Usage ##
 
 ### Workflow ###
 
-- Include param_set.h and task_def.h.
-- Configure parameters.
-  + Create new PARAM_SET object with set of parameters PARAM_SET_new.
-  + Add implementations for format, control (and convert) functions with PARAM_SET_addControl.
-  + Add implementation for wildcard expander (e.g. to implement wildcards when getting file input on Windows "-i *.txt") PARAM_SET_setWildcardExpander.
-  + Add parsing options for parameters with PARAM_SET_setParseOptions.
-- Configure tasks.
-  + Create new TASK_SET object with TASK_SET_new.
-  + Add task definitions to the TASK_SET with TASK_SET_add.
-- Get parameters.
-  + Parse command-line with PARAM_SET_parseCMD.
-  + Read parameters from configuration file with PARAM_SET_readFromFile.
-  + Check and report user if configuration file contained some syntax errors with PARAM_SET_isSyntaxError and PARAM_SET_syntaxErrorsToString.
-  + Merge different PARAM_SET objects with PARAM_SET_IncludeSet.
-  + Check for unknown parameters and typos with PARAM_SET_isUnknown and PARAM_SET_isTypoFailure.
-  + Check for invalid parameters that failed format or content checks with PARAM_SET_isFormatOK.
-  + If there are some errors help user with error messages by using following functions PARAM_SET_unknownsToString, PARAM_SET_typosToString and PARAM_SET_invalidParametersToString.
-- Analyze task set against given input.
-  + Analyze the TASK_SET against PARAM_SET TASK_SET_analyzeConsistency.
-  + Extract consistent task from TASK_SET with TASK_SET_getConsistentTask.
-  + In case of failure check if there is a invalid task that stands out from the others and give user some hints how to fix it with functions TASK_SET_isOneFromSetTheTarget and TASK_SET_howToRepair_toString. When it's hard to distinguish which task user is trying to accomplish give some suggestions that do have the most similar pattern to the given input with TASK_SET_suggestions_toString.
-- Use functions TASK_getID and TASK_getSet and perform the selected task.
-  * To check if a parameter is set, use function PARAM_SET_isSetByName.
-  + To get parameters value from the set, use functions PARAM_SET_getStr and PARAM_SET_getObj.
-  + To get parameter value count, use function PARAM_SET_getValueCount.
-- Release object with TASK_SET_free and PARAM_SET_free.
+- Include `param_set.h` and `task_def.h`.
+- Configure parameters:
+  + Create new `PARAM_SET` object with set of parameters `PARAM_SET_new`.
+  + Add implementations for format, control (and convert) functions with `PARAM_SET_addControl`.
+  + Add implementation for wildcard expander (e.g. to implement wildcards when getting file input on Windows `-i *.txt`) `PARAM_SET_setWildcardExpander`.
+  + Add parsing options for parameters with `PARAM_SET_setParseOptions`.
+- Configure tasks:
+  + Create new `TASK_SET` object with `TASK_SET_new`.
+  + Add task definitions to the `TASK_SET` with `TASK_SET_add`.
+- Get parameters:
+  + Parse command line with `PARAM_SET_parseCMD`.
+  + Read parameters from configuration file with `PARAM_SET_readFromFile`.
+  + Check and report user if configuration file contained some syntax errors with `PARAM_SET_isSyntaxError` and `PARAM_SET_syntaxErrorsToString`.
+  + Merge different `PARAM_SET` objects with `PARAM_SET_IncludeSet`.
+  + Check for unknown parameters and typos with `PARAM_SET_isUnknown` and `PARAM_SET_isTypoFailure`.
+  + Check for invalid parameters that failed format or content checks with `PARAM_SET_isFormatOK`.
+  + If there are some errors, help user with error messages by using following functions: `PARAM_SET_unknownsToString`, `PARAM_SET_typosToString` and `PARAM_SET_invalidParametersToString`.
+- Analyze task set against given input:
+  + Analyze the `TASK_SET` against `PARAM_SET` with `TASK_SET_analyzeConsistency`.
+  + Extract consistent task from `TASK_SET` with `TASK_SET_getConsistentTask`.
+  + In case of failure, check if there is an invalid task that stands out from the others and give user some hints how to fix it with functions `TASK_SET_isOneFromSetTheTarget` and `TASK_SET_howToRepair_toString`. When it's hard to distinguish which task user is trying to accomplish, give some suggestions that do have the most similar pattern to the given input with `TASK_SET_suggestions_toString`.
+- Use functions `TASK_getID` and `TASK_getSet` and perform the selected task:
+  + To check if a parameter is set, use function `PARAM_SET_isSetByName`.
+  + To get parameters value from the set, use functions `PARAM_SET_getStr` and `PARAM_SET_getObj`.
+  + To get parameter value count, use function `PARAM_SET_getValueCount`.
+- Release object with `TASK_SET_free` and `PARAM_SET_free`.
 
 
 ### Code examples ###
 
-Example 1:
-A really basic example that illustrates just how to parse the command-line options without any error handling and do the task. See example 2 for more advanced use case.
+#### Example 1
+A very basic example that illustrates how to parse the command-line options without any error handling and perform the task. See Example 2 for more advanced use case.
+
 ```C
 #include <stdio.h>
 #include <param_set/param_set.h>
@@ -145,8 +146,9 @@ int main(int argc, char** argv) {
 }
 ```
 
-Example 2:
-A simple example of a command-line tool that uses libparamset to specify parameter set and task set, parse the command-line, handle errors and gives user some feedback to help get things working.
+#### Example 2
+A simple example of a command-line tool that uses `libparamset` to specify parameter set and task set, parse the command line, handle errors and give some feedback to the user to help get things working.
+
 ```C
 #include <stdio.h>
 #include <param_set/param_set.h>
@@ -337,11 +339,11 @@ int convertRepair_path(const char* arg, char* buf, unsigned len){
 
 ## License ##
 
-See `LICENSE` file.
+See the `LICENSE` file.
 
 ## Contributing
 
-See `CONTRIBUTING.md` file.
+See the `CONTRIBUTING.md` file.
 
 ## Dependencies ##
 | Dependency        | Version                           | License type | Source                         | Notes |
@@ -352,5 +354,5 @@ See `CONTRIBUTING.md` file.
 ## Compatibility ##
 | OS / Platform                              | Compatibility                                |
 | :---                                       | :---                                         |
-| CentOS / RHEL 6 and 7, x86_64 architecture | Fully compatible and tested.                  |
-| Windows 7, 8, 10                           | Compatible but not tested on a regular basis. Build combination of DLL=dll and RTL=MT(d) not supported. |
+| CentOS/RHEL 6 and 7, x86_64 architecture   | Fully compatible and tested.                 |
+| Windows 7, 8, 10                           | Compatible but not tested on a regular basis. Build combination of `DLL=dll` and `RTL=MT(d)` not supported. |
