@@ -30,6 +30,7 @@ LIB_NAME = libparamset
 SRC_DIR = .
 OBJ_DIR = ..\..\obj\$(LIB_NAME)$(RTL)
 LIB_DIR = ..\..\out\$(DLL)
+INCLUDE_DIR = ..\..\out\include\param_set
 LIB_DEF = $(SRC_DIR)\$(LIB_NAME).def
 
 
@@ -40,6 +41,15 @@ LIB_OBJ = \
 	$(OBJ_DIR)\parameter.obj \
 	$(OBJ_DIR)\task_def.obj \
 	$(OBJ_DIR)\wildcardexpanders.obj
+
+INC_FILES = \
+	parameter.h \
+	param_set.h \
+	param_value.h \
+	strn.h \
+	task_def.h \
+	version.h \
+	wildcardexpanders.h
 
 
 #Compiler and linker configuration
@@ -64,7 +74,7 @@ CCFLAGS = $(CCFLAGS) $(CCEXTRA) /DVERSION=\"$(VERSION)\"
 LDFLAGS = $(LDFLAGS) $(LDEXTRA)
 #Making
 
-default: $(LIB_DIR)\$(LIB_NAME)$(RTL).$(DLL)
+default: $(LIB_DIR)\$(LIB_NAME)$(RTL).$(DLL) include
 
 $(LIB_DIR)\$(LIB_NAME)$(RTL).lib: $(OBJ_DIR) $(LIB_DIR) $(LIB_OBJ)
 	link /LIB /OUT:$@ $(LDFLAGS) $(LIB_OBJ)
@@ -75,11 +85,12 @@ $(LIB_DIR)\$(LIB_NAME)$(RTL).dll: $(OBJ_DIR) $(LIB_DIR) $(LIB_OBJ) $(LIB_DEF)
 {$(SRC_DIR)\}.c{$(OBJ_DIR)\}.obj:
 	cl /c /$(RTL) $(CCFLAGS) /Fo$@ $<
 
-
+include: $(INCLUDE_DIR)
+	for %%f in ($(INC_FILES)) do @xcopy $(SRC_DIR)\%%f $(INCLUDE_DIR) /D /Y > nul
 
 #Folder factory
-$(OBJ_DIR) $(LIB_DIR):
+$(OBJ_DIR) $(LIB_DIR) $(INCLUDE_DIR):
 	@if not exist $@ mkdir $@
 
 clean:
-	@for %i in ($(OBJ_DIR) $(LIB_DIR)) do @if exist .\%i rmdir /s /q .\%i
+	@for %i in ($(OBJ_DIR) $(LIB_DIR) $(INCLUDE_DIR)) do @if exist .\%i rmdir /s /q .\%i
