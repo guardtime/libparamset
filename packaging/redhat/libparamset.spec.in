@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2015 Guardtime, Inc.
+# Copyright 2013-2017 Guardtime, Inc.
 #
 # This file is part of the Guardtime client SDK.
 #
@@ -63,7 +63,21 @@ make
 rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
 
-%files
+# Add doxygen documentation to the build.
+%define extrafiles %{_builddir}/%{buildsubdir}/extrafiles
+touch %{extrafiles}
+
+# Check if doxygen with supported version (>=1.8.0) is installed.
+if (doxygen -v | grep -q -P -e '((^1\.([8-9]|[1-9][0-9]+))|(^[2-9]\.[0-9]+)|(^[0-9]{2,}\.[0-9]+))\.[0-9]+$') > /dev/null 2>&1 ; then
+    make doc
+    mkdir %{buildroot}%{_docdir}/html/
+    cp -r %{_builddir}/%{buildsubdir}/doc/html/ %{buildroot}%{_docdir}/%{name}/html/
+    echo %{_docdir}/%{name}/html/ > %{extrafiles}
+else
+    echo "Doxygen documentation not included into rpm package!"
+fi
+
+%files -f %{extrafiles}
 %defattr(644,root,root,755)
 %{_libdir}/libparamset.so
 %{_libdir}/libparamset.so.*
@@ -75,11 +89,11 @@ make install DESTDIR=%{buildroot}
 
 %{_includedir}/param_set/parameter.h
 %{_includedir}/param_set/param_set.h
-%{_includedir}/param_set/param_set_obj_impl.h
 %{_includedir}/param_set/param_value.h
 %{_includedir}/param_set/strn.h
 %{_includedir}/param_set/task_def.h
 %{_includedir}/param_set/version.h
+%{_includedir}/param_set/wildcardexpanders.h
 %{_libdir}/libparamset.a
 %{_libdir}/libparamset.la
 # %{_libdir}/pkgconfig/libparamset.pc

@@ -17,20 +17,15 @@
 # reserves and retains all trademark rights.
 #
 
-AM_CFLAGS=-g -Wall -I$(top_builddir)/src/param_set
-AM_LDFLAGS=-L$(top_builddir)/src/param_set -no-install -lparamset
-check_PROGRAMS = test
+AUTOMAKE_OPTIONS = foreign
 
-test_SOURCES= \
-		all_tests.c \
-		all_tests.h \
-		command_line_test.c \
-		cutest/CuTest.c \
-		cutest/CuTest.h \
-		param_set_test.c \
-		param_value_test.c \
-		parameter_test.c \
-		support_tests.c \
-		support_tests.h \
-		task_def_test.c
+all:
+
+doc: htmldoc 
+
+htmldoc: 
+	doxygen $(builddir)/doxyfile
+
+clean-local:
+	rm -rf html latex
 

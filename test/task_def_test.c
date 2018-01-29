@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -24,9 +24,9 @@
 
 #include "cutest/CuTest.h"
 #include "all_tests.h"
-#include "../param_set/param_set_obj_impl.h"
-#include "../param_set/param_set.h"
-#include "../param_set/task_def.h"
+#include "../src/param_set/param_set_obj_impl.h"
+#include "../src/param_set/param_set.h"
+#include "../src/param_set/task_def.h"
 
 #define LIFO_SIZE 32
 
@@ -364,19 +364,19 @@ static void Test_task_definition_repair_messages(CuTest* tc) {
 
 
 	CuAssert(tc, "Invalid repair suggestions.",
-			TASK_DEFINITION_howToRepiar_toString(task_def_1, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_1) == 0);
+			TASK_DEFINITION_howToRepair_toString(task_def_1, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_1) == 0);
 
 	CuAssert(tc, "Invalid repair suggestions.",
-			TASK_DEFINITION_howToRepiar_toString(task_def_2, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_2) == 0);
+			TASK_DEFINITION_howToRepair_toString(task_def_2, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_2) == 0);
 
 	CuAssert(tc, "Invalid repair suggestions.",
-			TASK_DEFINITION_howToRepiar_toString(task_def_3, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_3) == 0);
+			TASK_DEFINITION_howToRepair_toString(task_def_3, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_3) == 0);
 
 	CuAssert(tc, "Invalid repair suggestions.",
-			TASK_DEFINITION_howToRepiar_toString(task_def_4, set, NULL, buf, sizeof(buf)) != NULL && strcmp(buf, exp_4) == 0);
+			TASK_DEFINITION_howToRepair_toString(task_def_4, set, NULL, buf, sizeof(buf)) != NULL && strcmp(buf, exp_4) == 0);
 
 	CuAssert(tc, "Invalid repair suggestions.",
-			TASK_DEFINITION_howToRepiar_toString(task_def_5, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_5) == 0);
+			TASK_DEFINITION_howToRepair_toString(task_def_5, set, "Error: ", buf, sizeof(buf)) != NULL && strcmp(buf, exp_5) == 0);
 
 	PARAM_SET_free(set);
 	TASK_DEFINITION_free(task_def_1);

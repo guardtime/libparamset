@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2015 Guardtime, Inc.
+# Copyright 2013-2017 Guardtime, Inc.
 #
 # This file is part of the Guardtime client SDK.
 #
@@ -24,6 +24,7 @@ libparamset_la_SOURCES = \
 	param_set.c \
 	param_set.h \
 	param_set_obj_impl.h \
+	internal.h \
 	param_value.c \
 	param_value.h \
 	parameter.c \
@@ -32,17 +33,19 @@ libparamset_la_SOURCES = \
 	strn.h \
 	task_def.c \
 	task_def.h \
+	wildcardexpanders.c \
+	wildcardexpanders.h \
 	version.h
 
 
 otherincludedir = $(includedir)/param_set
 otherinclude_HEADERS = \
 	param_set.h \
-	param_set_obj_impl.h \
 	param_value.h \
 	parameter.h \
 	strn.h \
 	task_def.h \
+	wildcardexpanders.h \
 	version.h
 
 libparamset_la_LDFLAGS=-version-info @LTVER@

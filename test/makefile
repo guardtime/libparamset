@@ -1,3 +1,21 @@
+#
+# Copyright 2013-2017 Guardtime, Inc.
+#
+# This file is part of the Guardtime client SDK.
+#
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES, CONDITIONS, OR OTHER LICENSES OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+# "Guardtime" and "KSI" are trademarks or registered trademarks of
+# Guardtime, Inc., and no license to trademarks is granted; Guardtime
+# reserves and retains all trademark rights.
+
 !IF "$(RTL)" != "MT" && "$(RTL)" != "MTd" && "$(RTL)" != "MD" && "$(RTL)" != "MDd"
 !ERROR "TEST MAKE: You Must specify RTL as MT, MTd, MD or MDd"
 !ENDIF
@@ -9,13 +27,13 @@
 TOOL_NAME = test
 
 PARAM_SET_LIB_NAME = libparamset
-PARAM_SET_LIB_DIR = ..\..\out\$(ENG_LIB)
+PARAM_SET_LIB_DIR = ..\out\$(ENG_LIB)
 
 SRC_DIR = .
 SRC_CUTEST_DIR = $(SRC_DIR)\cutest
-OBJ_DIR = ..\..\obj\$(TOOL_NAME)
-OBJ_CUTEST_DIR = ..\..\obj\cutest
-BIN_DIR = ..\..\out\bin
+OBJ_DIR = ..\obj\$(TOOL_NAME)
+OBJ_CUTEST_DIR = ..\obj\cutest
+BIN_DIR = ..\out\bin
 
 
 #Objects for making command-line tool
@@ -28,16 +46,16 @@ TOOL_OBJ = \
 	$(OBJ_DIR)\param_set_test.obj \
 	$(OBJ_DIR)\support_tests.obj \
 	$(OBJ_DIR)\task_def_test.obj
-	
-CUTEST_OBJ = $(OBJ_CUTEST_DIR)\CuTest.obj	
-	
+
+CUTEST_OBJ = $(OBJ_CUTEST_DIR)\CuTest.obj
+
 
 
 #Compiler and linker configuration
 EXT_LIB = $(PARAM_SET_LIB_NAME)$(RTL).lib \
 	user32.lib gdi32.lib advapi32.lib Ws2_32.lib Kernel32.lib
-	  
-	
+
+
 CCFLAGS = /nologo /W4 /D_CRT_SECURE_NO_DEPRECATE  /I$(SRC_DIR) /I$(SRC_CUTEST_DIR)
 LDFLAGS = $(LDFLAGS) /NOLOGO /LIBPATH:$(PARAM_SET_LIB_DIR)
 
@@ -61,25 +79,26 @@ LDFLAGS = $(LDFLAGS) $(LDEXTRA)
 
 #Making
 
-default: $(BIN_DIR)\$(TOOL_NAME).exe 
+default: $(BIN_DIR)\$(TOOL_NAME).exe
 
-#Linking 
+#Linking
 $(BIN_DIR)\$(TOOL_NAME).exe: $(BIN_DIR) $(OBJ_DIR) $(OBJ_CUTEST_DIR) $(TOOL_OBJ) $(CUTEST_OBJ)
-	link $(LDFLAGS) /OUT:$@ $(TOOL_OBJ) $(CUTEST_OBJ) $(EXT_LIB) 
+	link $(LDFLAGS) /OUT:$@ $(TOOL_OBJ) $(CUTEST_OBJ) $(EXT_LIB)
+!IF "$(DLL)" == "dll"
+	copy "$(PARAM_SET_LIB_DIR)\$(PARAM_SET_LIB_NAME)$(RTL).dll" "$(BIN_DIR)\" /Y /D
+!ENDIF
 
-	
-#C file compilation  	
+#C file compilation
 {$(SRC_DIR)\}.c{$(OBJ_DIR)\}.obj:
 	cl /c /$(RTL) $(CCFLAGS) /Fo$@ $<
 
 {$(SRC_CUTEST_DIR)\}.c{$(OBJ_CUTEST_DIR)\}.obj:
 	cl /c /$(RTL) $(CCFLAGS) /Fo$@ $<
-	
 
-#Folder factory	
+
+#Folder factory
 $(OBJ_DIR) $(OBJ_CUTEST_DIR) $(BIN_DIR):
 	@if not exist $@ mkdir $@
-	
+
 clean:
 	@for %i in ($(OBJ_DIR) $(OBJ_CUTEST_DIR) $(BIN_DIR)) do @if exist .\%i rmdir /s /q .\%i
-	

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -27,8 +27,6 @@
 #include "parameter.h"
 #include "param_set_obj_impl.h"
 #include "strn.h"
-
-#define debug_array_printf 	{int n; for (n = 0; n < task_set->count; n++) {printf("[%2.2f:%2i]", task_set->cons[n], task_set->index[n]);}printf("\n");}
 
 
 static int new_string(const char *str, char **out) {
@@ -113,10 +111,10 @@ static int task_definition_getAtLeastOneSetMetrica(TASK_DEFINITION *def, PARAM_S
 	return PST_OK;
 }
 
-static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **new){
+static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **newObj){
 	TASK *tmp = NULL;
 
-	if (new == NULL) return PST_INVALID_ARGUMENT;
+	if (newObj == NULL) return PST_INVALID_ARGUMENT;
 
 	tmp = (TASK*)malloc(sizeof(TASK));
 	if (tmp == NULL) return PST_OUT_OF_MEMORY;
@@ -125,7 +123,7 @@ static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **new){
 	tmp->id = pDef->id;
 	tmp->set = pSet;
 
-	*new = tmp;
+	*newObj = tmp;
 	return PST_OK;
 }
 
@@ -149,18 +147,12 @@ PARAM_SET *TASK_getSet(TASK *task) {
 	else return task->set;
 }
 
-TASK_DEFINITION *TASK_getDef(TASK *task) {
-	if (task == NULL) return NULL;
-	else return task->def;
-}
-
-
-int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore, TASK_DEFINITION **new) {
+int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *atleastone, const char *forb, const char *ignore, TASK_DEFINITION **newObj) {
 	int res;
 	TASK_DEFINITION *tmp = NULL;
 	char buf[1024];
 
-	if (name == NULL || man == NULL || new == NULL) {
+	if (name == NULL || man == NULL || newObj == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
@@ -213,7 +205,7 @@ int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *a
 		if (res != PST_OK) goto cleanup;
 	}
 
-	*new = tmp;
+	*newObj = tmp;
 	tmp = NULL;
 	res = PST_OK;
 
@@ -272,8 +264,6 @@ int TASK_DEFINITION_analyzeConsistency(TASK_DEFINITION *def, PARAM_SET *set, dou
 
 	forbiddentSet = forCount - forMissing;
 
-//	printf("M %i/%i F %i/%i\n", manMissing, manCount, forMissing, forCount);
-
 	/**
 	 * First flag in category is most important and gives 0.5 of consistency and
 	 * another 0.5 comes from all other mandatory flags. Every forbidden flag
@@ -284,7 +274,6 @@ int TASK_DEFINITION_analyzeConsistency(TASK_DEFINITION *def, PARAM_SET *set, dou
 
 	def->consistency = defMan - defFor;
 
-//	printf(">>> consistency (%i %s) %f\n",def->id, def->name, def->consistency);
 
 	if (manMissing == 0 && forbiddentSet == 0){
 		def->isConsistent = 1;
@@ -359,7 +348,6 @@ int TASK_DEFINITION_getMoreConsistent(TASK_DEFINITION *A, TASK_DEFINITION *B, PA
 				if (strcmp(bufA, bufB) == 0 && PARAM_SET_isSetByName(set, bufA) && PARAM_SET_isSetByName(set, bufB)) {
 						A_different_set_flag_count--;
 						B_different_set_flag_count--;
-//						printf("%s--\n", bufA);
 				}
 			}
 		}
@@ -372,7 +360,6 @@ int TASK_DEFINITION_getMoreConsistent(TASK_DEFINITION *A, TASK_DEFINITION *B, PA
 				if (strcmp(bufA, bufB) == 0 && PARAM_SET_isSetByName(set, bufA) && PARAM_SET_isSetByName(set, bufB)) {
 						A_different_set_flag_count--;
 						B_different_set_flag_count--;
-//						printf("%s--\n", bufA);
 				}
 			}
 		}
@@ -381,8 +368,6 @@ int TASK_DEFINITION_getMoreConsistent(TASK_DEFINITION *A, TASK_DEFINITION *B, PA
 			tmp = NULL;
 		} else {
 			tmp = ((double)A_different_set_flag_count * A->consistency > (double)B_different_set_flag_count * B->consistency) ? A : B;
-//			printf("%s %i compared to %s %i, more consistent is %s %i\n", A->name, A->id, B->name, B->id, tmp->name, tmp->id);
-//			printf("A: %f and B: %f\n", (double)A_different_set_flag_count * A->consistency , (double)B_different_set_flag_count * B->consistency);
 		}
 	} else if (consisteny_A == consisteny_B || fabs(consisteny_A - consisteny_B) >= 0.00000000001) {
 		tmp = NULL;
@@ -428,14 +413,13 @@ char* TASK_DEFINITION_toString(TASK_DEFINITION *def, char *buf, size_t buf_len) 
 			round++;
 		}
 
-		count += PST_snprintf(buf + count, buf_len - count, ")");
+		PST_snprintf(buf + count, buf_len - count, ")");
 	}
 
-//	count += PST_snprintf(buf + count, buf_len - count, "\n");
 	return buf;
 }
 
-char *TASK_DEFINITION_howToRepiar_toString(TASK_DEFINITION *def, PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
+char *TASK_DEFINITION_howToRepair_toString(TASK_DEFINITION *def, PARAM_SET *set, const char *prefix, char *buf, size_t buf_len) {
 	const char *pName = NULL;
 	int err_printed = 0;
 	size_t count = 0;
@@ -509,7 +493,7 @@ char *TASK_DEFINITION_howToRepiar_toString(TASK_DEFINITION *def, PARAM_SET *set,
 			}
 		}
 	}
-	if (err_printed) count += PST_snprintf(buf + count, buf_len - count, ".\n");
+	if (err_printed) PST_snprintf(buf + count, buf_len - count, ".\n");
 
 	return buf;
 }
@@ -543,18 +527,18 @@ char* TASK_DEFINITION_ignoredParametersToString(TASK_DEFINITION *def, PARAM_SET 
 		}
 	}
 
-	if (err_printed) count += PST_snprintf(buf + count, buf_len - count, ".\n");
+	if (err_printed) PST_snprintf(buf + count, buf_len - count, ".\n");
 
 	return buf;
 }
 
 
-int TASK_SET_new(TASK_SET **new) {
+int TASK_SET_new(TASK_SET **newObj) {
 	int res;
 	TASK_SET *tmp = NULL;
 	int i;
 
-	if (new == NULL) {
+	if (newObj == NULL) {
 		res = PST_INVALID_ARGUMENT;
 		goto cleanup;
 	}
@@ -579,7 +563,7 @@ int TASK_SET_new(TASK_SET **new) {
 	}
 
 
-	*new = tmp;
+	*newObj = tmp;
 	tmp = NULL;
 	res = PST_OK;
 
@@ -590,16 +574,16 @@ cleanup:
 	return res;
 }
 
-void TASK_SET_free(TASK_SET *obj){
+void TASK_SET_free(TASK_SET *task_set){
 	int i;
-	if (obj != NULL) {
-		TASK_free(obj->consistentTask);
+	if (task_set != NULL) {
+		TASK_free(task_set->consistentTask);
 
 		for (i = 0; i < TASK_DEFINITION_MAX_COUNT; i++) {
-			TASK_DEFINITION_free(obj->array[i]);
+			TASK_DEFINITION_free(task_set->array[i]);
 		}
 
-		free(obj);
+		free(task_set);
 	}
 }
 
@@ -686,7 +670,6 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 	 * with less consistent. If consistency is very similar analyze the order
 	 * in more precise way.
 	 */
-//	debug_array_printf
 	for (i = 0; i < task_set->count; i++) {
 		for (j = i + 1; j < task_set->count; j++) {
 			if (fabs(task_set->cons[i] - task_set->cons[j]) <= sensitivity) {
@@ -727,7 +710,6 @@ int TASK_SET_analyzeConsistency(TASK_SET *task_set, PARAM_SET *set, double sensi
 
 			}
 		}
-//		debug_array_printf
 	}
 
 	task_set->isAnalyzed = 1;
@@ -767,7 +749,7 @@ int TASK_SET_getConsistentTask(TASK_SET *task_set, TASK **task) {
 	}
 
 	/**
-	 * If there is not exactly one consistent task there must be a error.
+	 * If there is not exactly one consistent task there must be an error.
 	 */
 	if (task_set->consistent_count != 1) {
 		res = task_set->consistent_count == 0 ? PST_TASK_ZERO_CONSISTENT_TASKS : PST_TASK_MULTIPLE_CONSISTENT_TASKS;
@@ -887,7 +869,7 @@ char* TASK_SET_howToRepair_toString(TASK_SET *task_set, PARAM_SET *set, int ID, 
 				count += PST_snprintf(buf + count, buf_len - count, "Task '%s' %s is OK.", task_set->array[i]->name, task_set->array[i]->toString);
 			} else {
 				count += PST_snprintf(buf + count, buf_len - count, "Task '%s' %s is invalid:\n", task_set->array[i]->name, task_set->array[i]->toString);
-				tmp = TASK_DEFINITION_howToRepiar_toString(task_set->array[i], set, prefix, buf + count, buf_len - count);
+				tmp = TASK_DEFINITION_howToRepair_toString(task_set->array[i], set, prefix, buf + count, buf_len - count);
 
 				if (tmp == NULL) return NULL;
 				else return buf;

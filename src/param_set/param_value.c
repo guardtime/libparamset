@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -25,6 +25,9 @@
 #include "param_value.h"
 #include "param_set.h"
 #include "strn.h"
+
+#define PST_FORMAT_STATUS_OK 0
+#define PST_CONTENT_STATUS_OK 0
 
 static char *new_string(const char *str) {
 	char *tmp = NULL;
@@ -157,7 +160,6 @@ void PARAM_VAL_free(PARAM_VAL *rootValue) {
 
 	if (rootValue == NULL) return;
 
-	to_be_freed = rootValue;
 	next = rootValue;
 
 	do {
@@ -552,7 +554,7 @@ int ITERATOR_set(ITERATOR *itr, PARAM_VAL *new_root, const char* source, int pri
 
 cleanup:
 
-	return PST_OK;
+	return res;
 }
 
 int ITERATOR_new(PARAM_VAL *root, ITERATOR **itr) {
@@ -585,7 +587,7 @@ cleanup:
 	return res;
 }
 
-int ITERATOR_canBeUsedToFetch(ITERATOR *itr, const char* source, int priority, int at) {
+static int ITERATOR_canBeUsedToFetch(ITERATOR *itr, const char* source, int priority, int at) {
 	if (itr == NULL) return 0;
 	if ((source == NULL && itr->source != NULL) || (source != NULL && itr->source == NULL)) return 0;
 	if (source != NULL && strcmp(source, itr->source) != 0) return 0;

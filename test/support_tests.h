@@ -17,11 +17,41 @@
  * reserves and retains all trademark rights.
  */
 
-#ifndef _VERSION_H_
-#define _VERSION_H_
+#ifndef SUPPORT_TESTS_H
+#define	SUPPORT_TESTS_H
 
-#define PST_VER_MAJOR @VER_MAJOR@
-#define PST_VER_MINOR @VER_MINOR@
-#define PST_VER_BUILD @VER_BUILD@
+#include "cutest/CuTest.h"
+#include <stdio.h>
 
-#endif /* _VERSION_H_ */
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+#ifdef _WIN32
+#	ifndef snprintf
+#		define snprintf _snprintf
+#	endif
+#	ifdef _DEBUG
+#		define _CRTDBG_MAP_ALLOC
+#		include <stdlib.h>
+#		include <crtdbg.h>
+#	endif
+#endif
+
+
+void addSuite(CuSuite *suite, CuSuite* (*fn)(void));
+
+void printStats(CuSuite *suite, const char *heding);
+
+void initFullResourcePath(const char* rootDir);
+const char *getFullResourcePath(const char* resource);
+
+void writeXmlReport(CuSuite *suite, const char *fname);
+
+
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* SUPPORT_TESTS_H */
+

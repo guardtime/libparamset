@@ -59,3 +59,7 @@ libtool
 
 # Debug files
 *.dSYM/
+
+# doxygen generated html and (la)tex files
+/doc/html/
+/doc/latex/

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 const char *getFullResourcePath(const char* resource);
+#define VARIABLE_IS_NOT_USED(v) ((void)(v));
 
 CuSuite* ParamValueTest_getSuite(void);
 CuSuite* ParameterTest_getSuite(void);

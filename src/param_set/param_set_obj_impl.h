@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -21,10 +21,15 @@
 #define	PARAM_SET_OBJ_IMPL_H
 
 #include "param_set.h"
+#include "task_def.h"
+#include "internal.h"
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
+
+/** Maximum task count. */
+#define TASK_DEFINITION_MAX_COUNT 64
 
 /**
  * Parameter value data structure that contains the data and information about its
@@ -51,7 +56,8 @@ struct PARAM_VAL_st{
 struct PARAM_st{
 	char *flagName;					/* The name of the parameter. */
 	char *flagAlias;				/* The alias for the parameter. */
-	int constraints;			/* Constraint If there is more than 1 parameters allowed. For validity check. */
+	char *helpText;				/* The help text for a parameter. */
+	int constraints;			/* Constraint If there is more than 1 parameter allowed. For validity check. */
 	int highestPriority;			/* Highest priority of inserted values. */
 	int parsing_options;			/* Some options used when parsing variables. */
 	int argCount;					/* Count of all arguments in chain. */
@@ -62,20 +68,22 @@ struct PARAM_st{
 
 	/**
 	 * A function to extract object from the parameter.
-	 * int extractObject(void *extra, const char *str, void **obj)
-	 * extra - optional pointer to data structure.
+	 * int extractObject(void **extra, const char *str, void **obj)
+	 * extra - optional pointer to array of pointers of size 2.
 	 * str - c-string value that belongs to PARAM_VAL object.
 	 * obj - pointer to receiving pointer to desired object.
 	 * Returns PST_OK if successful, error code otherwise.
 	 */
-	int (*extractObject)(void *extra, const char *str, void **obj);
+	int (*extractObject)(void **extra, const char *str, void **obj);
 
 	/**
 	 * Function convert takes input as raw parameter, followed by a buffer and its size.
 	 * str - c-string value that belongs to PARAM_VAL object.
 	 * buf - a buffer that will contain value after conversion.
 	 * buf_len - the size of the buffer.
-	 * Returns 1 if conversion successful, 0 otherwise.
+	 * Returns #PST_OK (0) if conversion successful, error code otherwise. If
+	 * conversion is not performed, #PST_PARAM_CONVERT_NOT_PERFORMED must be used
+	 * or \c str must be copied to \ buf.
 	 */
 	int (*convert)(const char *str, char *buf, unsigned buf_len);
 
@@ -96,16 +104,18 @@ struct PARAM_st{
 	int (*controlContent)(const char *str);
 
 	/**
-	 * This buffer and its size is feed to the abstract function getPrintName.
-	 * It is not ment to be used directly.
+	 * This buffer and its size is fed to the abstract function getPrintName.
+	 * It is not meant to be used directly.
 	 */
 	char print_name_buf[256];
+	char print_name_alias_buf[256];
 
 	/**
 	 * Function \c getPrintName is used to return string representation of the
 	 * parameter.
 	 */
 	const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len);
+	const char* (*getPrintNameAlias)(PARAM *param, char *buf, unsigned buf_len);
 
 	/**
 	 * A function to expand tokens that contain wildcard character (WC) to array of
@@ -129,6 +139,17 @@ struct PARAM_st{
 	 * Additional context for expand_wildcard.
 	 */
 	void *expand_wildcard_ctx;
+
+	/**
+	 * List of characters the is used to identify the string that needs wildcard
+	 * processor to convert it.
+	 */
+	const char *expand_wildcard_char;
+
+	/**
+	 * An optional expaned wildcard ctx object.
+	 */
+	void (*expand_wildcard_free)(void *);
 };
 
 

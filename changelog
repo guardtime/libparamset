@@ -1,8 +1,36 @@
-* IMPROVEMENT: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
-* IMPROVEMENT: PARAM_SET_typosToString interface changed - flag parameter removed.
-* FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
+Version 1.0
 
-2016-11-30 0.2.0
+2018-01-29 1.0.212
+
+* IMPROVEMENT: (Interface) Abstract function extractObject extra parameter type changed from void* to void** (see PARAM_SET_addControl).
+* IMPROVEMENT: (Interface) Function convert interface, specified by PARAM_addControl and PARAM_SET_addControl, changed to return PST_OK when successful, error code otherwise.
+* IMPROVEMENT: (Interface) PARAM_SET_typosToString interface changed - flag parameter removed.
+* IMPROVEMENT: (Interface) Parsing option PST_PRSCMD_COLLECT_LIMITER_ON renamed to PST_PRSCMD_COLLECT_LIMITER_BREAK_ON.
+* IMPROVEMENT: (Interface) Parsing option PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH changed to PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH.
+* IMPROVEMENT: (Interface) Parsing option PST_PRSCMD_HAS_MULTIPLE_INSTANCES changed to PST_PRSCMD_HAS_VALUE_SEQUENCE.
+* IMPROVEMENT: (Interface) PARAM_SET_WildcardExpander renamed to PARAM_SET_setWildcardExpander.
+* IMPROVEMENT: (Interface) PARAM_SET_setWildcardExpander interface changed - new parameters ctx_free and charList added.
+* IMPROVEMENT: (Interface) PARAM_setWildcardExpander interface changed - new parameters ctx_free and charList added.
+* IMPROVEMENT: (Interface) Macros PST_FORMAT_STATUS_OK, PST_CONTENT_STATUS_OK and TASK_DEFINITION_MAX_COUNT are used internally only.
+* IMPROVEMENT: (Internal) Enumeration "enum_priority" renamed to "PST_PRIORITY_enum" and moved from param_set.h to param_value.h.
+* IMPROVEMENT: (Internal) Enumeration "enum_value_index" renamed to "PST_INDEX_enum" and moved from param_set.h to param_value.h.
+* IMPROVEMENT: (Internal) Object PARAM_ATR  moved from param_set.h to parameter.h.
+* IMPROVEMENT: (Internal) PARAM_VAL and PARAM objects type definitions moved from param_set.h to param_value.h and parameter.h accordingly.
+* IMPROVEMENT: (Internal) TASK_SET and TASK objects type definitions moved from param_set.h to task_def.h.
+* IMPROVEMENT: (Internal) Object TASK_DEFINITION is used internally only.
+* IMPROVEMENT: (Internal) Object ITERATOR is used internally only.
+* IMPROVEMENT: (Internal) Tests are run with resource folder "test" instead of  "test/resource".
+* IMPROVEMENT: (Internal) Test folder moved from "src/test" to "test".
+* IMPROVEMENT: Debian packaging implemented.
+* FEATURE: Help text can be generated and auto formatted.
+* FEATURE: Windows file system wildcard implementation included to predefined wildcard expanders.
+* FEATURE: Parameter contains internal iterator that improves PARAM_getValue performance on cases where values are get in sequence.
+* FEATURE: New function PARAM_SET_setPrintName to alter parameters string representation in error messages.
+* FEATURE: Doxygen documentation added.
+* BUGFIX: Small mathematical correction applied for typo detection (has fractional effect in typo detection).
+* BUGFIX: Seemingly random segmentation fault fixed in support_test.c.
+
+2016-11-30 0.2.0 - First code in repository that is never packaged. Code was copied and included as source files.
 
 * IMPROVEMENT: RPM packaging implemented.
 * IMPROVEMENT: Unit tests implemented.

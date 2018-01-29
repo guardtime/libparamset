@@ -1,26 +1,30 @@
-# libparamset
-The `libparamset` is a software development kit, written in plain C, for handling command-line parameters and program tasks. Parameters can be read from command line and a task can be extracted that matches with the given input. Process is covered with error detection and functions that generate helpful feedback messages to the user.
+# PARAM SET Overview {#mainpage}
+
+The `libparamset` is a software development kit, written in plain C, for handling command-line parameters and program tasks. Parameters can be read from command line and a task can be extracted that matches with the given input. Process is covered with error detection and functions that generates helpful feedback messages to the user.
+
+## libparamset
 
 The `libparamset` provides the following functionality:
-* Parameters can be parsed from command line, read from configuration file, or inserted from the code.
-* Short and long parameters are recognised (`-a` and `--long`).
-* Concatenating of flags with length 1 (`-ab` instead of `-a -b`).
+* Works on Linux and Windows.
+* Parameters can be parsed from command line, read from configuration file or inserted from the code.
+* Short and long parameters (`-a` and `--long`).
+* Concatenating of flags with length `1` (`-ab` instead of `-a -b`).
 * One alias for the parameter name (e.g. `--load` and `-l` or `--version` and `--VERSION`).
 * Individual parsing options for parameters:
-  + Parameter with multiple coexisting values (`-a v1 -a v2 ... -a vn`, where `-a = {v1, v2, ..., vn}`).
-  + Parameter that never takes a value (`-a v1 -a -a`, where `-a = {NULL, NULL, NULL}` and `v1` is unknown token).
-  + Parameter that always takes a value (`-a -a`, where `-a = {-a}`).
-  + Existing parameter break that takes next token as it's value only if it's not an existing parameter.
-  + Possible parameter break that takes next token as it's value only if it does not look like possible parameter (`-a v1 -a -b`, where `-a = {v1, NULL}`).
-  + Parameter value sequence with (existing or possible) parameter break (`-a v1 v2 ... vn -b`, where `-a = {v1, v2, ..., vn}`).
-  + Parameter that is hidden from the command line but can be inserted from the code or configuration file.
-  + Parameter that does not generate any typo errors (useful when hiding a parameter from command line).
-  + Value collectors:
-    - Parameter `--`, that will redirect every next token to a specified parameter(s).
-    - Parameter that collects values that are not bound with any parameter (`-i x y ...`, where `x` is bound with `-i` but `y` is not).
-    - Parameter that collects all unknown parameters (`--unknown unknown`, where `--unknown` is collected and `unknown` is unknown token).
-    - Individual collector count limiters (e.g. no more than `5` values).
-* Values can be filtered by name (e.g. `-i` as `i` and  `--long` as `long`), source (e.g. `default`), priority (e.g. `3`) and index (`0 - n`).
+  * Parameter with multiple coexisting values (`-a v1 -a v2 ... -a vn`, where `-a = {v1, v2, ..., vn}`).
+  * Parameter that never takes a value (`-a v1 -a -a`, where `-a = {NULL, NULL, NULL}` and `v1` is unknown token).
+  * Parameter that always takes a value (`-a -a`, where `-a = {-a}`).
+  * Existing parameter break that takes next token as it's value only if it's not an existing parameter.
+  * Possible parameter break that takes next token as it's value only if it does not look like possible parameter (`-a v1 -a -b`, where `-a = {v1, NULL}`).
+  * Parameter value sequence with (existing or possible) parameter break (`-a v1 v2 ... vn -b`, where `-a = {v1, v2, ..., vn}`).
+  * Parameter that is hidden from the command line but can be inserted from the code or configuration file.
+  * Parameter that does not generate any typo errors (useful when hiding a parameter from command line).
+  * Value collectors:
+    * Parameter `--`, that will redirect every next token to a specified parameter(s).
+    * Parameter that collects values that are not bound with any parameter (`-i x y ...`, where `x` is bound with `-i` but `y` is not).
+    * Parameter that collects all unknown parameters (`--unknown unknown`, where `--unknown` is collected and `unknown` is unknown token).
+    * Individual collector count limiters (e.g. no more than `5` values).
+* Values can be filtered by, name (e.g. `-i` as `i` and  `--long` as `long`), source (e.g. `default`), priority (e.g. `3`) and index (`0 - n`).
 * Values can be counted by name, source and priority (e.g. `3`).
 * Values can be filtered as the last or the first with the highest or the lowest priority.
 * Values can be counted as the highest or the lowest priority.
@@ -30,7 +34,7 @@ The `libparamset` provides the following functionality:
 * Abstract format and content check functionality with auto-generated error messages.
 * Abstract parameter transformation or repair functionality.
 * Abstract Wildcard expander (can be used to make `-i *` work on Windows).
-  + Implemented wildcards for Windows file system.
+  * Implemented wildcards for Windows file system.
 * Abstract object parsing functionality (e.g. extract double or file).
 * Multiple parameter sets can be merged.
 * Task set, composed of multiple tasks, where from a task can be extracted by specified parameter set.
@@ -38,67 +42,55 @@ The `libparamset` provides the following functionality:
 * Auto-generated suggestions how to fix the task user tries to perform.
 * Parameters can be bound with description and formatted to human readable list for help text.
 
+## Main objects
 
-## Installation
+[PARAM_SET](@ref param_set.h) contains user defined parameters that can be parsed from command line, read from configuration file or added from the code.
 
-To use `libparamset` in your C/C++ project, link it against the `libparamset` binary.
+[TASK_SET](@ref task_def.h) contains multiple task definitions (parameters that are mandatory, ignored or restricted for defined task) that can be analyzed against specified [PARAM_SET](@ref param_set.h) to extract a signle consistent task that matches the input.
 
-### Latest Release from Guardtime Repository
+[TASK](@ref task_def.h) is object returned by successful [TASK_SET](@ref task_def.h) analyze that contains the matching task \c ID and \c PARAM_SET object.
 
-In order to install the `libparamset` CentOS/RHEL packages directly from the Guardtime public repository, download and save the repository configuration to the `/etc/yum.repos.d/` folder:
+## Memory Management
 
-```
-cd /etc/yum.repos.d
+The memory management obeys the following rules:
+* Every object you create, belongs to you.
+* Every object you own, must be freed by you.
+* Using free function on \c NULL does nothing and won't crash.
+* Input strings are copied and freed by parent object.
 
-# In case of RHEL/CentOS 6
-sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el6.repo
-
-# In case of RHEL/CentOS 7
-sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el7.repo
-
-yum install libparamset
-```
-
-### From Source Code
-
-If the latest version is needed or the package is not available for the platform you are using, check out source code from Github and build it using `gcc` or `VS`. To build the `libparamset`, you need to have `gcc` and `autotools`. For building in Windows you need the Windows SDK.
-
-## Usage ##
-
-### Workflow ###
+## Workflow
 
 - Include `param_set.h` and `task_def.h`.
 - Configure parameters:
-  + Create new `PARAM_SET` object with set of parameters `PARAM_SET_new`.
-  + Add implementations for format, control (and convert) functions with `PARAM_SET_addControl`.
-  + Add implementation for wildcard expander (e.g. to implement wildcards when getting file input on Windows `-i *.txt`) `PARAM_SET_setWildcardExpander`.
-  + Add parsing options for parameters with `PARAM_SET_setParseOptions`.
+  + Create new \c PARAM_SET object with set of parameters [PARAM_SET_new](@ref PARAM_SET_new).
+  + Add implementations for format, control (and convert) functions with [PARAM_SET_addControl](@ref PARAM_SET_addControl).
+  + Add implementation for wildcard expander (e.g. to implement wildcards when getting file input on Windows `-i *.txt`) [PARAM_SET_setWildcardExpander](@ref PARAM_SET_setWildcardExpander).
+  + Add parsing options for parameters with [PARAM_SET_setParseOptions](@ref PARAM_SET_setParseOptions).
 - Configure tasks:
-  + Create new `TASK_SET` object with `TASK_SET_new`.
-  + Add task definitions to the `TASK_SET` with `TASK_SET_add`.
+  + Create new \c TASK_SET object with [TASK_SET_new](@ref TASK_SET_new).
+  + Add task definitions to the \c TASK_SET with [TASK_SET_add](@ref TASK_SET_add).
 - Get parameters:
-  + Parse command line with `PARAM_SET_parseCMD`.
-  + Read parameters from configuration file with `PARAM_SET_readFromFile`.
-  + Check and report user if configuration file contained some syntax errors with `PARAM_SET_isSyntaxError` and `PARAM_SET_syntaxErrorsToString`.
-  + Merge different `PARAM_SET` objects with `PARAM_SET_IncludeSet`.
-  + Check for unknown parameters and typos with `PARAM_SET_isUnknown` and `PARAM_SET_isTypoFailure`.
-  + Check for invalid parameters that failed format or content checks with `PARAM_SET_isFormatOK`.
-  + If there are some errors, help user with error messages by using following functions: `PARAM_SET_unknownsToString`, `PARAM_SET_typosToString` and `PARAM_SET_invalidParametersToString`.
+  + Parse command line with [PARAM_SET_parseCMD](@ref PARAM_SET_parseCMD).
+  + Read parameters from configuration file with [PARAM_SET_readFromFile](@ref PARAM_SET_readFromFile).
+  + Check and report user if configuration file contained some syntax errors with [PARAM_SET_isSyntaxError](@ref PARAM_SET_isSyntaxError) and [PARAM_SET_syntaxErrorsToString](@ref PARAM_SET_syntaxErrorsToString).
+  + Merge different \c PARAM_SET objects with [PARAM_SET_IncludeSet](@ref PARAM_SET_IncludeSet).
+  + Check for unknown parameters and typos with [PARAM_SET_isUnknown](@ref PARAM_SET_isUnknown) and [PARAM_SET_isTypoFailure](@ref PARAM_SET_isTypoFailure).
+  + Check for invalid parameters that failed format or content checks with [PARAM_SET_isFormatOK](@ref PARAM_SET_isFormatOK).
+  + If there are some errors, help user with error messages by using following functions [PARAM_SET_unknownsToString](@ref PARAM_SET_unknownsToString), [PARAM_SET_typosToString](@ref PARAM_SET_typosToString) and [PARAM_SET_invalidParametersToString](@ref PARAM_SET_invalidParametersToString).
 - Analyze task set against given input:
-  + Analyze the `TASK_SET` against `PARAM_SET` with `TASK_SET_analyzeConsistency`.
-  + Extract consistent task from `TASK_SET` with `TASK_SET_getConsistentTask`.
-  + In case of failure, check if there is an invalid task that stands out from the others and give user some hints how to fix it with functions `TASK_SET_isOneFromSetTheTarget` and `TASK_SET_howToRepair_toString`. When it's hard to distinguish which task user is trying to accomplish, give some suggestions that do have the most similar pattern to the given input with `TASK_SET_suggestions_toString`.
-- Use functions `TASK_getID` and `TASK_getSet` and perform the selected task:
-  + To check if a parameter is set, use function `PARAM_SET_isSetByName`.
-  + To get parameters value from the set, use functions `PARAM_SET_getStr` and `PARAM_SET_getObj`.
-  + To get parameter value count, use function `PARAM_SET_getValueCount`.
-- Release object with `TASK_SET_free` and `PARAM_SET_free`.
+  + Analyze the \c TASK_SET against \c PARAM_SET [TASK_SET_analyzeConsistency](@ref TASK_SET_analyzeConsistency).
+  + Extract consistent task from \c TASK_SET with [TASK_SET_getConsistentTask](@ref TASK_SET_getConsistentTask).
+  + In case of failure, check if there is a invalid task that stands out from the others and give user some hints how to fix it with functions [TASK_SET_isOneFromSetTheTarget](@ref TASK_SET_isOneFromSetTheTarget) and [TASK_SET_howToRepair_toString](@ref TASK_SET_howToRepair_toString). When it's difficult to distinguish which task user is trying to accomplish give some suggestions that have the most similar pattern to the given input with [TASK_SET_suggestions_toString](@ref TASK_SET_suggestions_toString).
+- Use functions [TASK_getID](@ref TASK_getID) and [TASK_getSet](@ref TASK_getSet) and perform the selected task:
+  * To check if a parameter is set, use function [PARAM_SET_isSetByName](@ref PARAM_SET_isSetByName).
+  + To get parameters value from the set, use functions [PARAM_SET_getStr](@ref PARAM_SET_getStr) and [ PARAM_SET_getObj](@ref PARAM_SET_getObj).
+  + To get parameter value count, use function [PARAM_SET_getValueCount](@ref PARAM_SET_getValueCount).
+- Release object with [TASK_SET_free](@ref TASK_SET_free) and [PARAM_SET_free](@ref PARAM_SET_free).
 
+## Code examples
 
-### Code examples ###
-
-#### Example 1
-A very basic example that illustrates how to parse the command-line options without any error handling and perform the task. See Example 2 for more advanced use case.
+### Example 1
+A basic example that illustrates just how to parse the command-line options without any error handling and do the task. See `Example 2` for more advanced use case.
 
 ```C
 #include <stdio.h>
@@ -121,7 +113,7 @@ int main(int argc, char** argv) {
 	PARAM_SET_setHelpText(set, "r", "Reverse file.");
 	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
 	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
-	PARAM_SET_setHelpText(set, "debug", "Print param_setobject.");
+	PARAM_SET_setHelpText(set, "debug", "Print param_set object.");
 
 	/*
 	 * See PARAM_SET_isSetByName, PARAM_SET_isOneOfSetByName, PARAM_SET_getStr,
@@ -146,8 +138,8 @@ int main(int argc, char** argv) {
 }
 ```
 
-#### Example 2
-A simple example of a command-line tool that uses `libparamset` to specify parameter set and task set, parse the command line, handle errors and give some feedback to the user to help get things working.
+### Example 2
+A simple example of a command-line tool that uses `libparamset` to specify parameter set and task set, parse the command line, handle errors and give some feedback to help get things working.
 
 ```C
 #include <stdio.h>
@@ -198,7 +190,7 @@ int main(int argc, char** argv, char **envp) {
 	PARAM_SET_setHelpText(set, "r", "Reverse file.");
 	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
 	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
-	PARAM_SET_setHelpText(set, "debug", "Print param_set object.");
+	PARAM_SET_setHelpText(set, "debug", "Print param_setobject.");
 
 	/*
 	 * To enable Windows file system wildcards, specify the wildcard expander
@@ -207,7 +199,7 @@ int main(int argc, char** argv, char **envp) {
 	 */
 #ifdef _WIN32
 	PARAM_SET_setWildcardExpander(set, "i", NULL, NULL, NULL, PST_WCF_Win32FileWildcard);
-	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_EXPAND_WILDCARD);
+	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE |  PST_PRSCMD_EXPAND_WILDCARD);
 #else
 	PARAM_SET_setParseOptions(set, "i", PST_PRSCMD_HAS_VALUE);
 #endif
@@ -334,25 +326,9 @@ int convertRepair_path(const char* arg, char* buf, unsigned len){
 
 	return PST_OK;
 }
-
 ```
 
-## License ##
+## Third party components
 
-See the `LICENSE` file.
-
-## Contributing
-
-See the `CONTRIBUTING.md` file.
-
-## Dependencies ##
-| Dependency        | Version                           | License type | Source                         | Notes |
-| :---              | :---                              | :---         | :---                           |:---   |
-| CuTest            | 1.5                               | Zlib         |                                | Required only for testing. |
-
-
-## Compatibility ##
-| OS / Platform                              | Compatibility                                |
-| :---                                       | :---                                         |
-| CentOS/RHEL 6 and 7, x86_64 architecture   | Fully compatible and tested.                 |
-| Windows 7, 8, 10                           | Compatible but not tested on a regular basis. Build combination of `DLL=dll` and `RTL=MT(d)` not supported. |
+The SDK is using the following third party components:
+* CuTest [cutest.sourceforge.net](http://cutest.sourceforge.net/)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -21,8 +21,8 @@
 
 #include "cutest/CuTest.h"
 #include "all_tests.h"
-#include "../param_set/param_value.h"
-#include "../param_set/param_set_obj_impl.h"
+#include "../src/param_set/param_value.h"
+#include "../src/param_set/param_set_obj_impl.h"
 
 #ifdef _WIN32
 #define snprintf _snprintf

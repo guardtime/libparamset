@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -23,9 +23,9 @@
 
 #include "cutest/CuTest.h"
 #include "all_tests.h"
-#include "../param_set/param_value.h"
-#include "../param_set/parameter.h"
-#include "../param_set/param_set_obj_impl.h"
+#include "../src/param_set/param_value.h"
+#include "../src/param_set/parameter.h"
+#include "../src/param_set/param_set_obj_impl.h"
 
 
 
@@ -193,7 +193,7 @@ static int convert_replaceNonAlpha(const char *value, char *buf, unsigned buf_le
 		i++;
 	}
 	buf[j] = '\0';
-	return 1;
+	return PST_OK;
 }
 
 static void Test_SetValuesAndControl(CuTest* tc) {
@@ -309,20 +309,20 @@ static void Test_SetValuesAndControl(CuTest* tc) {
 	PARAM_free(p4);
 }
 
-static int wrapper_returnStr(void *extra, const char* str, void** obj){
+static int wrapper_returnStr(void **extra, const char* str, void** obj){
 	if (extra);
 	*obj = (void*)str;
 	return PST_OK;
 }
 
-static int wrapper_returnInt(void *extra, const char* str,  void** obj){
+static int wrapper_returnInt(void **extra, const char* str,  void** obj){
 	int *pI = (int*)obj;
 	if (extra);
 	*pI = atoi(str);
 	return PST_OK;
 }
 
-static int wrapper_returnDouble(void *extra, const char* str,  void** obj){
+static int wrapper_returnDouble(void **extra, const char* str,  void** obj){
 	double *pd = (double*)obj;
 	if (extra);
 	*pd = atof(str);
@@ -429,25 +429,25 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	res = PARAM_new("string", NULL, 0, PST_PRSCMD_DEFAULT, &p1);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	CuAssert(tc, "Parsing option is not default.", PARAM_isParsOptionSet(p1, PST_PRSCMD_DEFAULT));
-	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_HAS_NO_VALUE));
+	CuAssert(tc, "Parsing option is not default.", PARAM_isParseOptionSet(p1, PST_PRSCMD_DEFAULT));
+	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_HAS_NO_VALUE));
 
 	res = PARAM_setParseOption(p1, PST_PRSCMD_NONE);
-	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParsOptionSet(p1, PST_PRSCMD_NONE));
-	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_DEFAULT));
+	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParseOptionSet(p1, PST_PRSCMD_NONE));
+	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_DEFAULT));
 
 	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
-	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER));
-	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH | PST_PRSCMD_DEFAULT));
+	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER));
+	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH | PST_PRSCMD_DEFAULT));
 
-	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH);
-	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH));
-	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
+	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH);
+	CuAssert(tc, "Unable set parsing options.", res == PST_OK && PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH));
+	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
 
 	/**
 	 * Some invalid cases.
      */
-	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_HAS_NO_VALUE);
+	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_HAS_NO_VALUE);
 	CuAssert(tc, "This combinations should not be possible to be applied.", res == PST_PRSCMD_INVALID_COMBINATION);
 
 	res = PARAM_setParseOption(p1, PST_PRSCMD_HAS_VALUE | PST_PRSCMD_HAS_NO_VALUE);
@@ -456,19 +456,22 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	res = PARAM_setParseOption(p1, PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_NO_VALUE);
 	CuAssert(tc, "This combinations should not be possible to be applied.", res == PST_PRSCMD_INVALID_COMBINATION);
 
-	res = PARAM_setParseOption(p1, PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_MULTIPLE_INSTANCES);
+	res = PARAM_setParseOption(p1, PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE_SEQUENCE);
 	CuAssert(tc, "This combinations should not be possible to be applied.", res == PST_PRSCMD_INVALID_COMBINATION);
 
 	res = PARAM_setParseOption(p1, PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE);
 	CuAssert(tc, "This combinations should not be possible to be applied.", res == PST_PRSCMD_INVALID_COMBINATION);
 
-	CuAssert(tc, "Parameter must not be changed after multiple unsuccessful function calls.", PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH));
-	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParsOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
+	CuAssert(tc, "Parameter must not be changed after multiple unsuccessful function calls.", PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH));
+	CuAssert(tc, "Invalid parsing flags also set.", !PARAM_isParseOptionSet(p1, PST_PRSCMD_HAS_NO_VALUE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER | PST_PRSCMD_DEFAULT | PST_PRSCMD_HAS_VALUE));
 
 	PARAM_free(p1);
 }
 
- static int expand_wildcard_len3str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
+/* A wildcard character! Must be initialized! */
+char wc = ' ';
+
+ static int expand_wildcard_len2str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
 	 const char *input = NULL;
 	 int res;
 	 char **accepted_strs = (char**)ctx;
@@ -490,9 +493,9 @@ static void Test_ParseOptionSetter(CuTest* tc) {
 	 if (strlen(input) != 3) return PST_INVALID_FORMAT;
 
 	 while ((str = accepted_strs[i++]) != NULL) {
-		if ((input[0] == '?' || input[0] == str[0])
-			&& (input[1] == '?' || input[1] == str[1])
-			&& (input[2] == '?' || input[2] == str[2])){
+		if ((input[0] == wc || input[0] == str[0])
+			&& (input[1] == wc || input[1] == str[1])
+			&& (input[2] == wc || input[2] == str[2])){
 
 			res = PARAM_VAL_new(str, src, prio, &tmp);
 			if (res != PST_OK) goto cleanup;
@@ -515,13 +518,14 @@ static void Test_ParseOptionSetter(CuTest* tc) {
  }
 
 
-static void Test_WildcarcExpander(CuTest* tc) {
+static void test_wildcarc_expander(CuTest* tc, const char *charList, int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift), const char **inputList) {
 	int res;
 	PARAM *param = NULL;
 	PARAM_VAL *value = NULL;
 	char *argv[] = {"abc", "cba", "efx", "ebc", "eee", NULL};
 	int value_count = 0;
 	int expand_count = 0;
+	size_t i = 0;
 
 	/**
 	 * Create some parameter objects.
@@ -529,19 +533,18 @@ static void Test_WildcarcExpander(CuTest* tc) {
 	res = PARAM_new("string", NULL, 0, PST_PRSCMD_DEFAULT | PST_PRSCMD_EXPAND_WILDCARD, &param);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
-	res += PARAM_addValue(param, "ef?", NULL, 0);
-	res += PARAM_addValue(param, "xxx", NULL, 0);
-	res += PARAM_addValue(param, "?x?", NULL, 0);
-	res += PARAM_addValue(param, "?b?", NULL, 0);
-	res += PARAM_addValue(param, "yyy", NULL, 0);
-	res += PARAM_addValue(param, "e??", NULL, 0);
+	while (inputList[i] != NULL) {
+		res += PARAM_addValue(param, inputList[i], NULL, 0);
+		i++;
+	}
+
 	CuAssert(tc, "Unable to add valid parameters.", res == PST_OK);
 
 	res = PARAM_getValueCount(param, NULL, PST_PRIORITY_NONE, &value_count);
 	CuAssert(tc, "Unable to get value count.", res == PST_OK);
 	CuAssert(tc, "Invalid value count.", value_count == 6);
 
-	res = PARAM_setWildcardExpander(param, argv, expand_wildcard_len3str);
+	res = PARAM_setWildcardExpander(param, charList, argv, NULL, expand_wildcard);
 	CuAssert(tc, "Unable to set wildcard expander.", res == PST_OK);
 
 	res = PARAM_expandWildcard(param, &expand_count);
@@ -550,44 +553,56 @@ static void Test_WildcarcExpander(CuTest* tc) {
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 0, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "efx") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "efx") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 1, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "xxx") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "xxx") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 2, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "abc") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "abc") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 3, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "cba") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "cba") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 4, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "ebc") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 5, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "yyy") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "yyy") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 6, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "efx") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "efx") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 7, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "ebc") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "ebc") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 8, &value);
 	CuAssert(tc, "Unable to get value.", res == PST_OK);
-	CuAssert(tc, "Wrong expand count.", strcmp(value->cstr_value, "eee") == 0);
+	CuAssert(tc, "Wrong value.", strcmp(value->cstr_value, "eee") == 0);
 
 	res = PARAM_getValue(param, NULL, PST_PRIORITY_NONE, 9, &value);
 	CuAssert(tc, "There should not be more values.", res == PST_PARAMETER_VALUE_NOT_FOUND);
 
 	PARAM_free(param);
+}
+
+static void Test_WildcarcExpander_defaultWC(CuTest* tc) {
+	char *values[] = {"ef?", "xxx", "?x?", "?b?", "yyy", "e??", NULL};
+	wc = '?'; /* Global variable to change  expand_wildcard_len2str behaviour. */
+	test_wildcarc_expander(tc, NULL, expand_wildcard_len2str, values);
+}
+
+static void Test_WildcarcExpander_defaultSpecifiedWC(CuTest* tc) {
+	char *values[] = {"ef*", "xxx", "*x*", "*b*", "yyy", "e**", NULL};
+	wc = '*'; /* Global variable to change  expand_wildcard_len2str behaviour. */
+	test_wildcarc_expander(tc, "*", expand_wildcard_len2str, values);
 }
 
 static void Test_root_and_get_values(CuTest* tc) {
@@ -631,8 +646,12 @@ static void Test_defaultPrintName(CuTest* tc) {
 	int res;
 	PARAM *param_1 = NULL;
 	PARAM *param_2 = NULL;
+	PARAM *param_3 = NULL;
+	PARAM *param_4 = NULL;
 	const char *expected_print_name_1 = "--string";
 	const char *expected_print_name_2 = "-s";
+	const char *expected_print_name_3 = "--long";
+	const char *expected_print_name_4 = "-l";
 
 	/* Create a single parameter without any special steps to alter its print name. */
 	res = PARAM_new("string", NULL, 0, 0, &param_1);
@@ -641,25 +660,72 @@ static void Test_defaultPrintName(CuTest* tc) {
 	res = PARAM_new("s", NULL, 0, 0, &param_2);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
+	res = PARAM_new("long", "l", 0, 0, &param_3);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_new("l", "long", 0, 0, &param_4);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
 
 	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_1), expected_print_name_1) == 0);
 	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_2), expected_print_name_2) == 0);
 
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_3), expected_print_name_3) == 0);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintNameAlias(param_3), expected_print_name_4) == 0);
+
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param_4), expected_print_name_4) == 0);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintNameAlias(param_4), expected_print_name_3) == 0);
+
 	PARAM_free(param_1);
 	PARAM_free(param_2);
+	PARAM_free(param_3);
+	PARAM_free(param_4);
+}
+
+static const char* dummy_print_name_implementation(PARAM *param, char *buf, unsigned buf_len){
+	VARIABLE_IS_NOT_USED(param);
+	VARIABLE_IS_NOT_USED(buf);
+	VARIABLE_IS_NOT_USED(buf_len);
+	return NULL;
+}
+
+static void Test_PrintNameAlias_alias_do_not_exist(CuTest* tc) {
+	int res;
+	PARAM *param_1 = NULL;
+
+	/* Create a single parameter without any special steps to alter its print name. */
+	res = PARAM_new("string", NULL, 0, 0, &param_1);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+
+	res = PARAM_setPrintNameAlias(param_1, "const", NULL);
+	CuAssert(tc, "Unexpected return code. Adding print name must fail!", res == PST_ALIAS_NOT_SPECIFIED);
+
+	res = PARAM_setPrintNameAlias(param_1, NULL, dummy_print_name_implementation);
+	CuAssert(tc, "Unexpected return code. Adding print name must fail!", res == PST_ALIAS_NOT_SPECIFIED);
+
+	CuAssert(tc, "Alias must be NULL.", PARAM_getPrintNameAlias(param_1) == NULL);
+
+	PARAM_free(param_1);
 }
 
 static void Test_constantPrintName(CuTest* tc) {
 	int res;
 	PARAM *param = NULL;
 	char *expected_print_name = "constant";
+	char *expected_print_name_alias = "alias constant";
 
 	/* Create a single parameter without any special steps to alter its print name. */
-	res = PARAM_new("string", NULL, 0, 0, &param);
+	res = PARAM_new("string", "s", 0, 0, &param);
 	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
 
 	res = PARAM_setPrintName(param, expected_print_name, NULL);
+	CuAssert(tc, "Unable to set print name.", res == PST_OK);
+
+	res = PARAM_setPrintNameAlias(param, expected_print_name_alias, NULL);
+	CuAssert(tc, "Unable to set print name alias.", res == PST_OK);
+
 	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintName(param), expected_print_name) == 0);
+	CuAssert(tc, "Unexpected print name.", strcmp(PARAM_getPrintNameAlias(param), expected_print_name_alias) == 0);
 
 	PARAM_free(param);
 }
@@ -692,6 +758,22 @@ static void Test_getAttributes(CuTest* tc) {
 	PARAM_free(param);
 }
 
+static void Test_setHelpText(CuTest* tc) {
+	int res;
+	PARAM *param = NULL;
+	const char *expectedHelpText = "This is parameter p description.";
+
+	res = PARAM_new("p", NULL, 0, 0, &param);
+	CuAssert(tc, "Unable to create PARAM obj.", res == PST_OK);
+	CuAssert(tc, "Help text must be NULL.", PARAM_getHelpText(param) == NULL);
+
+	res = PARAM_setHelpText(param, expectedHelpText);
+	CuAssert(tc, "Unable to add help text.", res == PST_OK);
+	CuAssert(tc, "Unexpected help text.", strcmp(PARAM_getHelpText(param), expectedHelpText) == 0);
+
+	PARAM_free(param);
+}
+
 static void Test_getName(CuTest* tc) {
 	int res;
 	PARAM *param = NULL;
@@ -717,12 +799,15 @@ CuSuite* ParameterTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_SetValuesAndControl);
 	SUITE_ADD_TEST(suite, Test_ObjectGetter);
 	SUITE_ADD_TEST(suite, Test_ParseOptionSetter);
-	SUITE_ADD_TEST(suite, Test_WildcarcExpander);
+	SUITE_ADD_TEST(suite, Test_WildcarcExpander_defaultWC);
+	SUITE_ADD_TEST(suite, Test_WildcarcExpander_defaultSpecifiedWC);
 	SUITE_ADD_TEST(suite, Test_root_and_get_values);
 	SUITE_ADD_TEST(suite, Test_defaultPrintName);
+	SUITE_ADD_TEST(suite, Test_PrintNameAlias_alias_do_not_exist);
 	SUITE_ADD_TEST(suite, Test_constantPrintName);
 	SUITE_ADD_TEST(suite, Test_getAttributes);
 	SUITE_ADD_TEST(suite, Test_getName);
+	SUITE_ADD_TEST(suite, Test_setHelpText);
 
 	return suite;
 }

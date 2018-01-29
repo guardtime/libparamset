@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -19,10 +19,10 @@
 
 #include "cutest/CuTest.h"
 #include "all_tests.h"
-#include "../param_set/param_value.h"
-#include "../param_set/parameter.h"
-#include "../param_set/param_set.h"
-#include "../param_set/param_set_obj_impl.h"
+#include "../src/param_set/param_value.h"
+#include "../src/param_set/parameter.h"
+#include "../src/param_set/param_set.h"
+#include "../src/param_set/param_set_obj_impl.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
@@ -122,7 +122,7 @@ static void Test_param_set_cmd_special(CuTest* tc) {
 
 	res += PARAM_SET_setParseOptions(set, "{e}{x}{y}{w}{v}{z}", PST_PRSCMD_DEFAULT);
 	res += PARAM_SET_setParseOptions(set, "{a}{b}{c}", PST_PRSCMD_HAS_NO_VALUE);
-	res += PARAM_SET_setParseOptions(set, "{d}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH);
+	res += PARAM_SET_setParseOptions(set, "{d}", PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH);
 	res += PARAM_SET_setParseOptions(set, "{f}", PST_PRSCMD_HAS_VALUE);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
@@ -196,13 +196,13 @@ static void Test_param_set_cmd_special_array_break(CuTest* tc) {
 
 	res += PARAM_SET_setParseOptions(set, "{e}{f}", PST_PRSCMD_DEFAULT);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
-	res += PARAM_SET_setParseOptions(set, "{mb}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH);
+	res += PARAM_SET_setParseOptions(set, "{mb}", PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
-	res += PARAM_SET_setParseOptions(set, "{db}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
+	res += PARAM_SET_setParseOptions(set, "{db}", PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
-	res += PARAM_SET_setParseOptions(set, "{mdb}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
+	res += PARAM_SET_setParseOptions(set, "{mdb}", PST_PRSCMD_HAS_VALUE_SEQUENCE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH | PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
-	res += PARAM_SET_setParseOptions(set, "{all}", PST_PRSCMD_HAS_MULTIPLE_INSTANCES);
+	res += PARAM_SET_setParseOptions(set, "{all}", PST_PRSCMD_HAS_VALUE_SEQUENCE);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
 
@@ -334,7 +334,7 @@ static void Test_param_set_loose_parameters_end_of_commands(CuTest* tc) {
 }
 
 
-static void Test_param_set_loose_parameters_collect_dashes(CuTest* tc) {
+static void Test_param_set_loose_parameters_collect_values_parse_close_restricted(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
 	char *argv[] = {
@@ -352,7 +352,7 @@ static void Test_param_set_loose_parameters_collect_dashes(CuTest* tc) {
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
 	res += PARAM_SET_setParseOptions(set, "{a}{b}", PST_PRSCMD_DEFAULT);
-	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
 
@@ -385,6 +385,52 @@ static void Test_param_set_loose_parameters_collect_dashes(CuTest* tc) {
 	buf[0] = '\0';
 	PARAM_SET_unknownsToString(set, NULL, buf, sizeof(buf));
 	CuAssert(tc, "Four unknown should be detected.", strcmp(buf, "Unknown parameter 'f'.\n") == 0);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_param_set_loose_parameters_collect_values_parse_close_permitted(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "plah",					/* A default path at the first place. */
+		"-a", "-", "--",
+		"-f", "f", NULL};
+	int argc = 0;
+	int count = 0;
+
+	while (argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{a}{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{a}", PST_PRSCMD_DEFAULT);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES| PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED | PST_PRSCMD_CLOSE_PARSING);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+
+	res = PARAM_SET_getValueCount(set, "{a}{c}", NULL, PST_PRIORITY_NONE, &count);
+	CuAssert(tc, "Unable to count values set from cmd.", res == PST_OK);
+	CuAssert(tc, "Invalid value count.", count == 4);
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, "-", 0);
+	assert_value(tc, set, "a", 1, __FILE__, __LINE__, NULL, 1);
+
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "plah", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, "-f", 0);
+	assert_value(tc, set, "c", 2, __FILE__, __LINE__, "f", 0);
+	assert_value(tc, set, "c", 3, __FILE__, __LINE__, NULL, 1);
+
+	/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isUnknown(set));
 
 	PARAM_SET_free(set);
 }
@@ -429,6 +475,54 @@ static void Test_param_last_parameter_without_mandatory_value(CuTest* tc) {
 	CuAssert(tc, "There should be no typos.", !PARAM_SET_isUnknown(set));
 
 	PARAM_SET_free(set);
+}
+
+static void parsing_is_closed_by_double_dash_first_double_dash_is_always_bound_with_parameter_next_generates_break(CuTest* tc, int flag) {
+	int res;
+	PARAM_SET *set = NULL;
+	char *argv[] = {
+		"<path>", "-a", "--", "-b", "dummy", "-b", "--", "plah", NULL};
+	int argc = 0;
+
+	while (argv[argc] != NULL) argc++;
+
+	res = PARAM_SET_new("{a}{b}{c}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res += PARAM_SET_setParseOptions(set, "{a}", PST_PRSCMD_HAS_VALUE);
+	res += PARAM_SET_setParseOptions(set, "{b}", PST_PRSCMD_HAS_VALUE | flag);
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_CLOSE_PARSING | PST_PRSCMD_COLLECT_WHEN_PARSING_IS_CLOSED);
+	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
+
+	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
+	CuAssert(tc, "Unable to parse command line.", res == PST_OK);
+
+
+	assert_value(tc, set, "a", 0, __FILE__, __LINE__, "--", 0);
+	assert_value(tc, set, "a", 1, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "b", 0, __FILE__, __LINE__, "dummy", 0);
+	assert_value(tc, set, "b", 1, __FILE__, __LINE__, NULL, 0);
+	assert_value(tc, set, "b", 2, __FILE__, __LINE__, NULL, 1);
+
+	assert_value(tc, set, "c", 0, __FILE__, __LINE__, "plah", 0);
+	assert_value(tc, set, "c", 1, __FILE__, __LINE__, NULL, 1);
+
+	/**
+	 * Check for unknown and typos.
+	 */
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isTypoFailure(set));
+	CuAssert(tc, "There should be no typos.", !PARAM_SET_isUnknown(set));
+
+	PARAM_SET_free(set);
+}
+
+static void Test_parsing_is_closed_by_double_dash_first_double_dash_is_always_bound_with_parameter_next_generates_break_1(CuTest* tc) {
+	parsing_is_closed_by_double_dash_first_double_dash_is_always_bound_with_parameter_next_generates_break(tc, PST_PRSCMD_BREAK_WITH_POTENTIAL_PARAMETER);
+}
+
+static void Test_parsing_is_closed_by_double_dash_first_double_dash_is_always_bound_with_parameter_next_generates_break_2(CuTest* tc) {
+	parsing_is_closed_by_double_dash_first_double_dash_is_always_bound_with_parameter_next_generates_break(tc, PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH);
 }
 
 static void Test_param_last_token_bunch_of_flags(CuTest* tc) {
@@ -519,7 +613,7 @@ static void Test_command_line_limited_loose_collect(CuTest* tc) {
 	res = PARAM_SET_new("{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_LIMITER_ON | (PST_PRSCMD_COLLECT_LIMITER_1X * 2));
+	res += PARAM_SET_setParseOptions(set, "{c}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_COLLECT_LIMITER_BREAK_ON | (PST_PRSCMD_COLLECT_LIMITER_1X * 2));
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
 	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
@@ -594,7 +688,7 @@ static void Test_command_line_collect_lower_priority(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
-static void Test_command_line_collect_has_no_flag_no_ignore_typos(CuTest* tc) {
+static void Test_command_line_collect_has_no_flag_no_typos(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
 	char *argv[] = {
@@ -694,7 +788,7 @@ static void Test_command_line_parameter_with_value_in_the_end_2(CuTest* tc) {
 	res = PARAM_SET_new("{i}{o}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res += PARAM_SET_setParseOptions(set, "{i}{o}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_VALUE_WITH_EXISTING_PARAMETER_MATCH);
+	res += PARAM_SET_setParseOptions(set, "{i}{o}", PST_PRSCMD_HAS_VALUE | PST_PRSCMD_BREAK_WITH_EXISTING_PARAMETER_MATCH);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
 	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);
@@ -804,7 +898,7 @@ static void Test_command_test_1(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
-static int expand_wildcard_len3str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
+static int expand_wildcard_len2str(PARAM_VAL *param_value, void *ctx, int *value_shift) {
 	 const char *input = NULL;
 	 int res;
 	 char **accepted_strs = (char**)ctx;
@@ -888,7 +982,7 @@ static void Test_expand_WC_on_CMD_WC_configured_WC_as_input(CuTest* tc) {
 	res = PARAM_SET_setParseOptions(set, "{i}", PST_PRSCMD_COLLECT_LOOSE_VALUES | PST_PRSCMD_EXPAND_WILDCARD);
 	CuAssert(tc, "Unable to set parameter set command line parsing options.", res == PST_OK);
 
-	res = PARAM_SET_wildcardExpander(set, "i", data, expand_wildcard_len3str);
+	res = PARAM_SET_setWildcardExpander(set, "i", NULL, data, NULL, expand_wildcard_len2str);
 	CuAssert(tc, "Unable to configure wildcard expander.", res == PST_OK);
 
 	res = PARAM_SET_parseCMD(set, argc, argv, NULL, 3);
@@ -1035,13 +1129,14 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_cmd_special);
 	SUITE_ADD_TEST(suite, Test_param_set_cmd_special_array_break);
 	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_end_of_commands);
-	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_collect_dashes);
+	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_collect_values_parse_close_restricted);
+	SUITE_ADD_TEST(suite, Test_param_set_loose_parameters_collect_values_parse_close_permitted);
 	SUITE_ADD_TEST(suite, Test_param_last_parameter_without_mandatory_value);
 	SUITE_ADD_TEST(suite, Test_param_last_token_bunch_of_flags);
 	SUITE_ADD_TEST(suite, Test_command_line_short_and_long);
 	SUITE_ADD_TEST(suite, Test_command_line_limited_loose_collect);
 	SUITE_ADD_TEST(suite, Test_command_line_collect_lower_priority);
-	SUITE_ADD_TEST(suite, Test_command_line_collect_has_no_flag_no_ignore_typos);
+	SUITE_ADD_TEST(suite, Test_command_line_collect_has_no_flag_no_typos);
 	SUITE_ADD_TEST(suite, Test_command_line_parameter_with_value_in_the_end_2);
 	SUITE_ADD_TEST(suite, Test_command_last_value_after_flag_type_parameteter);
 	SUITE_ADD_TEST(suite, Test_command_test_1);
@@ -1050,6 +1145,8 @@ CuSuite* Command_LineTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_expand_WC_on_CMD_WC_configured_WC_as_input);
 	SUITE_ADD_TEST(suite, Test_param_set_collect_befor_and_after_parsing_is_closed);
 	SUITE_ADD_TEST(suite, Test_param_set_collectors_without_the_flag);
+	SUITE_ADD_TEST(suite, Test_parsing_is_closed_by_double_dash_first_double_dash_is_always_bound_with_parameter_next_generates_break_1);
+	SUITE_ADD_TEST(suite, Test_parsing_is_closed_by_double_dash_first_double_dash_is_always_bound_with_parameter_next_generates_break_2);
 	return suite;
 }
 

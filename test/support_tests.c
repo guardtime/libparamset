@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -61,7 +61,7 @@ static const char *projectRoot = NULL;
 static char pathBuffer[2048];
 
 const char *getFullResourcePath(const char* resource) {
-	snprintf(pathBuffer, sizeof(pathBuffer), "%s%c%s", projectRoot, DIR_SEP, resource);
+	snprintf(pathBuffer, sizeof(pathBuffer), "%s%cresource%c%s", projectRoot, DIR_SEP, DIR_SEP, resource);
 	return pathBuffer;
 }
 
@@ -70,12 +70,12 @@ void initFullResourcePath(const char* rootDir) {
 }
 
 static void escapeStr(const char *str, CuString *escaped) {
-	int p;
+	long long int p;
 	static const char *replIndex = "<>&\"'";
 	static const char *repl[] = { "lt", "gt", "amp", "quot", "#39"};
 	while (*str) {
 		/* Find the index of current char. */
-		p = (int)(strchr(replIndex, *str) - replIndex);
+		p = (long long int)(strchr(replIndex, *str) - replIndex);
 		/* If the character is found, use the replacement */
 		if (p >= 0) {
 			CuStringAppendFormat(escaped, "&%s", repl[p]);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Guardtime, Inc.
+ * Copyright 2013-2017 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -29,6 +29,7 @@
 
 #define FORMAT_OK 0
 #define VARIABLE_IS_NOT_USED(v) ((void)(v));
+#define WILDCAR_EXPANDER_DEF_CHAR "*?"
 
 static char *new_string(const char *str) {
 	char *tmp = NULL;
@@ -104,8 +105,9 @@ cleanup:
 	return res;
 }
 
-static int wrapper_returnStr(void *extra, const char* str, void** obj){
-	if (extra);
+static int wrapper_returnStr(void **extra, const char* str, void** obj){
+	VARIABLE_IS_NOT_USED(extra);
+	if (obj == NULL) return PST_INVALID_ARGUMENT;
 	*obj = (void*)str;
 	return PST_OK;
 }
@@ -115,6 +117,13 @@ static const char* wrapper_returnConstantPrintName(PARAM *param, char *buf, unsi
 	VARIABLE_IS_NOT_USED(buf_len);
 	if (param == NULL) return NULL;
 	return param->print_name_buf;
+}
+
+static const char* wrapper_returnConstantPrintNameAlias(PARAM *param, char *buf, unsigned buf_len){
+	VARIABLE_IS_NOT_USED(buf);
+	VARIABLE_IS_NOT_USED(buf_len);
+	if (param == NULL) return NULL;
+	return param->print_name_alias_buf;
 }
 
 int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int pars_opt, PARAM **newObj){
@@ -136,6 +145,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 
 	tmp->flagName = NULL;
 	tmp->flagAlias = NULL;
+	tmp->helpText = NULL;
 	tmp->arg = NULL;
 	tmp->last_element = NULL;
 	tmp->itr = NULL;
@@ -149,7 +159,12 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 	tmp->extractObject = wrapper_returnStr;
 	tmp->expand_wildcard = NULL;
 	tmp->expand_wildcard_ctx = NULL;
+	tmp->expand_wildcard_free = NULL;
+	tmp->expand_wildcard_char = WILDCAR_EXPANDER_DEF_CHAR;
 	tmp->getPrintName = wrapper_returnConstantPrintName;
+	tmp->getPrintNameAlias = wrapper_returnConstantPrintNameAlias;
+	tmp->print_name_buf[0] = '\0';
+	tmp->print_name_alias_buf[0] = '\0';
 	PST_snprintf(tmp->print_name_buf, sizeof(tmp->print_name_buf), "%s%s", (strlen(flagName) == 1 ? "-" : "--"), flagName);
 
 
@@ -166,6 +181,8 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 			res = PST_OUT_OF_MEMORY;
 			goto cleanup;
 		}
+
+		PST_snprintf(tmp->print_name_alias_buf, sizeof(tmp->print_name_alias_buf), "%s%s", (strlen(flagAlias) == 1 ? "-" : "--"), flagAlias);
 	}
 
 	tmp->flagAlias = tmpAlias;
@@ -186,24 +203,30 @@ cleanup:
 	return res;
 }
 
-void PARAM_free(PARAM *obj) {
-	if (obj == NULL) return;
-	free(obj->flagName);
-	free(obj->flagAlias);
-	if (obj->itr) ITERATOR_free(obj->itr);
-	if (obj->arg) PARAM_VAL_free(obj->arg);
-	free(obj);
+void PARAM_free(PARAM *param) {
+	if (param == NULL) return;
+	free(param->flagName);
+	free(param->flagAlias);
+	if (param->itr) ITERATOR_free(param->itr);
+	if (param->arg) PARAM_VAL_free(param->arg);
+	if (param->helpText != NULL) free(param->helpText);
+
+	if (param->expand_wildcard_ctx != NULL && param->expand_wildcard_free != NULL) {
+		param->expand_wildcard_free(param->expand_wildcard_ctx);
+	}
+
+	free(param);
 }
 
-int PARAM_addControl(PARAM *obj,
+int PARAM_addControl(PARAM *param,
 		int (*controlFormat)(const char *),
 		int (*controlContent)(const char *),
 		int (*convert)(const char*, char*, unsigned)) {
-	if (obj == NULL) return PST_INVALID_ARGUMENT;
+	if (param == NULL) return PST_INVALID_ARGUMENT;
 
-	obj->controlFormat = controlFormat;
-	obj->controlContent = controlContent;
-	obj->convert = convert;
+	param->controlFormat = controlFormat;
+	param->controlContent = controlContent;
+	param->convert = convert;
 	return PST_OK;
 }
 
@@ -213,45 +236,59 @@ static int is_flag_set(int field, int flag) {
 	return 0;
 }
 
-int PARAM_isParsOptionSet(PARAM *param, int state) {
+int PARAM_isParseOptionSet(PARAM *param, int state) {
 	if (param == NULL) return 0;
 	return is_flag_set(param->parsing_options, state);
 }
 
-int PARAM_setParseOption(PARAM *obj, int option) {
-	if (obj == NULL) return PST_INVALID_ARGUMENT;
+int PARAM_setParseOption(PARAM *param, int option) {
+	if (param == NULL) return PST_INVALID_ARGUMENT;
 
 	/**
 	 * Give an error on some invalid configurations.
 	 */
 	if ((is_flag_set(option, PST_PRSCMD_HAS_NO_VALUE) || is_flag_set(option, PST_PRSCMD_DEFAULT))
-		&& (is_flag_set(option, PST_PRSCMD_HAS_MULTIPLE_INSTANCES) || is_flag_set(option, PST_PRSCMD_HAS_VALUE) ||
+		&& (is_flag_set(option, PST_PRSCMD_HAS_VALUE_SEQUENCE) || is_flag_set(option, PST_PRSCMD_HAS_VALUE) ||
 			(is_flag_set(option, PST_PRSCMD_HAS_NO_VALUE) && is_flag_set(option, PST_PRSCMD_DEFAULT))))
 		{
 		return PST_PRSCMD_INVALID_COMBINATION;
 	}
 
 
-	obj->parsing_options = option;
+	param->parsing_options = option;
 	return PST_OK;
 }
 
-int PARAM_setObjectExtractor(PARAM *obj, int (*extractObject)(void *, const char *, void**)) {
-	if (obj == NULL) return PST_INVALID_ARGUMENT;
+int PARAM_setObjectExtractor(PARAM *param, int (*extractObject)(void **, const char *, void**)) {
+	if (param == NULL) return PST_INVALID_ARGUMENT;
 
-	obj->extractObject = extractObject == NULL ? wrapper_returnStr : extractObject;
+	param->extractObject = extractObject == NULL ? wrapper_returnStr : extractObject;
 	return PST_OK;
 }
 
-int PARAM_setPrintName(PARAM *obj, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)) {
-	if (obj == NULL || (getPrintName == NULL && constv == NULL)) return PST_INVALID_ARGUMENT;
+int PARAM_setPrintName(PARAM *param, const char *constv, const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)) {
+	if (param == NULL || (getPrintName == NULL && constv == NULL)) return PST_INVALID_ARGUMENT;
 
 
 	if (constv != NULL) {
-		obj->getPrintName = wrapper_returnConstantPrintName;
-		PST_strncpy(obj->print_name_buf, constv, sizeof(obj->print_name_buf));
+		param->getPrintName = wrapper_returnConstantPrintName;
+		PST_strncpy(param->print_name_buf, constv, sizeof(param->print_name_buf));
 	} else {
-		obj->getPrintName = getPrintName;
+		param->getPrintName = getPrintName;
+	}
+
+	return PST_OK;
+}
+
+int PARAM_setPrintNameAlias(PARAM *param, const char *constv, const char* (*getPrintNameAlias)(PARAM *param, char *buf, unsigned buf_len)) {
+	if (param == NULL || (getPrintNameAlias == NULL && constv == NULL)) return PST_INVALID_ARGUMENT;
+	if (param->flagAlias == NULL) return PST_ALIAS_NOT_SPECIFIED;
+
+	if (constv != NULL) {
+		param->getPrintNameAlias = wrapper_returnConstantPrintNameAlias;
+		PST_strncpy(param->print_name_alias_buf, constv, sizeof(param->print_name_alias_buf));
+	} else {
+		param->getPrintNameAlias = getPrintNameAlias;
 	}
 
 	return PST_OK;
@@ -262,7 +299,24 @@ const char* PARAM_getPrintName(PARAM *obj) {
 	return obj->getPrintName(obj, obj->print_name_buf, sizeof(obj->print_name_buf));
 }
 
-int PARAM_addValue(PARAM *param, const char *argument, const char* source, int priority){
+const char* PARAM_getPrintNameAlias(PARAM *obj) {
+	if (obj == NULL || obj->flagAlias == NULL) return NULL;
+	return obj->getPrintNameAlias(obj, obj->print_name_alias_buf, sizeof(obj->print_name_alias_buf));
+}
+
+int PARAM_setHelpText(PARAM *param, const char *txt) {
+	if (param == NULL || txt == NULL) return PST_INVALID_ARGUMENT;
+	if (param->helpText != NULL) free(param->helpText);
+	param->helpText = new_string(txt);
+	return PST_OK;
+}
+
+const char* PARAM_getHelpText(PARAM *obj) {
+	if (obj == NULL) return NULL;
+	return obj->helpText;
+}
+
+int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio) {
 	int res;
 	PARAM_VAL *newValue = NULL;
 	PARAM_VAL *pLastValue = NULL;
@@ -275,14 +329,18 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 		goto cleanup;
 	}
 
-	/*If conversion function exists convert the argument*/
-	if (param->convert)
-		arg = param->convert(argument, buf, sizeof(buf)) ? buf : argument;
-	else
-		arg = argument;
+	/* If conversion function exists convert the argument. */
+	if (param->convert) {
+		res = param->convert(value, buf, sizeof(buf));
+		if (res != PST_OK && res != PST_PARAM_CONVERT_NOT_PERFORMED) goto cleanup;
 
-	/*Create new object and control the format*/
-	res = PARAM_VAL_new(arg, source, priority, &newValue);
+		arg = (res == PST_OK) ? buf : value;
+	} else {
+		arg = value;
+	}
+
+	/* Create new object and check the format. */
+	res = PARAM_VAL_new(arg, source, prio, &newValue);
 	if (res != PST_OK) goto cleanup;
 
 	if (param->controlFormat)
@@ -308,7 +366,7 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 			pLastValue = param->last_element;
 		}
 
-		/* The last element must exists and its next value must be NULL. */
+		/* The last element must exist and its next value must be NULL. */
 		if (pLastValue == NULL || pLastValue->next != NULL) {
 			res = PST_UNDEFINED_BEHAVIOUR;
 			goto cleanup;
@@ -319,8 +377,8 @@ int PARAM_addValue(PARAM *param, const char *argument, const char* source, int p
 	param->last_element = newValue;
 	param->argCount++;
 
-	if (param->highestPriority < priority)
-		param->highestPriority = priority;
+	if (param->highestPriority < prio)
+		param->highestPriority = prio;
 
 	newValue = NULL;
 	res = PST_OK;
@@ -337,7 +395,7 @@ int PARAM_getValue(PARAM *param, const char *source, int prio, int at, PARAM_VAL
 	return param_get_value(param, source, prio, at, NULL, value);
 }
 
-int PARAM_getAtr(PARAM *param, const char *source, int priority, int at, PARAM_ATR *atr) {
+int PARAM_getAtr(PARAM *param, const char *source, int prio, int at, PARAM_ATR *atr) {
 	int res;
 	PARAM_VAL *val = NULL;
 
@@ -347,7 +405,7 @@ int PARAM_getAtr(PARAM *param, const char *source, int priority, int at, PARAM_A
 	}
 
 
-	res = PARAM_getValue(param, source, priority, at, &val);
+	res = PARAM_getValue(param, source, prio, at, &val);
 	if (res != PST_OK) goto cleanup;
 
 
@@ -432,7 +490,7 @@ static int param_reser_iterator_if_needed_after_pop(PARAM *param, int popIndex) 
 	return PST_OK;
 }
 
-int PARAM_clearValue(PARAM *param, const char *source, int priority, int at) {
+int PARAM_clearValue(PARAM *param, const char *source, int prio, int at) {
 	int res;
 	PARAM_VAL *pop = NULL;
 
@@ -446,7 +504,7 @@ int PARAM_clearValue(PARAM *param, const char *source, int priority, int at) {
 		goto cleanup;
 	}
 
-	res = PARAM_VAL_popElement(&(param->arg), source, priority, at, &pop);
+	res = PARAM_VAL_popElement(&(param->arg), source, prio, at, &pop);
 	if (res != PST_OK) goto cleanup;
 
 	res = param_reser_iterator_if_needed_after_pop(param, at);
@@ -551,13 +609,13 @@ char* PARAM_constraintErrorToString(PARAM *param, const char *prefix, char *buf,
 	}
 
 	if (constraints & PARAM_SINGLE_VALUE_FOR_PRIORITY_LEVEL) {
-		count += param_add_constraint_error_to_buf(param, "Duplicate parameters in priority levels ", prefix, buf + count, buf_len - count);
+		param_add_constraint_error_to_buf(param, "Duplicate parameters in priority levels ", prefix, buf + count, buf_len - count);
 	}
 
 	return buf;
 }
 
-int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void *extra, void **obj) {
+int PARAM_getObject(PARAM *param, const char *source, int prio, int at, void **extra, void **obj) {
 	int res;
 	PARAM_VAL *value = NULL;
 
@@ -589,10 +647,18 @@ cleanup:
 	return res;
 }
 
-int PARAM_setWildcardExpander(PARAM *obj, void *ctx, int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
-	if (obj == NULL || expand_wildcard == NULL) return PST_INVALID_ARGUMENT;
-	obj->expand_wildcard = expand_wildcard;
-	obj->expand_wildcard_ctx = ctx;
+int PARAM_setWildcardExpander(PARAM *param, const char* charList, void *ctx, void (*ctx_free)(void*), int (*expand_wildcard)(PARAM_VAL *param_value, void *ctx, int *value_shift)) {
+	if (param == NULL || expand_wildcard == NULL) return PST_INVALID_ARGUMENT;
+	param->expand_wildcard = expand_wildcard;
+	param->expand_wildcard_ctx = ctx;
+	param->expand_wildcard_free = ctx_free;
+
+	if (charList != NULL) {
+		param->expand_wildcard_char = charList;
+	} else {
+		param->expand_wildcard_char = WILDCAR_EXPANDER_DEF_CHAR;
+	}
+
 	return PST_OK;
 }
 
@@ -617,7 +683,7 @@ int PARAM_expandWildcard(PARAM *param, int *count) {
 		goto cleanup;
 	}
 
-	if (PARAM_isParsOptionSet(param, PST_PRSCMD_EXPAND_WILDCARD)) {
+	if (PARAM_isParseOptionSet(param, PST_PRSCMD_EXPAND_WILDCARD)) {
 		res = PARAM_getValueCount(param, NULL, PST_PRIORITY_NONE, &initial_count);
 		if (res != PST_OK) goto cleanup;
 
@@ -628,7 +694,7 @@ int PARAM_expandWildcard(PARAM *param, int *count) {
 			if (res != PST_OK) goto cleanup;
 
 			/* Check if there are wildcard characters. If not goto next value. */
-			if (strchr(value->cstr_value, '*') == NULL && strchr(value->cstr_value, '?') == NULL) continue;
+			if (strpbrk(value->cstr_value, param->expand_wildcard_char) == NULL) continue;
 
 			expanded_count = 0;
 			res = param->expand_wildcard(value, param->expand_wildcard_ctx, &expanded_count);
@@ -665,12 +731,11 @@ cleanup:
 
 char* PARAM_toString(const PARAM *param, char *buf, size_t buf_len)  {
 	char sub_buf[2048];
-	size_t count = 0;
 
 	if (param == NULL || buf == NULL || buf_len == 0) return 0;
 
 
-	count += PST_snprintf(buf + count, buf_len - count, "%s(%i)->%s", param->flagName, param->argCount,
+	PST_snprintf(buf, buf_len, "%s(%i)->%s", param->flagName, param->argCount,
 			PARAM_VAL_toString(param->arg, sub_buf, sizeof(sub_buf)));
 
 	return buf;
