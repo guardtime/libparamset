@@ -38,6 +38,7 @@ The `libparamset` provides the following functionality:
 * Auto-generated suggestions how to fix the task user tries to perform.
 * Parameters can be bound with description and formatted to human readable list for help text.
 
+The API full reference is available here [https://guardtime.github.io/libparamset/](https://guardtime.github.io/libparamset/).
 
 ## Installation
 
