@@ -1,5 +1,9 @@
 Version 1.0
 
+2018-02-15 1.0.216
+
+* IMPROVEMENT: Readme contains link to doxygen documentation.
+
 2018-01-29 1.0.212
 
 * IMPROVEMENT: (Interface) Abstract function extractObject extra parameter type changed from void* to void** (see PARAM_SET_addControl).
