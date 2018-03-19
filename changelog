@@ -1,3 +1,6 @@
+* IMPROVEMENT: nmake test target implemented.
+* BUGFIX: WinBuild.bat fixed.
+
 Version 1.0
 
 2018-02-15 1.0.216

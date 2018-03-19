@@ -20,4 +20,4 @@ GOTO copyrightend
 :copyrightend
 
 @ECHO OFF
-nmake RTL=MTd DLL=lib clean test & out\bin\test.exe .\test\resource
+nmake RTL=MTd DLL=lib clean test
