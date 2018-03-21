@@ -1,23 +1,30 @@
 Source: @PACKAGE@
-Section: devel
+Section: libdevel
 Priority: optional
-Build-Depends:
 Maintainer: Guardtime <support@guardtime.com>
 Standards-Version: 3.9.8
 
 Package: @PACKAGE@
 Architecture: any
-Section: devel
+Section: libdevel
 Priority: optional
-Depends:
 Description: Guardtime Command-line Parameter and Task handling library.
+ The libparamset is a software development kit, written in plain C, for handling
+ command-line parameters and program tasks. Parameters can be read from command
+ line and a task can be extracted that matches with the given input. Process is
+ covered with error detection and functions that generate helpful feedback
+ messages to the user.
 
 Package: @PACKAGE@-dev
-Version: @VERSION@
 Provides: @PACKAGE@-dev
 Conflicts: @PACKAGE@-dev
 Architecture: any
-Section: devel
+Section: libdevel
 Priority: optional
 Depends: @PACKAGE@(=@VERSION@)
-Description: Guardtime Command-line Parameter and Task handling library.
+Description: Guardtime Command-line Parameter and Task handling development library.
+ The libparamset is a software development kit, written in plain C, for handling
+ command-line parameters and program tasks. Parameters can be read from command
+ line and a task can be extracted that matches with the given input. Process is
+ covered with error detection and functions that generate helpful feedback
+ messages to the user.

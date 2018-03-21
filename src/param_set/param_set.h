@@ -218,7 +218,7 @@ int PARAM_SET_addControl(PARAM_SET *set, const char *names,
  *
  * If \c constv is not \c NULL, a user specified constant value is used. If \c constv is
  * \c NULL, an abstract function \c getPrintName must be specified that formats the string.
- * Default print format for long and short parameters are  \c '\-\-long' and \c '-a'</em>.
+ * Default print format for long and short parameters are  \c '\-\-long' and \c '-a'.
  *
  * <tt>const char* (*getPrintName)(PARAM *param, char *buf, unsigned buf_len)</tt>
  *

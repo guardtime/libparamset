@@ -171,7 +171,7 @@ static size_t getWord(char *buf, size_t buf_len, const char *str, const char **n
  * \param ...
  * \return
  */
-size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int headerLen, int rowLen, const char *paramName, const char delimiter, const char *desc, ...) {
+size_t PST_snhiprintf(char *buf, size_t buf_len, unsigned indent, unsigned nxtLnIndnt, unsigned headerLen, unsigned rowLen, const char *paramName, const char delimiter, const char *desc, ...) {
 	va_list va;
 	char *description = NULL;
 	int calculated = 0;
@@ -203,7 +203,7 @@ size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int
 		/* Print the header of the help row (indention, parameter, delimiter and description. */
 		count += PST_snprintf(buf + count, buf_len - count, "%*s%s%*s", indent, "", paramName, calculated, "");
 		current_row_len = count;
-		if (current_row_len > headerLen - 3) {
+		if (current_row_len > (headerLen - 3)) {
 			c = PST_snprintf(buf + count, buf_len - count, "\n%*s %c ", headerLen - 3, "", delimiter);
 			count += c;
 			current_row_len = c - 1;

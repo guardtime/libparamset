@@ -80,7 +80,9 @@ lib-build: build
 	rm -rf $(FAKE_INSTALL)/$(INSTALL_INCLUDE)
 	rm -rf $(FAKE_INSTALL)/$(INSTALL_PCONF)
 	rm $(FAKE_INSTALL)/$(INSTALL_LIB)/*.a $(FAKE_INSTALL)/$(INSTALL_LIB)/*.la
-
+	gzip --best -n $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package)/changelog
+	rm $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package)/LICENSE
+	cp $(PROJECT_ROOT)/debian/copyright $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package)/copyright
 	
 	# Generate the binary control file from source control.
 	mkdir $(FAKE_INSTALL)/DEBIAN
@@ -96,7 +98,7 @@ lib-dev-build: build
 	$(MAKE) install DESTDIR=$(FAKE_INSTALL)
 
 	rm $(FAKE_INSTALL)/$(INSTALL_LIB)/*.so*
-	rm $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package)/changelog $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package)/LICENSE*
+	rm $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package)/changelog $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package)/LICENSE
 	if [ -d doc/html ]; then cp -r doc/html $(FAKE_INSTALL)/$(INSTALL_DOC)/$(package); fi
 	
 	# Generate the binary control file from source control.

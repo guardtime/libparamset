@@ -111,7 +111,7 @@ char *PST_strncpy (char *destination, const char *source, size_t n);
  * \param ...			Extra parameters for formatting.
  * \return The number of characters written, not including terminating \c NULL character. On error \c  0 is returned.
  */
-size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int headerLen, int rowLen, const char *paramName, const char delimiter, const char *desc, ...);
+size_t PST_snhiprintf(char *buf, size_t buf_len, unsigned indent, unsigned nxtLnIndnt, unsigned headerLen, unsigned rowLen, const char *paramName, const char delimiter, const char *desc, ...);
 /*
  * @}
  */
