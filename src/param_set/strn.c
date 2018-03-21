@@ -181,7 +181,7 @@ size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int
 	int spaceNeeded = 0;
 	const char *next = NULL;
 
-	if (buf == NULL || buf_len == 0 || paramName == NULL || desc == NULL) {
+	if (buf == NULL || buf_len == 0 || indent < 0 || paramName == NULL || desc == NULL || headerLen < 0 || rowLen < 0) {
 		return 0;
 	}
 
@@ -203,7 +203,7 @@ size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int
 		/* Print the header of the help row (indention, parameter, delimiter and description. */
 		count += PST_snprintf(buf + count, buf_len - count, "%*s%s%*s", indent, "", paramName, calculated, "");
 		current_row_len = count;
-		if (current_row_len > headerLen - 3) {
+		if (current_row_len > (size_t)(headerLen - 3)) {
 			c = PST_snprintf(buf + count, buf_len - count, "\n%*s %c ", headerLen - 3, "", delimiter);
 			count += c;
 			current_row_len = c - 1;
@@ -238,9 +238,9 @@ size_t PST_snhiprintf(char *buf, size_t buf_len, int indent, int nxtLnIndnt, int
 			}
 		}
 
-		if (current_row_len + word_len + 1 >= rowLen) {
+		if (current_row_len + word_len + 1 >= (size_t)rowLen) {
 
-			if (word_len + indent >= rowLen) {
+			if (word_len + indent >= (size_t)rowLen) {
 				/* TODO: Do something about that. */
 				c = PST_snprintf(buf + count, buf_len - count, "\n%*s%s", headerLen + nxtLnIndnt, "", wordBuffer);
 			} else {

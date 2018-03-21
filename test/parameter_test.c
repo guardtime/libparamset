@@ -310,21 +310,21 @@ static void Test_SetValuesAndControl(CuTest* tc) {
 }
 
 static int wrapper_returnStr(void **extra, const char* str, void** obj){
-	if (extra);
+	VARIABLE_IS_NOT_USED(extra);
 	*obj = (void*)str;
 	return PST_OK;
 }
 
 static int wrapper_returnInt(void **extra, const char* str,  void** obj){
 	int *pI = (int*)obj;
-	if (extra);
+	VARIABLE_IS_NOT_USED(extra);
 	*pI = atoi(str);
 	return PST_OK;
 }
 
 static int wrapper_returnDouble(void **extra, const char* str,  void** obj){
 	double *pd = (double*)obj;
-	if (extra);
+	VARIABLE_IS_NOT_USED(extra);
 	*pd = atof(str);
 	return PST_OK;
 }

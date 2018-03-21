@@ -444,7 +444,9 @@ static int wrapper_return_str_append_a_value(void **extra, const char* str, void
 }
 
 static int wrapper_return_error(void **extra, const char* str, void** obj){
-	if (extra || str || obj);
+	VARIABLE_IS_NOT_USED(extra);
+	VARIABLE_IS_NOT_USED(str);
+	VARIABLE_IS_NOT_USED(obj);
 	return PST_UNDEFINED_BEHAVIOUR;
 }
 
