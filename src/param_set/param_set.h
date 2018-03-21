@@ -253,13 +253,26 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
 
 /**
  * Specify help text for a parameter.
+ *
+ * Overall help text is composed of:
+ * \code{.txt}
+ * General format:
+ *   <print name> [<arg>] <delimiter> <description text>
+ *
+ * Examples:
+ *   --myoption [arg] - description where arg is "[arg]".
+ *   --input file     - description where arg is "file".
+ *   --debug          - description where arg is "" or NULL.
+ * \endcode
+ *
  * \param	set		#PARAM_SET object.
  * \param	names	List of names to add the help text for.
+ * \param	arg		Description of argument. Can be \c NULL.
  * \param	txt		Help text for a parameter. Value is copied. Must NOT be \c NULL.
  * \return #PST_OK when successful, error code otherwise.
  * \see #PARAM_SET_setPrintName and #PARAM_SET_helpToString.
  */
-int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt);
+int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *arg, const char *txt);
 
 /**
  * Generates help text for parameters. Before any help text

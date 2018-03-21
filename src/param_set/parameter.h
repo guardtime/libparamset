@@ -674,21 +674,66 @@ const char* PARAM_getPrintName(PARAM *obj);
  * \return String that is the string representation of the parameter alias. If alias does not exist, \c NULL is returned.
  */
 const char* PARAM_getPrintNameAlias(PARAM *obj);
+
 /**
- * Sets help text for a parameter. The input value is copied.
+ * Sets help text for a parameter. See #PARAM_setHelpArg to describe parameters
+ * argument. The input value is copied.
+ *
+ * Overall help text is composed of:
+ * \code{.txt}
+ * General format:
+ *   <print name> [<arg>] <delimiter> <description text>
+ *
+ * Examples:
+ *   --myoption [arg] - this is description for myoption.
+ *   --input file     - this is description for file.
+ *   --debug          - this is description for debug.
+ * \endcode
+ *
  * \param param			#PARAM object.
  * \param txt			Help text for a parameter. Value is copied.
  * \return #PST_OK when successful, error code otherwise.
+ * \see #PARAM_setPrintName, #PARAM_setPrintNameAlias, #PARAM_setHelpText.
  */
 int PARAM_setHelpText(PARAM *param, const char *txt);
 
 /**
- * Returns the help text of the parameter. See #PARAM_setHelpText to change the value.
+ * Sets parameters argument description text for a parameter. See #PARAM_setHelpText
+ * to set the description of the parameter. The input value is copied.
+ *
+ * Overall help text is composed of:
+ * \code{.txt}
+ * General format:
+ *   <print name> [<arg>] <delimiter> <description text>
+ *
+ * Examples:
+ *   --myoption [arg] - description where arg is "[arg]".
+ *   --input file     - description where arg is "file".
+ *   --debug          - description where arg is "" or NULL.
+ * \endcode
+ *
+ * \param param			#PARAM object.
+ * \param arg			Help text for parameter's argument. Value is copied.
+ * \return #PST_OK when successful, error code otherwise.
+ * \see #PARAM_setPrintName, #PARAM_setPrintNameAlias, #PARAM_setHelpText.
+ */
+int PARAM_setHelpArg(PARAM *param, const char *arg);
+
+/**
+ * Returns the help text of the parameter. See #PARAM_setHelpText for more details.
  * \param obj			#PARAM object.
  * \return String that is the help text of the parameter. If value is not specified,
  * \c NULL is returned.
  */
 const char* PARAM_getHelpText(PARAM *obj);
+
+/**
+ * Returns the parameter argument description string. See #PARAM_setHelpArg for more details.
+ * \param obj			#PARAM object.
+ * \return String that is parameter's argument description. If value is not specified,
+ * \c NULL is returned.
+ */
+const char* PARAM_getHelpArg(PARAM *obj);
 
 /**
  * Checks if parameter constraints are satisfied (see #PARAM_new

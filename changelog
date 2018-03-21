@@ -1,3 +1,4 @@
+* IMPROVEMENT: Function PARAM_SET_setHelpText takes extra parameter arg that describes command-line parameter argument (e.g. -i arg).
 * IMPROVEMENT: Build warnings resolved.
 * IMPROVEMENT: nmake test target implemented.
 * BUGFIX: Winbuild.bat fixed.

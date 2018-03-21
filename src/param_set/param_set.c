@@ -970,7 +970,7 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
 	return param_set_set_print_name(set, names, PARAM_setPrintNameAlias, constv, getPrintName);
 }
 
-int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt) {
+int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *arg, const char *txt) {
 	int res;
 	PARAM *tmp = NULL;
 	const char *pName = NULL;
@@ -985,6 +985,11 @@ int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt) {
 
 		res = PARAM_setHelpText(tmp, txt);
 		if (res != PST_OK) return res;
+
+		if (arg != NULL) {
+			res = PARAM_setHelpArg(tmp, arg);
+			if (res != PST_OK) return res;
+		}
 	}
 
 	return PST_OK;
@@ -1003,6 +1008,7 @@ char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent
 		PARAM *tmp = NULL;
 		const char *name = NULL;
 		const char *alias = NULL;
+		const char *arg = NULL;
 		char param_name_combo[256];
 		const char *param_name = NULL;
 
@@ -1013,11 +1019,14 @@ char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent
 
 		name = PARAM_getPrintName(tmp);
 		alias = PARAM_getPrintNameAlias(tmp);
+		arg = PARAM_getHelpArg(tmp);
+
 
 		if (alias == NULL) {
-			param_name = name;
+			PST_snprintf(param_name_combo, sizeof(param_name_combo), "%s%s%s", name, (arg ? " " : ""), (arg ? arg : ""));
+			param_name = param_name_combo;
 		} else {
-			PST_snprintf(param_name_combo, sizeof(param_name_combo), "%s, %s", name, alias);
+			PST_snprintf(param_name_combo, sizeof(param_name_combo), "%s, %s%s%s", name, alias, (arg ? " " : ""), (arg ? arg : ""));
 			param_name = param_name_combo;
 		}
 

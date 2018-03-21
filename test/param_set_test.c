@@ -1140,13 +1140,13 @@ static void Test_basic_help_text_different_combinations(CuTest* tc) {
 	res = PARAM_SET_new("{a}{b}{c}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res = PARAM_SET_setHelpText(set, "x", "dummy");
+	res = PARAM_SET_setHelpText(set, "x", NULL, "dummy");
 	CuAssert(tc, "Such a parameter does not exist.", res == PST_PARAMETER_NOT_FOUND);
 
-	res = PARAM_SET_setHelpText(set, "a", "This is a.");
+	res = PARAM_SET_setHelpText(set, "a", NULL,  "This is a.");
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
-	res = PARAM_SET_setHelpText(set, "b", "This is b.");
+	res = PARAM_SET_setHelpText(set, "b", NULL,  "This is b.");
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
 	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "x", 2, 10, 80, buf, sizeof(buf)) == NULL);
@@ -1173,6 +1173,48 @@ static void Test_basic_help_text_different_combinations(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_basic_help_text_with_arg(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *help = NULL;
+	char buf[1024];
+
+	char *expected_help_1 = "  -a    - This is a.\n"
+							"  -b    - This is b.\n"
+							"  -c i  - This is c.\n"
+							"  -d [opt]\n"
+							"        - This is d.\n";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{a}{b}{c}{d}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "x", NULL, "dummy");
+	CuAssert(tc, "Such a parameter does not exist.", res == PST_PARAMETER_NOT_FOUND);
+
+	res = PARAM_SET_setHelpText(set, "a", NULL,  "This is a.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "b", "",  "This is b.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "c", "i",  "This is c.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "d", "[opt]",  "This is d.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "x", 2, 10, 80, buf, sizeof(buf)) == NULL);
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "a,x", 2, 10, 80, buf, sizeof(buf)) == NULL);
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "x,a", 2, 10, 80, buf, sizeof(buf)) == NULL);
+	CuAssert(tc, "Help generation must fail - unknown flag.", PARAM_SET_helpToString(set, "a,x,b", 2, 10, 80, buf, sizeof(buf)) == NULL);
+
+	help = PARAM_SET_helpToString(set, "a,b,c,d", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help_1) == 0);
+	PARAM_SET_free(set);
+}
+
 static void Test_help_text_multi_line_description(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
@@ -1187,7 +1229,7 @@ static void Test_help_text_multi_line_description(CuTest* tc) {
 	res = PARAM_SET_new("{a}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res = PARAM_SET_setHelpText(set, "a", "This is parameters a long description string that must be formatted correctly. It must be displayed on 3 lines and text must 10 characters indented.");
+	res = PARAM_SET_setHelpText(set, "a", NULL, "This is parameters a long description string that must be formatted correctly. It must be displayed on 3 lines and text must 10 characters indented.");
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
 	help = PARAM_SET_helpToString(set, "a", 2, 10, 80, buf, sizeof(buf));
@@ -1211,7 +1253,7 @@ static void Test_help_text_multi_line_description_with_long_parameter(CuTest* tc
 	res = PARAM_SET_new("{this-is-long}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res = PARAM_SET_setHelpText(set, "this-is-long", "This is parameters that is long and has also a longe description string on two lines.");
+	res = PARAM_SET_setHelpText(set, "this-is-long", NULL, "This is parameters that is long and has also a longe description string on two lines.");
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
 	help = PARAM_SET_helpToString(set, "this-is-long", 2, 10, 80, buf, sizeof(buf));
@@ -1234,7 +1276,7 @@ static void Test_help_text_with_specified_alias(CuTest* tc) {
 	res = PARAM_SET_new("{input|i}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res = PARAM_SET_setHelpText(set, "input", "This is a parameter that has long and also short version (alias).");
+	res = PARAM_SET_setHelpText(set, "input", NULL, "This is a parameter that has long and also short version (alias).");
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
 	help = PARAM_SET_helpToString(set, "input", 2, 10, 80, buf, sizeof(buf));
@@ -1271,6 +1313,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_set_print_name);
 	SUITE_ADD_TEST(suite, Test_param_set_set_print_name_alias);
 	SUITE_ADD_TEST(suite, Test_basic_help_text_different_combinations);
+	SUITE_ADD_TEST(suite, Test_basic_help_text_with_arg);
 	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description);
 	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description_with_long_parameter);
 	SUITE_ADD_TEST(suite, Test_help_text_with_specified_alias);

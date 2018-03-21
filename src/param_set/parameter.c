@@ -145,6 +145,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 
 	tmp->flagName = NULL;
 	tmp->flagAlias = NULL;
+	tmp->helpArg = NULL;
 	tmp->helpText = NULL;
 	tmp->arg = NULL;
 	tmp->last_element = NULL;
@@ -210,6 +211,7 @@ void PARAM_free(PARAM *param) {
 	if (param->itr) ITERATOR_free(param->itr);
 	if (param->arg) PARAM_VAL_free(param->arg);
 	if (param->helpText != NULL) free(param->helpText);
+	if (param->helpArg != NULL) free(param->helpArg);
 
 	if (param->expand_wildcard_ctx != NULL && param->expand_wildcard_free != NULL) {
 		param->expand_wildcard_free(param->expand_wildcard_ctx);
@@ -311,9 +313,21 @@ int PARAM_setHelpText(PARAM *param, const char *txt) {
 	return PST_OK;
 }
 
+int PARAM_setHelpArg(PARAM *param, const char *arg) {
+	if (param == NULL || arg == NULL) return PST_INVALID_ARGUMENT;
+	if (param->helpArg != NULL) free(param->helpArg);
+	param->helpArg = new_string(arg);
+	return PST_OK;
+}
+
 const char* PARAM_getHelpText(PARAM *obj) {
 	if (obj == NULL) return NULL;
 	return obj->helpText;
+}
+
+const char* PARAM_getHelpArg(PARAM *obj) {
+	if (obj == NULL) return NULL;
+	return obj->helpArg;
 }
 
 int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio) {
