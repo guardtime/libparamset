@@ -596,13 +596,13 @@ static void test_wildcarc_expander(CuTest* tc, const char *charList, int (*expan
 static void Test_WildcarcExpander_defaultWC(CuTest* tc) {
 	char *values[] = {"ef?", "xxx", "?x?", "?b?", "yyy", "e??", NULL};
 	wc = '?'; /* Global variable to change  expand_wildcard_len2str behaviour. */
-	test_wildcarc_expander(tc, NULL, expand_wildcard_len2str, values);
+	test_wildcarc_expander(tc, NULL, expand_wildcard_len2str, (const char**)values);
 }
 
 static void Test_WildcarcExpander_defaultSpecifiedWC(CuTest* tc) {
 	char *values[] = {"ef*", "xxx", "*x*", "*b*", "yyy", "e**", NULL};
 	wc = '*'; /* Global variable to change  expand_wildcard_len2str behaviour. */
-	test_wildcarc_expander(tc, "*", expand_wildcard_len2str, values);
+	test_wildcarc_expander(tc, "*", expand_wildcard_len2str, (const char**)values);
 }
 
 static void Test_root_and_get_values(CuTest* tc) {

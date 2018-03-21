@@ -1,3 +1,4 @@
+* IMPROVEMENT: Build warnings resolved.
 * IMPROVEMENT: nmake test target implemented.
 * BUGFIX: Winbuild.bat fixed.
 
