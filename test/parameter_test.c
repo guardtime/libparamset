@@ -310,21 +310,21 @@ static void Test_SetValuesAndControl(CuTest* tc) {
 }
 
 static int wrapper_returnStr(void **extra, const char* str, void** obj){
-	if (extra);
+	VARIABLE_IS_NOT_USED(extra);
 	*obj = (void*)str;
 	return PST_OK;
 }
 
 static int wrapper_returnInt(void **extra, const char* str,  void** obj){
 	int *pI = (int*)obj;
-	if (extra);
+	VARIABLE_IS_NOT_USED(extra);
 	*pI = atoi(str);
 	return PST_OK;
 }
 
 static int wrapper_returnDouble(void **extra, const char* str,  void** obj){
 	double *pd = (double*)obj;
-	if (extra);
+	VARIABLE_IS_NOT_USED(extra);
 	*pd = atof(str);
 	return PST_OK;
 }
@@ -596,13 +596,13 @@ static void test_wildcarc_expander(CuTest* tc, const char *charList, int (*expan
 static void Test_WildcarcExpander_defaultWC(CuTest* tc) {
 	char *values[] = {"ef?", "xxx", "?x?", "?b?", "yyy", "e??", NULL};
 	wc = '?'; /* Global variable to change  expand_wildcard_len2str behaviour. */
-	test_wildcarc_expander(tc, NULL, expand_wildcard_len2str, values);
+	test_wildcarc_expander(tc, NULL, expand_wildcard_len2str, (const char**)values);
 }
 
 static void Test_WildcarcExpander_defaultSpecifiedWC(CuTest* tc) {
 	char *values[] = {"ef*", "xxx", "*x*", "*b*", "yyy", "e**", NULL};
 	wc = '*'; /* Global variable to change  expand_wildcard_len2str behaviour. */
-	test_wildcarc_expander(tc, "*", expand_wildcard_len2str, values);
+	test_wildcarc_expander(tc, "*", expand_wildcard_len2str, (const char**)values);
 }
 
 static void Test_root_and_get_values(CuTest* tc) {
