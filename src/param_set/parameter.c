@@ -34,7 +34,7 @@
 static char *new_string(const char *str) {
 	char *tmp = NULL;
 	if (str == NULL) return NULL;
-	tmp = (char*)malloc(strlen(str)*sizeof(char)+1);
+	tmp = (char*)malloc(strlen(str) * sizeof(*tmp) + 1);
 	if (tmp == NULL) return NULL;
 	return strcpy(tmp, str);
 }
@@ -137,7 +137,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 		goto cleanup;
 	}
 
-	tmp = (PARAM*)malloc(sizeof(PARAM));
+	tmp = (PARAM*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;

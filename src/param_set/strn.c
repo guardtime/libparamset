@@ -187,7 +187,7 @@ size_t PST_snhiprintf(char *buf, size_t buf_len, unsigned indent, unsigned nxtLn
 
 
 	/* Create buff value for preprocessing. */
-	description =(char*)malloc(sizeof(char) * buf_len);
+	description = (char*)malloc(buf_len * sizeof(*description));
 	if (description == NULL) return 0;
 
 	va_start(va, desc);

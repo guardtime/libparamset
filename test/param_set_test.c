@@ -429,7 +429,7 @@ static int wrapper_return_str_append_a_value(void **extra, const char* str, void
 
 	char *tmp = NULL;
 
-	m = (char*)malloc(sizeof(char) * 1024);
+	m = (char*)malloc(1024 * sizeof(*m));
 	if (m == NULL) {
 		return PST_OUT_OF_MEMORY;
 	}
