@@ -348,11 +348,11 @@ static int editDistance_levenshtein(const char *A, const char *B){
 	M_W = lenB+1;
 
 	/*Creating of initial matrix*/
-	m=(char**)malloc(M_H*sizeof(char*));
+	m=(char**)malloc(M_H * sizeof(*m));
 	if (m == NULL) goto cleanup;
 
 	for (i=0; i<M_H; i++){
-		m[i]=(char*)malloc(M_W*sizeof(char));
+		m[i]=(char*)malloc(M_W * sizeof(*m[i]));
 		if (m[i] == NULL) goto cleanup;
 		m[i][0] = 0xff & i;
 		rows_created++;
@@ -638,7 +638,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 	int unknown_count = 0;
 	len = (unsigned)strlen(param);
 
-	typo_list = (TYPO*) malloc(set->count * sizeof(TYPO));
+	typo_list = (TYPO*) malloc(set->count * sizeof(*typo_list));
 	if (typo_list == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -817,7 +817,7 @@ int PARAM_SET_new(const char *names, PARAM_SET **set){
 	/**
 	 * Create empty objects.
 	 */
-	tmp = (PARAM_SET*)malloc(sizeof(PARAM_SET));
+	tmp = (PARAM_SET*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -1089,7 +1089,7 @@ int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const cha
 		goto cleanup;
 	}
 
-	typo_list = (TYPO*) malloc(set->count * sizeof(TYPO));
+	typo_list = (TYPO*) malloc(set->count * sizeof(*typo_list));
 	if (typo_list == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -1729,7 +1729,7 @@ static int COLLECTORS_new(PARAM_SET *set, COLLECTORS **newObj) {
 		goto cleanup;
 	}
 
-	tmp = (COLLECTORS*)malloc(sizeof(COLLECTORS) * 1);
+	tmp = (COLLECTORS*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -1867,7 +1867,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 		goto cleanup;
 	}
 
-	typo_helper = (TYPO*) malloc(set->count * sizeof(TYPO));
+	typo_helper = (TYPO*) malloc(set->count * sizeof(*typo_helper));
 	if (typo_helper == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;

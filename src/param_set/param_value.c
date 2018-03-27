@@ -32,7 +32,7 @@
 static char *new_string(const char *str) {
 	char *tmp = NULL;
 	if (str == NULL) return NULL;
-	tmp = (char*)malloc(strlen(str)*sizeof(char)+1);
+	tmp = (char*)malloc(strlen(str) * sizeof(*tmp) + 1);
 	if (tmp == NULL) return NULL;
 	return strcpy(tmp, str);
 }
@@ -93,7 +93,7 @@ int PARAM_VAL_new(const char *value, const char* source, int priority, PARAM_VAL
 	}
 
 	/*Create obj itself*/
-	tmp = (PARAM_VAL*)malloc(sizeof(PARAM_VAL));
+	tmp = (PARAM_VAL*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -566,7 +566,7 @@ int ITERATOR_new(PARAM_VAL *root, ITERATOR **itr) {
 		goto cleanup;
 	}
 
-	tmp = (ITERATOR*)malloc(sizeof(ITERATOR));
+	tmp = (ITERATOR*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
