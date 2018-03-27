@@ -108,12 +108,12 @@ int main(int argc, char** argv) {
 	PARAM_SET_parseCMD(set, argc, argv, NULL, 0);
 
 	/* Document options. */
-	PARAM_SET_setHelpText(set, "i", "File input. To specify multiple input files, use -i multiple times.");
-	PARAM_SET_setHelpText(set, "o", "Output file.");
-	PARAM_SET_setHelpText(set, "r", "Reverse file.");
-	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
-	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
-	PARAM_SET_setHelpText(set, "debug", "Print param_set object.");
+	PARAM_SET_setHelpText(set, "i", "file", "File input. To specify multiple input files, use -i multiple times.");
+	PARAM_SET_setHelpText(set, "o", "file", "Output file.");
+	PARAM_SET_setHelpText(set, "r", NULL, "Reverse file.");
+	PARAM_SET_setHelpText(set, "help", NULL, "Show help message (You are reading it right now!).");
+	PARAM_SET_setHelpText(set, "dump", NULL, "Dump file content.");
+	PARAM_SET_setHelpText(set, "debug", NULL, "Print param_setobject.");
 
 	/*
 	 * See PARAM_SET_isSetByName, PARAM_SET_isOneOfSetByName, PARAM_SET_getStr,
@@ -185,12 +185,12 @@ int main(int argc, char** argv, char **envp) {
 	PARAM_SET_setParseOptions(set, "dump,debug,h,r", PST_PRSCMD_HAS_NO_VALUE);
 
 	/* Document options. */
-	PARAM_SET_setHelpText(set, "i", "File input. To specify multiple input files, use -i multiple times or use wildcards.");
-	PARAM_SET_setHelpText(set, "o", "Output file.");
-	PARAM_SET_setHelpText(set, "r", "Reverse file.");
-	PARAM_SET_setHelpText(set, "help", "Show help message (You are reading it right now!).");
-	PARAM_SET_setHelpText(set, "dump", "Dump file content.");
-	PARAM_SET_setHelpText(set, "debug", "Print param_setobject.");
+	PARAM_SET_setHelpText(set, "i", "file", "File input. To specify multiple input files, use -i multiple times.");
+	PARAM_SET_setHelpText(set, "o", "file", "Output file.");
+	PARAM_SET_setHelpText(set, "r", NULL, "Reverse file.");
+	PARAM_SET_setHelpText(set, "help", NULL, "Show help message (You are reading it right now!).");
+	PARAM_SET_setHelpText(set, "dump", NULL, "Dump file content.");
+	PARAM_SET_setHelpText(set, "debug", NULL, "Print param_setobject.");
 
 	/*
 	 * To enable Windows file system wildcards, specify the wildcard expander
