@@ -310,6 +310,7 @@ int PARAM_setHelpText(PARAM *param, const char *txt) {
 	if (param == NULL || txt == NULL) return PST_INVALID_ARGUMENT;
 	if (param->helpText != NULL) free(param->helpText);
 	param->helpText = new_string(txt);
+	if (param->helpText == NULL) return PST_OUT_OF_MEMORY;
 	return PST_OK;
 }
 
@@ -317,6 +318,7 @@ int PARAM_setHelpArg(PARAM *param, const char *arg) {
 	if (param == NULL || arg == NULL) return PST_INVALID_ARGUMENT;
 	if (param->helpArg != NULL) free(param->helpArg);
 	param->helpArg = new_string(arg);
+	if (param->helpArg == NULL) return PST_OUT_OF_MEMORY;
 	return PST_OK;
 }
 

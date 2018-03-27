@@ -1221,15 +1221,15 @@ static void Test_help_text_multi_line_description(CuTest* tc) {
 	const char *help = NULL;
 	char buf[1024];
 
-	char *expected_help = "  -a    - This is parameters a long description string that must be formatted\n"
-						  "          correctly. It must be displayed on 3 lines and text must 10\n"
-						  "          characters indented.\n";
+	char *expected_help = "  -a    - This is a long description string of parameter 'a' that must be\n"
+						  "          formatted correctly. It must be displayed on 3 lines and text must be\n"
+						  "          10 characters indented.\n";
 
 	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
 	res = PARAM_SET_new("{a}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res = PARAM_SET_setHelpText(set, "a", NULL, "This is parameters a long description string that must be formatted correctly. It must be displayed on 3 lines and text must 10 characters indented.");
+	res = PARAM_SET_setHelpText(set, "a", NULL, "This is a long description string of parameter 'a' that must be formatted correctly. It must be displayed on 3 lines and text must be 10 characters indented.");
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
 	help = PARAM_SET_helpToString(set, "a", 2, 10, 80, buf, sizeof(buf));
@@ -1246,14 +1246,14 @@ static void Test_help_text_multi_line_description_with_long_parameter(CuTest* tc
 	char buf[1024];
 
 	char *expected_help = "  --this-is-long\n"
-						  "        - This is parameters that is long and has also a longe description\n"
-						  "          string on two lines.\n";
+						  "        - This is a description string of parameter 'this-is-long'. It has also\n"
+						  "          a longer description string on two lines.\n";
 
 	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
 	res = PARAM_SET_new("{this-is-long}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
-	res = PARAM_SET_setHelpText(set, "this-is-long", NULL, "This is parameters that is long and has also a longe description string on two lines.");
+	res = PARAM_SET_setHelpText(set, "this-is-long", NULL, "This is a description string of parameter 'this-is-long'. It has also a longer description string on two lines.");
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
 	help = PARAM_SET_helpToString(set, "this-is-long", 2, 10, 80, buf, sizeof(buf));
