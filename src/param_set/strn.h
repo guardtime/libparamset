@@ -19,6 +19,7 @@
 
 #ifndef STRN_H
 #define	STRN_H
+
 #include <stddef.h>
 #include <stdarg.h>
 
@@ -49,69 +50,142 @@ size_t PST_snprintf(char *buf, size_t n, const char *format, ... );
 char *PST_strncpy (char *destination, const char *source, size_t n);
 
 /**
- * Similar to the #PST_snprintf but is used to print text for
- * command-line help. Formatter can:
+ * Similar to the #PST_snprintf but is used to print and format text for
+ * command-line help. Formatter can work in two similar modes: command-line option (CO)
+ * and regular text (RT) mode. To enter CM mode, specify \c paramName, otherwise set
+ * it to \c NULL.
  *
- *  + Print formatted text (\c desc) with maximum length (including indention) of \c rowLen.
- *  + Print indented text (\c desc) with indention of \c indent. See Example 1.
- *  + Print indented text (\c desc) where next line has extra indention of \c nxtLnIndnt. See Example 2.
- *  + Print a header with length of \c headerLen. It is composed of \c paramName and \c delimiter (including \c indent). If real header is larger than \c headerLen, it is printed without delimiter on the first line. In that case \c delimiter is printed on the next row followed by description (\c desc). See Example 3 and Example 4.
- *
- * Usage and examples:
+ * 1) CO mode with specified indentation and row length:
  * \code{.txt}
- *
- * [          maximum row size           ]
- *
- * Regular text with indention:
- * [     indent      ][    text  line 1  ]
- * [     indent      ][    text  line N  ]
- * Example 1. (indent = 2, headerLen = 0, delimiter = '\0', nxtLnIndnt = 0, paramName = NULL, rowLen = 10):
- *     "1234567890"
- *     "  this is "
- *     "  sample"
- *
- * Regular text with extra indention from next row:
- * [indent][         text line 1         ]
- * [indent][eint][   text line 2         ]
- * [indent][eint][   text line N         ]
- * Example 2. (indent = 2, headerLen = 0, delimiter = '\0', nxtLnIndnt = 2, paramName = NULL, rowLen = 10):
- *     "1234567890"
- *     "  this is "
- *     "    sample"
- *     "    text  "
- *
- * Parameter description with indention:
- * [header][delimiter][    desc. line 1  ]
- * [     indent      ][    desc. line N  ]
- * Example 3. (indent = 2, headerLen = 8, delimiter = '-', nxtLnIndnt = 0, paramName = "-a", rowLen = 20):
- *     "123456789_1234567890"
- *     "  -a  - this is my  "
- *     "        description "
- *
- * Parameter description with indention where header is larger than expected:
- * [ too large header]
- * [indent][delimiter][   desc. line 1   ]
- * [indent           ][   desc. line N   ]
- * Example 4. (indent = 2, headerLen = 8, delimiter = '-', nxtLnIndnt = 0, paramName = "-a", rowLen = 20):
- *     "123456789_1234567890"
- *     "  --long            "
- *     "      - this is long"
- *     "        description "
+ *         <arg><del>     <txt>
+ * |      --myopt - This is my option
+ * |                with description.
+ * |      --my-long-opt
+ * |     |        - This is my another
+ * |     |          useful option with
+ * |     |          description       |
+ * |<-I->|         |                  |
+ * |<------H------>|                  |
+ * |<----------------R--------------->|
  * \endcode
  *
- * \param buf			Pointer to buffer.
+ * 2) RT mode with specified indentation and row length:
+ * \code{.txt}
+ * |     This is my sample text. This
+ * |     is my sample text. This is my
+ * |     sample text.
+ * |
+ * |        * This is my sample list
+ * |          first element.
+ * |        * This is my sample list
+ * |          second element.
+ * |
+ * |      This is my sample text. This
+ * |      is my sample text.          |
+ * |<-I->|                            |
+ * |<----------------R--------------->|
+ * \endcode
+ *
+ * In examples above:
+ *  + \c I   - Indentation from the left border. Is specified with \c indent.
+ *  + \c H   - The size of the header where only command-line parameters can be printed. Is specified with \c headerLen only in CO mode.
+ *  + \c R   - The overall length of the row. Is specified with \c rowLen.
+ *  + \c \<arg\> - The name of the command-line options. Is specified with \c paramName only in CO mode.
+ *  + \c \<del\> - Delimiter between option and its description (above '-' is used). Is specified with \c delimiter only in CO mode.
+ *  + \c \<txt\> - The description of the command-line option. Is specified with \c txt.
+ *
+ *
+ * When text is being formatted, it is broken into tokens, where whitespace characters
+ * are used as delimiters. When there is a need to change parsers behaviour, escape
+ * character "\" can be used.
+ *
+ *
+ * + Embed whitespace or '\' to the text:
+ *   - "\\"  - backslash.
+ *   - "\ "   - space.
+ * + Change indentation on the fly:
+ *   - "\>nr" - change indentation relative to the base. In RT mode base is \c indent
+ *               and in CO mode it is \c headerLen. Change in indentation is applied after
+ *               next new line. Note that "\>" is same as "\>0". Also negative value
+ *               can be used. If overall indentation is negative, it is set to \c 0.
+ *               If it's larger than \c rowLen, it is set to <tt>rowLen - 1</tt>.
+ *
+ *
+ * Limitations
+ *
+ * Words are not split. If word (+ indentation) is larger than \c rowLen, it is just put on the line.
+ *
+ * Examples
+ *
+ * + \c rowLen = \c 20, \c indent = \c 2, \c headerLen = \c 10, \c paramName = \c "-i", \c delimiter = \c '-' and \c txt = \c "text text text text!"
+ * \code{.txt}
+ * |  -i    - text text |
+ * |          text text!|
+ * \endcode
+ *
+ * + \c rowLen = \c 20, \c indent = \c 2, \c headerLen = \c 10, \c paramName = \c "--lon-param", \c delimiter = \c '-'  and \c txt = \c "text text text text!"
+ * \code{.txt}
+ * |  --lon-param       |
+ * |  -i    - text text |
+ * |          text text!|
+ * \endcode
+ *
+ * + \c rowLen = \c 20, \c indent = \c 2, \c headerLen = \c 7, \c paramName = \c "-i", \c delimiter = \c '-'  and \c
+ * txt = \c "txt txt txt t txt txt txt txt:\\>2\n*\\>4 list item list item\\>2\n*\\>4 list item list item\\>\ntxt txt"
+ * \code{.txt}
+ * |  -i - txt txt txt t|
+ * |       txt txt txt  |
+ * |       txt:         |
+ * |         * list item|
+ * |           list item|
+ * |         * list item|
+ * |           list item|
+ * |       txt txt      |
+ * \endcode
+ *
+ * + \c rowLen = \c 20, \c indent = \c 2, \c headerLen = \c X, \c paramName = \c NULL and \c
+ * txt = \c "text text text text text\n\\>2\n+\\>4 txt txt txt txt\n\\>\ntext text text text text text"
+ * \code{.txt}
+ * |  text text text    |
+ * |  text text         |
+ * |                    |
+ * |    + txt txt txt   |
+ * |      txt           |
+ * |                    |
+ * |  text text text    |
+ * |  text text text    |
+ * \endcode
+ *
+ *
+ * \param buf			Pointer to buffer where the formatted text is stored.
  * \param buf_len		The size of the buffer.
- * \param indent		The size of regular indention. Can be \c 0.
- * \param nxtLnIndnt	The amount of extra indention beginning from the next line. Can be \c 0.
- * \param headerLen		The size of the header. Can be \c 0.
- * \param rowLen		The overall size of the line.
- * \param paramName		Parameter name used to compose header.
- * \param delimiter		Delimiter character used for delimiter that separates parameter name from description.
- * \param desc		Format string, parameter description.
+ * \param rowLen		The overall size of the row.
+ * \param indent		The size of indentation. Can be \c 0.
+ * \param headerLen		The size of the header. Available only in CO mode. Can be \c 0.
+ * \param paramName		Parameter name, if NOT \NULL function works in CO mode.
+ * \param delimiter		Delimiter character used to separates parameter name from description. Available only in CO mode.
+ * \param txt			Format string: parameter description in CO mode or regular text RT mode.
  * \param ...			Extra parameters for formatting.
- * \return The number of characters written, not including terminating \c NULL character. On error \c  0 is returned.
+ * \return The number of characters written, not including terminating \c NULL character. On error \c 0 is returned.
  */
-size_t PST_snhiprintf(char *buf, size_t buf_len, unsigned indent, unsigned nxtLnIndnt, unsigned headerLen, unsigned rowLen, const char *paramName, const char delimiter, const char *desc, ...);
+size_t PST_snhiprintf(char *buf, size_t buf_len, unsigned rowLen, unsigned indent, unsigned headerLen, const char *paramName, const char delimiter, const char *txt, ...);
+
+/**
+ * Same as #PST_snhiprintf but with <tt>va_list</tt>.
+ *
+ * \param buf			Pointer to buffer where the formatted text is stored.
+ * \param buf_len		The size of the buffer.
+ * \param rowLen		The overall size of the row.
+ * \param indent		The size of indentation. Can be \c 0.
+ * \param headerLen		The size of the header. Available only in CO mode. Can be \c 0.
+ * \param paramName		Parameter name, if NOT \NULL function works in CO mode.
+ * \param delimiter		Delimiter character used to separates parameter name from description. Available only in CO mode.
+ * \param txt			Format string: parameter description in CO mode or regular text RT mode.
+ * \param va			Variable list.
+ * \return The number of characters written, not including terminating \c NULL character. On error \c 0 is returned.
+ */
+size_t PST_vsnhiprintf(char *buf, size_t buf_len, unsigned indent, unsigned headerLen, unsigned rowLen, const char *paramName, const char delimiter, const char *txt, va_list va);
+
 /*
  * @}
  */

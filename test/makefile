@@ -45,7 +45,8 @@ TOOL_OBJ = \
 	$(OBJ_DIR)\parameter_test.obj \
 	$(OBJ_DIR)\param_set_test.obj \
 	$(OBJ_DIR)\support_tests.obj \
-	$(OBJ_DIR)\task_def_test.obj
+	$(OBJ_DIR)\task_def_test.obj \
+	$(OBJ_DIR)\strn_test.obj
 
 CUTEST_OBJ = $(OBJ_CUTEST_DIR)\CuTest.obj
 

@@ -1263,6 +1263,37 @@ static void Test_help_text_multi_line_description_with_long_parameter(CuTest* tc
 	PARAM_SET_free(set);
 }
 
+static void Test_help_text_multi_line_description_with_changed_indentation(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *help = NULL;
+	char buf[1024];
+
+	char *expected_help = "  --this-is-long\n"
+						"        - txt txt txt txt txt.\n"
+						"          txt txt txt txt txt\n"
+						"          txt txt.\n"
+						"            * list list list l\n"
+						"              list.\n"
+						"            * list list list\n"
+						"              list.\n"
+						"          txt txt txt txt txt\n"
+						"          txt.\n";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{this-is-long}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "this-is-long", NULL, "txt txt txt txt txt. txt txt txt txt txt txt txt.\\>2\n*\\>4 list list list l list.\\>2\n*\\>4 list list list list.\\>\ntxt txt txt txt txt txt.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	help = PARAM_SET_helpToString(set, "this-is-long", 2, 10, 30, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help) == 0);
+
+	PARAM_SET_free(set);
+}
+
 static void Test_help_text_with_specified_alias(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
@@ -1280,6 +1311,29 @@ static void Test_help_text_with_specified_alias(CuTest* tc) {
 	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
 
 	help = PARAM_SET_helpToString(set, "input", 2, 10, 80, buf, sizeof(buf));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help) == 0);
+
+	PARAM_SET_free(set);
+}
+
+static void Test_help_text_parsing_error(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	const char *help = NULL;
+	char buf[1024];
+
+	char *expected_help = "  --this-is-long\n"
+						"        - txt txt txt <Parse error: '\\E'>";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{this-is-long}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "this-is-long", NULL, "txt txt txt \\\\ \\E.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	help = PARAM_SET_helpToString(set, "this-is-long", 2, 10, 30, buf, sizeof(buf));
 	CuAssert(tc, "Help is not generated!", help != NULL);
 	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help) == 0);
 
@@ -1316,7 +1370,9 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_basic_help_text_with_arg);
 	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description);
 	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description_with_long_parameter);
+	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description_with_changed_indentation);
 	SUITE_ADD_TEST(suite, Test_help_text_with_specified_alias);
+	SUITE_ADD_TEST(suite, Test_help_text_parsing_error);
 	return suite;
 }
 

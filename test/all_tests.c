@@ -40,6 +40,7 @@ static CuSuite* initSuite(void) {
 	addSuite(suite, ParamSetTest_getSuite);
 	addSuite(suite, TaskDefTest_getSuite);
 	addSuite(suite, Command_LineTest_getSuite);
+	addSuite(suite, StrnTest_getSuite);
 
 	return suite;
 }
