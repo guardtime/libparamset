@@ -35,6 +35,7 @@ CuSuite* ParameterTest_getSuite(void);
 CuSuite* ParamSetTest_getSuite(void);
 CuSuite* TaskDefTest_getSuite(void);
 CuSuite* Command_LineTest_getSuite(void);
+CuSuite* StrnTest_getSuite(void);
 
 #ifdef	__cplusplus
 }

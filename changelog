@@ -1,7 +1,9 @@
 * IMPROVEMENT: Function PARAM_SET_setHelpText takes extra parameter arg that describes command-line parameter argument (e.g. -i arg).
+* IMPROVEMENT: Function PST_snhiprintf changed and fixed.
 * IMPROVEMENT: Build warnings resolved.
 * IMPROVEMENT: nmake test target implemented.
 * BUGFIX: Winbuild.bat fixed.
+* BUGFIX: PST_snhiprintf works as documented.
 
 Version 1.0
 
