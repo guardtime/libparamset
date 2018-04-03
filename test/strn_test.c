@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 Guardtime, Inc.
+ * Copyright 2013-2018 Guardtime, Inc.
  *
  * This file is part of the Guardtime client SDK.
  *
@@ -106,7 +106,7 @@ static void Test_help_regular_text_change_indentation(CuTest* tc) {
 	CuAssert(tc, "Unexpected len!", len == strlen(expected_help));
 }
 
-static void Test_help_regular_text_change_indentation_go_ower_limits(CuTest* tc) {
+static void Test_help_regular_text_change_indentation_go_over_limits(CuTest* tc) {
 	size_t len = 0;
 	char buf[1024] = "";
 	char input[] = "1234567890\\>2 text tex text te\\>-2 text text text text\\>-24text text text text text text text text\\>24\na aa aaa\\>0\nxx x";
@@ -164,7 +164,7 @@ CuSuite* StrnTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_help_text_description_change_indent);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_without_changing_indentation);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_change_indentation);
-	SUITE_ADD_TEST(suite, Test_help_regular_text_change_indentation_go_ower_limits);
+	SUITE_ADD_TEST(suite, Test_help_regular_text_change_indentation_go_over_limits);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_invalid_arguments);
 	SUITE_ADD_TEST(suite, Test_snhiprintf_parse_errors);
 	return suite;
