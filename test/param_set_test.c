@@ -1349,7 +1349,7 @@ static void Test_help_text_parsing_error(CuTest* tc) {
 	char buf[1024];
 
 	char *expected_help = "  --this-is-long\n"
-						"        - txt txt txt <Parse error: '\\E'>\n";
+						"        - txt txt txt \\<Parse error: '\\E'>\n";
 
 	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
 	res = PARAM_SET_new("{this-is-long}", &set);

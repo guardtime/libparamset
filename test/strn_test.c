@@ -190,6 +190,15 @@ static void Test_help_regular_text_invalid_arguments(CuTest* tc) {
 	CuAssert(tc, "This call must fail due to invalid arguments", len == 0 && buf[0] == '\0');
 }
 
+static void Test_snhiprintf_parse_escape_char(CuTest* tc) {
+	size_t len = 0;
+	char buf[1024] = "";
+
+	len = PST_snhiprintf(buf, sizeof(buf), 20, 2, 0, NULL, ' ', "Test '\\ ', '\\\\', '\\\t'");
+	CuAssert(tc, "Unexpected output for PST_snhiprintf!", strcmp(buf, "  Test ' ', '\\', '\t'") == 0);
+	CuAssert(tc, "Unexpected len!", len == 20);
+}
+
 static void Test_snhiprintf_parse_errors(CuTest* tc) {
 	size_t len = 0;
 	char buf[1024] = "";
@@ -211,6 +220,7 @@ CuSuite* StrnTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_help_regular_text_change_indentation);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_change_indentation_go_over_limits);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_invalid_arguments);
+	SUITE_ADD_TEST(suite, Test_snhiprintf_parse_escape_char);
 	SUITE_ADD_TEST(suite, Test_snhiprintf_parse_errors);
 	return suite;
 }
