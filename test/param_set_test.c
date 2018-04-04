@@ -1215,6 +1215,31 @@ static void Test_basic_help_text_with_arg(CuTest* tc) {
 	PARAM_SET_free(set);
 }
 
+static void Test_help_text_with_arg_exact_line_length(CuTest* tc) {
+	int res;
+	PARAM_SET *set = NULL;
+	char help[1024];
+
+	char *expected_help_1 = "  -a    - This is a.\n"
+							"  -b    - This is b.\n";
+
+	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	res = PARAM_SET_new("{a}{b}", &set);
+	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "a", NULL,  "This is a.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	res = PARAM_SET_setHelpText(set, "b", "",  "This is b.");
+	CuAssert(tc, "It must be possible to add help text.", res == PST_OK);
+
+	PARAM_SET_helpToString(set, "a,b", 2, 10, 20, help, sizeof(help));
+	CuAssert(tc, "Help is not generated!", help != NULL);
+	CuAssert(tc, "Unexpected help text generated!", strcmp(help, expected_help_1) == 0);
+
+	PARAM_SET_free(set);
+}
+
 static void Test_help_text_multi_line_description(CuTest* tc) {
 	int res;
 	PARAM_SET *set = NULL;
@@ -1324,7 +1349,7 @@ static void Test_help_text_parsing_error(CuTest* tc) {
 	char buf[1024];
 
 	char *expected_help = "  --this-is-long\n"
-						"        - txt txt txt <Parse error: '\\E'>";
+						"        - txt txt txt <Parse error: '\\E'>\n";
 
 	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
 	res = PARAM_SET_new("{this-is-long}", &set);
@@ -1368,6 +1393,7 @@ CuSuite* ParamSetTest_getSuite(void) {
 	SUITE_ADD_TEST(suite, Test_param_set_set_print_name_alias);
 	SUITE_ADD_TEST(suite, Test_basic_help_text_different_combinations);
 	SUITE_ADD_TEST(suite, Test_basic_help_text_with_arg);
+	SUITE_ADD_TEST(suite, Test_help_text_with_arg_exact_line_length);
 	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description);
 	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description_with_long_parameter);
 	SUITE_ADD_TEST(suite, Test_help_text_multi_line_description_with_changed_indentation);
