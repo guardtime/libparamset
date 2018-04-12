@@ -49,6 +49,49 @@ static void Test_help_text_with_parameter(CuTest* tc) {
 	CuAssert(tc, "Unexpected len!", len == strlen(expected_help_2));
 }
 
+static void Test_help_text_with_parameter_last_line_exact_row_length(CuTest* tc) {
+	size_t len = 0;
+	char buf[1024] = "";
+	char input[] = "1234567890 123456789 1234567890";
+
+	char *expected_help_1 = "  -i    - 1234567890\n"
+						    "          123456789\n"
+						    "          1234567890";
+
+	char *expected_help_2 = "  --lon-param\n"
+						    "        - 1234567890\n"
+						    "          123456789\n"
+						    "          1234567890";
+
+	len = PST_snhiprintf(buf, sizeof(buf), 20, 2, 10, "-i", '-', input);
+	CuAssert(tc, "Unexpected output for PST_snhiprintf!", strcmp(buf, expected_help_1) == 0);
+	CuAssert(tc, "Unexpected len!", len == strlen(expected_help_1));
+
+	len = PST_snhiprintf(buf, sizeof(buf), 20, 2, 10, "--lon-param", '-', input);
+	CuAssert(tc, "Unexpected output for PST_snhiprintf!", strcmp(buf, expected_help_2) == 0);
+	CuAssert(tc, "Unexpected len!", len == strlen(expected_help_2));
+}
+
+static void Test_help_text_with_parameter_first_and_only_line_exact_row_length(CuTest* tc) {
+	size_t len = 0;
+	char buf[1024] = "";
+	char input[] = "1234567890";
+
+	char *expected_help_1 = "  -i    - 1234567890";
+
+	char *expected_help_2 = "  --lon-param\n"
+							"        - 1234567890";
+
+
+	len = PST_snhiprintf(buf, sizeof(buf), 20, 2, 10, "-i", '-', input);
+	CuAssert(tc, "Unexpected output for PST_snhiprintf!", strcmp(buf, expected_help_1) == 0);
+	CuAssert(tc, "Unexpected len!", len == strlen(expected_help_1));
+
+	len = PST_snhiprintf(buf, sizeof(buf), 20, 2, 10, "--lon-param", '-', input);
+	CuAssert(tc, "Unexpected output for PST_snhiprintf!", strcmp(buf, expected_help_2) == 0);
+	CuAssert(tc, "Unexpected len!", len == strlen(expected_help_2));
+}
+
 static void Test_help_text_description_only_one_word(CuTest* tc) {
 	size_t len = 0;
 	char buf[1024] = "";
@@ -147,6 +190,15 @@ static void Test_help_regular_text_invalid_arguments(CuTest* tc) {
 	CuAssert(tc, "This call must fail due to invalid arguments", len == 0 && buf[0] == '\0');
 }
 
+static void Test_snhiprintf_parse_escape_char(CuTest* tc) {
+	size_t len = 0;
+	char buf[1024] = "";
+
+	len = PST_snhiprintf(buf, sizeof(buf), 20, 2, 0, NULL, ' ', "Test '\\ ', '\\\\', '\\\t'");
+	CuAssert(tc, "Unexpected output for PST_snhiprintf!", strcmp(buf, "  Test ' ', '\\', '\t'") == 0);
+	CuAssert(tc, "Unexpected len!", len == 20);
+}
+
 static void Test_snhiprintf_parse_errors(CuTest* tc) {
 	size_t len = 0;
 	char buf[1024] = "";
@@ -160,12 +212,15 @@ static void Test_snhiprintf_parse_errors(CuTest* tc) {
 CuSuite* StrnTest_getSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, Test_help_text_with_parameter);
+	SUITE_ADD_TEST(suite, Test_help_text_with_parameter_last_line_exact_row_length);
+	SUITE_ADD_TEST(suite, Test_help_text_with_parameter_first_and_only_line_exact_row_length);
 	SUITE_ADD_TEST(suite, Test_help_text_description_only_one_word);
 	SUITE_ADD_TEST(suite, Test_help_text_description_change_indent);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_without_changing_indentation);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_change_indentation);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_change_indentation_go_over_limits);
 	SUITE_ADD_TEST(suite, Test_help_regular_text_invalid_arguments);
+	SUITE_ADD_TEST(suite, Test_snhiprintf_parse_escape_char);
 	SUITE_ADD_TEST(suite, Test_snhiprintf_parse_errors);
 	return suite;
 }

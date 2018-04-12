@@ -1030,7 +1030,8 @@ char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent
 			param_name = param_name_combo;
 		}
 
-		count += PST_snhiprintf(buf + count, buf_len - count, rowWidth, indent, header, param_name, '-', "%s\n", PARAM_getHelpText(tmp));
+		count += PST_snhiprintf(buf + count, buf_len - count, rowWidth, indent, header, param_name, '-', "%s", PARAM_getHelpText(tmp));
+		count += PST_snprintf(buf + count, buf_len - count, "\n");
 	}
 
 	return buf;

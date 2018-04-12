@@ -152,6 +152,9 @@ static size_t parseNextToken(char *buf, size_t buf_len, const char *str, int* in
 				isIdent = 1;
 				tmp_indent = 0;
 				continue;
+			} else {
+				buf[n] = (char) (0xff & C);
+				n++;
 			}
 		} else if (isIdent) {
 			if (isdigit(C)) {
