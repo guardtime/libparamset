@@ -30,6 +30,7 @@ test_SOURCES= \
 		param_set_test.c \
 		param_value_test.c \
 		parameter_test.c \
+		strn_test.c \
 		support_tests.c \
 		support_tests.h \
 		task_def_test.c

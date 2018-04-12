@@ -348,11 +348,11 @@ static int editDistance_levenshtein(const char *A, const char *B){
 	M_W = lenB+1;
 
 	/*Creating of initial matrix*/
-	m=(char**)malloc(M_H*sizeof(char*));
+	m=(char**)malloc(M_H * sizeof(*m));
 	if (m == NULL) goto cleanup;
 
 	for (i=0; i<M_H; i++){
-		m[i]=(char*)malloc(M_W*sizeof(char));
+		m[i]=(char*)malloc(M_W * sizeof(*m[i]));
 		if (m[i] == NULL) goto cleanup;
 		m[i][0] = 0xff & i;
 		rows_created++;
@@ -638,7 +638,7 @@ static int param_set_addRawParameter(const char *param, const char *arg, const c
 	int unknown_count = 0;
 	len = (unsigned)strlen(param);
 
-	typo_list = (TYPO*) malloc(set->count * sizeof(TYPO));
+	typo_list = (TYPO*) malloc(set->count * sizeof(*typo_list));
 	if (typo_list == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -817,7 +817,7 @@ int PARAM_SET_new(const char *names, PARAM_SET **set){
 	/**
 	 * Create empty objects.
 	 */
-	tmp = (PARAM_SET*)malloc(sizeof(PARAM_SET));
+	tmp = (PARAM_SET*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -970,7 +970,7 @@ int PARAM_SET_setPrintNameAlias(PARAM_SET *set, const char *names,
 	return param_set_set_print_name(set, names, PARAM_setPrintNameAlias, constv, getPrintName);
 }
 
-int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt) {
+int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *arg, const char *txt) {
 	int res;
 	PARAM *tmp = NULL;
 	const char *pName = NULL;
@@ -985,6 +985,11 @@ int PARAM_SET_setHelpText(PARAM_SET *set, const char *names, const char *txt) {
 
 		res = PARAM_setHelpText(tmp, txt);
 		if (res != PST_OK) return res;
+
+		if (arg != NULL) {
+			res = PARAM_setHelpArg(tmp, arg);
+			if (res != PST_OK) return res;
+		}
 	}
 
 	return PST_OK;
@@ -1003,6 +1008,7 @@ char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent
 		PARAM *tmp = NULL;
 		const char *name = NULL;
 		const char *alias = NULL;
+		const char *arg = NULL;
 		char param_name_combo[256];
 		const char *param_name = NULL;
 
@@ -1013,15 +1019,19 @@ char* PARAM_SET_helpToString(const PARAM_SET *set, const char *names, int indent
 
 		name = PARAM_getPrintName(tmp);
 		alias = PARAM_getPrintNameAlias(tmp);
+		arg = PARAM_getHelpArg(tmp);
+
 
 		if (alias == NULL) {
-			param_name = name;
+			PST_snprintf(param_name_combo, sizeof(param_name_combo), "%s%s%s", name, (arg ? " " : ""), (arg ? arg : ""));
+			param_name = param_name_combo;
 		} else {
-			PST_snprintf(param_name_combo, sizeof(param_name_combo), "%s, %s", name, alias);
+			PST_snprintf(param_name_combo, sizeof(param_name_combo), "%s, %s%s%s", name, alias, (arg ? " " : ""), (arg ? arg : ""));
 			param_name = param_name_combo;
 		}
 
-		count += PST_snhiprintf(buf + count, buf_len - count, indent, 0, header, rowWidth, param_name, '-', "%s\n", PARAM_getHelpText(tmp));
+		count += PST_snhiprintf(buf + count, buf_len - count, rowWidth, indent, header, param_name, '-', "%s", PARAM_getHelpText(tmp));
+		count += PST_snprintf(buf + count, buf_len - count, "\n");
 	}
 
 	return buf;
@@ -1080,7 +1090,7 @@ int PARAM_SET_add(PARAM_SET *set, const char *name, const char *value, const cha
 		goto cleanup;
 	}
 
-	typo_list = (TYPO*) malloc(set->count * sizeof(TYPO));
+	typo_list = (TYPO*) malloc(set->count * sizeof(*typo_list));
 	if (typo_list == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -1720,7 +1730,7 @@ static int COLLECTORS_new(PARAM_SET *set, COLLECTORS **newObj) {
 		goto cleanup;
 	}
 
-	tmp = (COLLECTORS*)malloc(sizeof(COLLECTORS) * 1);
+	tmp = (COLLECTORS*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -1858,7 +1868,7 @@ int PARAM_SET_parseCMD(PARAM_SET *set, int argc, char **argv, const char *source
 		goto cleanup;
 	}
 
-	typo_helper = (TYPO*) malloc(set->count * sizeof(TYPO));
+	typo_helper = (TYPO*) malloc(set->count * sizeof(*typo_helper));
 	if (typo_helper == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;

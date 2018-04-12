@@ -38,7 +38,7 @@ static int new_string(const char *str, char **out) {
 		return PST_OK;
 	}
 
-	tmp = (char*)malloc(strlen(str)*sizeof(char) + 1);
+	tmp = (char*)malloc(strlen(str) * sizeof(*tmp) + 1);
 	if (tmp == NULL) return PST_OUT_OF_MEMORY;
 
 	strcpy(tmp, str);
@@ -116,7 +116,7 @@ static int TASK_new(TASK_DEFINITION *pDef, PARAM_SET *pSet, TASK **newObj){
 
 	if (newObj == NULL) return PST_INVALID_ARGUMENT;
 
-	tmp = (TASK*)malloc(sizeof(TASK));
+	tmp = (TASK*)malloc(sizeof(*tmp));
 	if (tmp == NULL) return PST_OUT_OF_MEMORY;
 
 	tmp->def = pDef;
@@ -160,7 +160,7 @@ int TASK_DEFINITION_new(int id, const char *name, const char *man, const char *a
 	/**
 	 * Construct new and empty task definition data structure.
 	 */
-	tmp = (TASK_DEFINITION*)malloc(sizeof(TASK_DEFINITION));
+	tmp = (TASK_DEFINITION*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -546,7 +546,7 @@ int TASK_SET_new(TASK_SET **newObj) {
 	/**
 	 * Construct new and empty task definition data structure.
 	 */
-	tmp = (TASK_SET*)malloc(sizeof(TASK_SET));
+	tmp = (TASK_SET*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;

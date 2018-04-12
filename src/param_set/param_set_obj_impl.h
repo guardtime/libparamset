@@ -56,6 +56,7 @@ struct PARAM_VAL_st{
 struct PARAM_st{
 	char *flagName;					/* The name of the parameter. */
 	char *flagAlias;				/* The alias for the parameter. */
+	char *helpArg;				/* Parameters argument description. */
 	char *helpText;				/* The help text for a parameter. */
 	int constraints;			/* Constraint If there is more than 1 parameter allowed. For validity check. */
 	int highestPriority;			/* Highest priority of inserted values. */

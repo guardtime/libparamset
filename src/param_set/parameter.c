@@ -34,7 +34,7 @@
 static char *new_string(const char *str) {
 	char *tmp = NULL;
 	if (str == NULL) return NULL;
-	tmp = (char*)malloc(strlen(str)*sizeof(char)+1);
+	tmp = (char*)malloc(strlen(str) * sizeof(*tmp) + 1);
 	if (tmp == NULL) return NULL;
 	return strcpy(tmp, str);
 }
@@ -137,7 +137,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 		goto cleanup;
 	}
 
-	tmp = (PARAM*)malloc(sizeof(PARAM));
+	tmp = (PARAM*)malloc(sizeof(*tmp));
 	if (tmp == NULL) {
 		res = PST_OUT_OF_MEMORY;
 		goto cleanup;
@@ -145,6 +145,7 @@ int PARAM_new(const char *flagName, const char *flagAlias, int constraints, int 
 
 	tmp->flagName = NULL;
 	tmp->flagAlias = NULL;
+	tmp->helpArg = NULL;
 	tmp->helpText = NULL;
 	tmp->arg = NULL;
 	tmp->last_element = NULL;
@@ -210,6 +211,7 @@ void PARAM_free(PARAM *param) {
 	if (param->itr) ITERATOR_free(param->itr);
 	if (param->arg) PARAM_VAL_free(param->arg);
 	if (param->helpText != NULL) free(param->helpText);
+	if (param->helpArg != NULL) free(param->helpArg);
 
 	if (param->expand_wildcard_ctx != NULL && param->expand_wildcard_free != NULL) {
 		param->expand_wildcard_free(param->expand_wildcard_ctx);
@@ -308,12 +310,26 @@ int PARAM_setHelpText(PARAM *param, const char *txt) {
 	if (param == NULL || txt == NULL) return PST_INVALID_ARGUMENT;
 	if (param->helpText != NULL) free(param->helpText);
 	param->helpText = new_string(txt);
+	if (param->helpText == NULL) return PST_OUT_OF_MEMORY;
+	return PST_OK;
+}
+
+int PARAM_setHelpArg(PARAM *param, const char *arg) {
+	if (param == NULL || arg == NULL) return PST_INVALID_ARGUMENT;
+	if (param->helpArg != NULL) free(param->helpArg);
+	param->helpArg = new_string(arg);
+	if (param->helpArg == NULL) return PST_OUT_OF_MEMORY;
 	return PST_OK;
 }
 
 const char* PARAM_getHelpText(PARAM *obj) {
 	if (obj == NULL) return NULL;
 	return obj->helpText;
+}
+
+const char* PARAM_getHelpArg(PARAM *obj) {
+	if (obj == NULL) return NULL;
+	return obj->helpArg;
 }
 
 int PARAM_addValue(PARAM *param, const char *value, const char* source, int prio) {

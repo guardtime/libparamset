@@ -26,6 +26,7 @@
 !ENDIF
 
 SRC_DIR = src
+BIN_DIR = out\bin
 PARAM_SET_DIR = $(SRC_DIR)\param_set
 TEST_DIR = test
 VERSION_FILE = VERSION
@@ -34,10 +35,13 @@ VER = \
 !INCLUDE <$(VERSION_FILE)>
 
 #Making
-test: param_set
+tests: param_set
 	cd $(TEST_DIR)
 	nmake RTL=$(RTL) ENG_LIB=$(DLL)
 	cd ..
+
+test: tests
+	$(BIN_DIR)\test.exe test
 
 param_set:
 	cd $(PARAM_SET_DIR)/
