@@ -1223,7 +1223,7 @@ static void Test_help_text_with_arg_exact_line_length(CuTest* tc) {
 	char *expected_help_1 = "  -a    - This is a.\n"
 							"  -b    - This is b.\n";
 
-	/* Like regular setPrintName test, but flag name is converted to alias to make abstract test work. */
+	/* Check how new line is handled if parameters description is exactly row length in size. */
 	res = PARAM_SET_new("{a}{b}", &set);
 	CuAssert(tc, "Unable to create new parameter set.", res == PST_OK);
 
