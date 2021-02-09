@@ -52,10 +52,10 @@ In order to install the `libparamset` CentOS/RHEL packages directly from the Gua
 cd /etc/yum.repos.d
 
 # In case of RHEL/CentOS 6
-sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el6.repo
+sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el6.repo
 
 # In case of RHEL/CentOS 7
-sudo curl -O http://download.guardtime.com/ksi/configuration/guardtime.el7.repo
+sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el7.repo
 
 yum install libparamset
 ```
