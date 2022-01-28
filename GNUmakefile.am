@@ -29,6 +29,8 @@ dist_doc_DATA = changelog LICENSE
 
 EXTRA_DIST = VERSION ABI_VERSION $(dist_doc_DATA) doc/doxyfile doc/mainpage.md
 
+pkgconfigdir = ${libdir}/pkgconfig
+pkgconfig_DATA = libparamset.pc
 
 test: check
 	./test/test test

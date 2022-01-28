@@ -51,11 +51,11 @@ In order to install the `libparamset` CentOS/RHEL packages directly from the Gua
 ```
 cd /etc/yum.repos.d
 
-# In case of RHEL/CentOS 6
-sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el6.repo
-
 # In case of RHEL/CentOS 7
 sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el7.repo
+
+# In case of RHEL/CentOS 8
+sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el8.repo
 
 yum install libparamset
 ```
@@ -355,5 +355,5 @@ See the `CONTRIBUTING.md` file.
 ## Compatibility ##
 | OS / Platform                              | Compatibility                                |
 | :---                                       | :---                                         |
-| CentOS/RHEL 6 and 7, x86_64 architecture   | Fully compatible and tested.                 |
+| CentOS/RHEL 7 and 8, x86_64 architecture   | Fully compatible and tested.                 |
 | Windows 7, 8, 10                           | Compatible but not tested on a regular basis. Build combination of `DLL=dll` and `RTL=MT(d)` not supported. |

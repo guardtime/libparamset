@@ -53,7 +53,7 @@ suggestions for the user.
 
 %prep
 %setup
-autoreconf -iv
+autoreconf -ifv
 
 %build
 %configure
@@ -64,29 +64,29 @@ rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
 
 # Add doxygen documentation to the build.
-%define extrafiles %{_builddir}/%{buildsubdir}/extrafiles
-touch %{extrafiles}
+%define libfiles %{_builddir}/%{buildsubdir}/libfiles.list
+touch %{libfiles}
 
 # Check if doxygen with supported version (>=1.8.0) is installed.
 if (doxygen -v | grep -q -P -e '((^1\.([8-9]|[1-9][0-9]+))|(^[2-9]\.[0-9]+)|(^[0-9]{2,}\.[0-9]+))\.[0-9]+$') > /dev/null 2>&1 ; then
     make doc
     mkdir %{buildroot}%{_docdir}/html/
     cp -r %{_builddir}/%{buildsubdir}/doc/html/ %{buildroot}%{_docdir}/%{name}/html/
-    echo %{_docdir}/%{name}/html/ > %{extrafiles}
+    echo %{_docdir}/%{name}/html/ > %{libfiles}
 else
     echo "Doxygen documentation not included into rpm package!"
 fi
 
-%files -f %{extrafiles}
+echo %{_docdir}/%{name}/changelog >> %{libfiles}
+echo %{_docdir}/%{name}/LICENSE >> %{libfiles}
+echo %{_libdir}/libparamset.so >> %{libfiles}
+echo %{_libdir}/libparamset.so.* >> %{libfiles}
+
+%files -f %{libfiles}
 %defattr(644,root,root,755)
-%{_libdir}/libparamset.so
-%{_libdir}/libparamset.so.*
-%{_docdir}/%{name}/changelog
-%{_docdir}/%{name}/LICENSE
 
 %files devel
 %defattr(644,root,root,755)
-
 %{_includedir}/param_set/parameter.h
 %{_includedir}/param_set/param_set.h
 %{_includedir}/param_set/param_value.h
@@ -96,4 +96,4 @@ fi
 %{_includedir}/param_set/wildcardexpanders.h
 %{_libdir}/libparamset.a
 %{_libdir}/libparamset.la
-# %{_libdir}/pkgconfig/libparamset.pc
+%{_libdir}/pkgconfig/libparamset.pc

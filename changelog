@@ -1,5 +1,10 @@
 Version 1.1
 
+2022-01-26 1.1.244
+
+* IMPROVEMENT: Documentation updated.
+* IMPROVEMENT: RPM build script works on centos 8.
+
 2018-04-12 1.1.240
 
 * IMPROVEMENT: Function PARAM_SET_setHelpText takes extra parameter arg that describes command-line parameter argument (e.g. -i arg).
