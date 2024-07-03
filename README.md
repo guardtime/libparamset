@@ -46,7 +46,8 @@ To use `libparamset` in your C/C++ project, link it against the `libparamset` bi
 
 ### Latest Release from Guardtime Repository
 
-In order to install the `libparamset` CentOS/RHEL packages directly from the Guardtime public repository, download and save the repository configuration to the `/etc/yum.repos.d/` folder:
+
+In order to install the `libparamset` on CentOS/RHEL:
 
 ```
 cd /etc/yum.repos.d
@@ -57,7 +58,30 @@ sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el7.repo
 # In case of RHEL/CentOS 8
 sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el8.repo
 
+# In case of RHEL/CentOS 9
+sudo curl -O https://download.guardtime.com/ksi/configuration/guardtime.el9.repo
+
 yum install libparamset
+```
+
+In order to install the `libparamset` on Debian / Ubuntu:
+
+```
+# Add Guardtime pgp key.
+sudo curl https://download.guardtime.com/ksi/GUARDTIME-GPG-KEY-2 | sudo apt-key add -
+
+# In case of Debian 12 (Bookworm)
+sudo curl -o /etc/apt/sources.list.d/guardtime.list https://download.guardtime.com/ksi/configuration/guardtime.bookworm.list
+
+
+sudo apt update
+apt-get install libparamset
+```
+
+In order to install the `libparamset` on OS X:
+```
+brew tap guardtime/ksi
+brew install libparamset
 ```
 
 ### From Source Code
