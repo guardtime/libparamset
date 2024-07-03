@@ -379,5 +379,8 @@ See the `CONTRIBUTING.md` file.
 ## Compatibility ##
 | OS / Platform                              | Compatibility                                |
 | :---                                       | :---                                         |
-| CentOS/RHEL 7 and 8, x86_64 architecture   | Fully compatible and tested.                 |
-| Windows 7, 8, 10                           | Compatible but not tested on a regular basis. Build combination of `DLL=dll` and `RTL=MT(d)` not supported. |
+| CentOS/RHEL 7,8,9, x86_64 architecture     | Fully compatible and tested.                 |
+| Debian 12+                                 | Fully compatible and tested.                 |
+| Ubuntu                                     | Compatible but not tested on regular basis.  |
+| OS X                                       | Compatible but not tested on regular basis.  |
+| Windows 7, 8, 10, 11                       | Compatible but not tested on a regular basis. Build combination of `DLL=dll` and `RTL=MT(d)` not supported. |
